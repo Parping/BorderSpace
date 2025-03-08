@@ -1,0 +1,157 @@
+#include "player_game_object.h"
+#include <iostream>
+namespace game {
+
+/*
+	PlayerGameObject inherits from GameObject
+	It overrides GameObject's update method, so that you can check for input to change the velocity of the player
+*/
+
+PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture,int hp,Circle circle)
+	: GameObject(position, geom, shader, texture) {
+	hitpoint = hp;
+	circle = circle;
+	alive = true;
+	colliable = true;
+	item = 0;//internal item counter
+	state = 0;//state for invicible
+	timer_invi = Timer();
+	type = 1;//type to distinguish different gameobject
+	speed = 5;//speed of the player
+	t_ = 0;//time passed
+	max_velocity = 2.0f;//max velocity is 2 unit
+	velocity_ = glm::vec3(0,0,0);
+}
+
+//gettters and setters
+Circle* PlayerGameObject::GetCircle()   {
+	return &circle;
+}
+int PlayerGameObject::GetHP() {
+	return hitpoint;
+}
+bool PlayerGameObject::GetAlive() {
+	return alive;
+}
+bool PlayerGameObject::GetColliable() {
+	return colliable;
+}
+void PlayerGameObject::SetColliable(bool a) {
+	colliable = a;
+}
+void PlayerGameObject::SetAlive(bool a) {
+	alive = a;
+}
+//updated getters and setters
+int PlayerGameObject::GetItem() {
+	return item;
+}
+int PlayerGameObject::GetState() {
+	return state;
+}
+float PlayerGameObject::GetSpeed() {
+	 return speed; 
+}
+//collision function
+void  PlayerGameObject::Get_Collision() {
+	//std::cout << " Get Collision" << std::endl;
+	if (state != 1) {//normal state
+		if (hitpoint > 0) {// get collision, hitpoint - 1
+			hitpoint--;
+		}
+		//if (hitpoint <= 0) {//if it is <= 0, then it is dying and get explosion
+		//	Explosion();
+		//}
+	}
+}
+
+//Explosion function
+void PlayerGameObject::Explosion() {
+	timer_exp.Start(5.0);//set the timer. the obj still need to be exist in 5s
+	colliable = false;// when it's explosing, it's not colliable.
+}
+
+void PlayerGameObject::CollectItem() {
+	item += 1;//item++ when call this function
+	std::cout << " item "<< item << std::endl;
+}
+void PlayerGameObject::Invincible() {
+	state = 1;//change state
+	std::cout << " Get Invincible" << std::endl;
+	timer_invi.Start(10);//timer
+}
+
+// Update function for moving the player object around
+void PlayerGameObject::Update(double delta_time) {
+	glm::vec3 P, d,T;
+	P = GetPosition();
+	d = GetBearing();
+
+	T = P + (float)delta_time * velocity_;
+	position_ = glm::vec3(T.x, T.y, 0.0);
+	t_ += delta_time;
+	if (this->GetHP() < 1) {//if HP<1.get explosion
+		if (this->GetAlive()&&this->GetColliable()) {
+			Explosion();
+		}
+		else {
+			if (timer_exp.Finished()) {
+				this->SetAlive(false);//if timer finished, died
+			}
+		}
+	}
+	if (this->GetState() == 1) {//if it is statue1,it is invisible
+		if (timer_invi.Finished()) {//check the timer finished
+			state = 0;//return to normal state
+		}
+	}
+	if (this->GetItem() == 5) {//if it has 5 item then it changes it state
+		Invincible();
+		item = 0;//reset the item collision
+	}
+
+
+
+/*	// Special player updates go here
+	if (alive && (!colliable)) {// if it is alive but it is not colliable, which means it is explosing
+		if (timer_exp.Finished()) {// when the timer is finished, which means it died
+			alive = false;
+		}//if not, keep explosing
+	}
+	if (statue == 1) {
+		if (timer_invi.Finished()) {
+			statue = 0;
+		}
+	}*/
+	// Call the parent's update method to move the object in standard way, if desired
+	GameObject::Update(delta_time);
+}
+
+
+void PlayerGameObject::SetVelocity(const glm::vec3& velocity) {
+	velocity_ = velocity;
+	float dp = glm::dot(velocity_, glm::vec3(1, 0, 0));//dot product with velocity and x axis
+	float dp2 = glm::dot(velocity_, glm::vec3(0, 1, 0));//dot product with velocity and y axis
+	dp /= glm::length(velocity_);//normalized
+	dp2 /= glm::length(velocity_);
+	float angle = acos(dp);//calculate the angle, can only show 0~180
+	if (dp2 >= 0) {//if it is in x>=0 
+		SetRotation(angle);
+	}
+	else {//it is in x<=0
+		SetRotation(-angle);//adjust the angle
+	}
+	std::cout << "Update angle" << angle << std::endl;
+	
+}
+void PlayerGameObject::AddVelocity(glm::vec3 a) {
+
+	glm::vec3 new_velocity = a + velocity_;
+	if (glm::length(new_velocity)> max_velocity) {//if > max, then normalize it to save the direction
+		velocity_=glm::normalize(new_velocity) * max_velocity;
+	}
+	else {
+		velocity_=new_velocity;
+	}
+}
+} // namespace game

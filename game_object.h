@@ -1,0 +1,132 @@
+#ifndef GAME_OBJECT_H_
+#define GAME_OBJECT_H_
+
+#include <glm/glm.hpp>
+#define GLEW_STATIC
+#include <GL/glew.h>
+
+#include "shader.h"
+#include "geometry.h"
+#include "timer.h"
+#include "circle.h"
+
+namespace game {
+
+    /*
+        GameObject is responsible for handling the rendering and updating of one object in the game world
+        The update and render methods are virtual, so you can inherit them from GameObject and override the update or render functionality (see PlayerGameObject for reference)
+    */
+
+
+
+
+    class GameObject {
+
+        public:
+            // Constructor
+            GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture);
+
+
+
+            // Update the GameObject's state. Can be overriden in children
+            virtual void Update(double delta_time);
+
+            // Renders the GameObject 
+            virtual void Render(glm::mat4 view_matrix, double current_time);
+
+            // Getters
+            inline glm::vec3 GetPosition(void) const { return position_; }
+            inline glm::vec2 GetScale(void) const { return scale_; }//change it to vec2
+            inline float GetRotation(void) const { return angle_; }
+            int GetType() { return type; }
+            virtual glm::vec3 GetVelocity(void) { return glm::vec3(0, 0, 0); };
+
+
+
+            // Get bearing direction (direction in which the game object
+            // is facing)
+            glm::vec3 GetBearing(void) const;
+
+            // Get vector pointing to the right side of the game object
+            glm::vec3 GetRight(void) const;
+
+            //Get the texture of the obj
+            GLuint getTexture();
+
+            // Setters
+            inline void SetPosition(const glm::vec3& position) { position_ = position; }
+            inline void SetScale(glm::vec2 scale) { scale_=scale; }//change it to vec2
+            void SetRotation(float angle);
+            virtual void SetVelocity(const glm::vec3& velocity) {};
+
+            //change the texture
+            void SetTexture(GLuint new_texture);
+            void SetGhost(bool a);
+
+            //virtual function return fixed value
+            virtual Circle* GetCircle() { return &Circle(0.0f, 0.0f, 0.0f); };
+            virtual bool GetAlive() { return false; };
+            virtual bool GetColliable() { return false; };
+            virtual int GetHP() { return 0; };
+            virtual bool GetCollectible() { return false; };
+            virtual int GetItem() { return 0; };
+            virtual int GetState() { return -1; };
+            virtual float GetSpeed() { return 0; };
+
+            virtual bool RayToCircleCheck(glm::vec3 position, float r,double deltatime) { return false; };
+            
+            //vitrual function, won't implimentation in this class
+            virtual void Get_Collision() {};
+            virtual void Explosion() {};
+            virtual void SetColliable(bool a) {};
+            virtual void SetAlive(bool a) {};
+            virtual void SetCollectible(bool a) {};
+            virtual void CollectItem() {};
+            virtual void Invincible() {};
+            virtual void SetState() {};
+            virtual void SetPlayer(GameObject* a) {};
+            virtual void SetCenter(glm::vec3& a) {};
+            virtual void SetWidth(float a) {};
+            virtual void SetHeight(float a) {};
+            virtual void AddVelocity(glm::vec3 a) {};
+
+            virtual void SetNumFrame(glm::vec2 n) { num_frame = n; };
+            virtual void SetCurrentFrame(int c) { current_frame = c; };
+            virtual void SetBar_Percent(float b);
+            int GetCurrentFrame() { return current_frame; }
+            int GetBar_Percent();
+            virtual void SetOffset(int o) { offset = o; }
+
+        protected:
+            // Object's Transform Variables
+            glm::vec3 position_;
+
+            glm::vec2 scale_;//change it to vec2
+            float angle_;
+            Timer timer_exp;
+            int type;//type to distinguish different type of gameobject
+            glm::vec3 velocity_;//velocity for object moving
+            bool ghost;//if it is ghost state
+
+            glm::vec2 num_frame;
+            int current_frame;
+            float bar_percent;
+
+            int offset=0;
+
+            // Geometry
+            Geometry *geometry_;
+ 
+            // Shader
+            Shader *shader_;
+
+            // Object's texture reference
+            GLuint texture_;
+            
+
+
+    }; // class GameObject
+
+} // namespace game
+
+#endif // GAME_OBJECT_H_
