@@ -20,6 +20,7 @@ audio_manager.h
 enemy_game_object.h
 projectile.h
 HUD.h
+expo_obj.h
 )
  
 set(SRCS
@@ -37,10 +38,12 @@ collectible_game_object.cpp
 enemy_game_object.cpp
 projectile.cpp
 HUD.cpp
+expo_obj.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     number_fragement_shader.glsl
     bar_fragement_shader.glsl
+animate_fragment_shader.glsl
  
 )
 

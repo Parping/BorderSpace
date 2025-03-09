@@ -46,6 +46,7 @@ namespace game {
             Shader sprite_shader_;
             Shader number_shader_;
             Shader bar_shader_;
+            Shader animate_shader_;
 
             // References to textures
             // This needs to be a pointer

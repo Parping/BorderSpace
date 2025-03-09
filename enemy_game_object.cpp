@@ -98,8 +98,9 @@ namespace game {
     
     }
     void EnemyGameObject::Explosion() {//change texture and count 5 s
-        timer_exp.Start(5.0);//set the timer. the obj still need to be exist in 5s
+
         colliable = false;// when it's explosing, it's not colliable.
+        alive = false;
     }
 
     void EnemyGameObject::patrolling() {
@@ -170,7 +171,8 @@ namespace game {
         
         if (this->GetHP() < 1) {//same as player
             if (this->GetAlive() && this->GetColliable()) {
-                Explosion();
+                this->SetAlive(false);
+                //Explosion();
             }
             else {
                 if (timer_exp.Finished()) {

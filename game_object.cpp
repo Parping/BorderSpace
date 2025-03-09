@@ -65,11 +65,11 @@ void GameObject::SetGhost(bool a) {
     ghost = a;
 }
 void GameObject::SetBar_Percent(float b) {
-    std::cout << "set bar_percent: "<<b << std::endl;
+   // std::cout << "set bar_percent: "<<b << std::endl;
     bar_percent = b;
 }
 int GameObject::GetBar_Percent() { 
-    std::cout << "bar_percent: " << bar_percent << std::endl;
+   // std::cout << "bar_percent: " << bar_percent << std::endl;
     return bar_percent; }
 void GameObject::Update(double delta_time) {
 
@@ -91,6 +91,8 @@ void GameObject::Render(glm::mat4 view_matrix, double current_time){
     shader_->SetUniform1i("current_frame",current_frame);
     shader_->SetUniform1f("percent", bar_percent);
     shader_->SetUniform1i("offset", offset);
+
+    shader_->SetUniform1f("time", (float)current_time);
 
     // Set up the view matrix
     shader_->SetUniformMat4("view_matrix", view_matrix);

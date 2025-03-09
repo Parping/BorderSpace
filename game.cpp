@@ -14,6 +14,7 @@
 #include "shader.h"
 #include "player_game_object.h"
 #include "collectible_game_object.h"
+#include "expo_obj.h"
 #include "enemy_game_object.h"
 #include "projectile.h"
 #include "game.h"
@@ -124,9 +125,10 @@ void Game::SetupGameWorld(void)
     GameObject* energy_spirt = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &bar_shader_, tex_[energy_bar]);
     GameObject* exp_spirt = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &bar_shader_, tex_[exp_bar]);
     GameObject* num_spirt = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[number]);
-
     GameObject* exp_text_s = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[exp_text]);
     GameObject* lv_text_s = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[level_text]);
+
+
 
     hud_ = new HUD(hp_spirt,num_spirt, energy_spirt,exp_spirt, exp_text_s, lv_text_s);
     game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tiny_ship17],3,Circle()));//change texture, add hitpoint, circle
@@ -146,11 +148,8 @@ void Game::SetupGameWorld(void)
 
 
     //setup item object
-    game_objects_.push_back(new CollectibleGameObject(glm::vec3(1.0f, 2.0f, 0.0f), sprite_, &sprite_shader_, tex_[4], Circle()));
-    game_objects_.push_back(new CollectibleGameObject(glm::vec3(1.0f, 3.0f, 0.0f), sprite_, &sprite_shader_, tex_[4], Circle()));
-    game_objects_.push_back(new CollectibleGameObject(glm::vec3(1.0f, 4.0f, 0.0f), sprite_, &sprite_shader_, tex_[4], Circle()));
-    game_objects_.push_back(new CollectibleGameObject(glm::vec3(1.5f, 2.0f, 0.0f), sprite_, &sprite_shader_, tex_[4], Circle()));
-    game_objects_.push_back(new CollectibleGameObject(glm::vec3(2.0f, 2.0f, 0.0f), sprite_, &sprite_shader_, tex_[4], Circle()));
+
+    
 
     //set circle radius for each
     for (int i = 0;i < game_objects_.size();i++) {
@@ -256,7 +255,7 @@ void Game::HandleControls(double delta_time)
 
 void Game::Update(double delta_time)
 {
-
+    current_time_ += delta_time;
 
     // Update all game objects
     for (int i = 0; i < game_objects_.size(); i++) {
@@ -336,15 +335,7 @@ void Game::Update(double delta_time)
         game_objects_[0]->SetTexture(tex_[1]);//set it normal
     }
 
-    for (int i = 0;i < (game_objects_.size()-1);i++) {//check without background
-        // Get the current game object
-        GameObject* current_game_object = game_objects_[i];
-        if ((current_game_object->GetType() != 4)&&(!current_game_object->GetColliable())&& (current_game_object->GetType() != 2) && (!current_game_object->GetCollectible())) {//if the obj is not colliable, then it is explosing
-            if (current_game_object->getTexture() != tex_[3]) {// if the texture is not explosion texture, then change it
-                current_game_object->SetTexture(tex_[3]);// update texture
-            }
-        }
-    }
+
     //delete all die object
     for (int i = 0;i < (game_objects_.size()-1);i++) {
         GameObject* current_game_object = game_objects_[i];
@@ -356,6 +347,29 @@ void Game::Update(double delta_time)
                 std::cout << "Game Over!" << std::endl;//print gameover
                 glfwSetWindowShouldClose(window_, GLFW_TRUE);//set the window, it need to be shutdown
                 return;//jump out of the function
+            }
+            else if ((current_game_object->GetType() != 4) && (current_game_object->GetType() != -1)) {
+
+                glm::vec3 posi = current_game_object->GetPosition();
+                GameObject* expo = new Expo_obj(posi, sprite_, &animate_shader_, tex_[3]);
+                expo->SetNumFrame(glm::vec2(8, 1));
+                
+                delete game_objects_[i];
+                game_objects_.erase(game_objects_.begin() + i);//shrink vector
+                game_objects_.insert(game_objects_.begin() + 1, expo);
+                GameObject* c1 = new CollectibleGameObject(glm::vec3(posi.x+0.2,posi.y,posi.z), sprite_, &sprite_shader_, tex_[4], Circle());
+                GameObject* c2 = new CollectibleGameObject(glm::vec3(posi.x - 0.2, posi.y, posi.z), sprite_, &sprite_shader_, tex_[4], Circle());
+                GameObject* c3 = new CollectibleGameObject(glm::vec3(posi.x, posi.y+0.2, posi.z), sprite_, &sprite_shader_, tex_[4], Circle());
+                GameObject* c4 = new CollectibleGameObject(glm::vec3(posi.x, posi.y-0.2, posi.z), sprite_, &sprite_shader_, tex_[4], Circle());
+                c1->SetScale(glm::vec2(0.3, 0.3));
+                c2->SetScale(glm::vec2(0.3, 0.3));
+                c3->SetScale(glm::vec2(0.3, 0.3));
+                c4->SetScale(glm::vec2(0.3, 0.3));
+                game_objects_.insert(game_objects_.begin() + 1, c1);
+                game_objects_.insert(game_objects_.begin() + 1, c2);
+                game_objects_.insert(game_objects_.begin() + 1, c3);
+                game_objects_.insert(game_objects_.begin() + 1, c4);
+
             }
             else {//otherthing die
                 delete game_objects_[i];//delete the obj
@@ -428,7 +442,6 @@ void Game::Render(void){
     // Render all game objects
     for (int i = 0; i < game_objects_.size(); i++) {
         game_objects_[i]->Render(view_matrix, current_time_);
-        
     }
 
 }
@@ -510,6 +523,7 @@ void Game::Init(void)
     sprite_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/sprite_fragment_shader.glsl")).c_str());
     number_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/number_fragement_shader.glsl")).c_str());
     bar_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/bar_fragement_shader.glsl")).c_str());
+    animate_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/animate_fragment_shader.glsl")).c_str());
     // Initialize time
     current_time_ = 0.0;
 
