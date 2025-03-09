@@ -76,21 +76,23 @@ void Game::SetupGameWorld(void)
     // Declare all the textures here
     std::vector<std::string> textures;
     enum {
-           tiny_ship1 = 0,//change name
-           //tex_green_ship = 1,
-           tiny_ship17 = 1,//change name
-           tex_stars = 2,
-           tex_explo =3,
-            item= 4,//new texture for item
-            tex_orb =5,
-            in_player=6,//new texture for invincible player
-            projectile=7,//new texture for shooter
-            healthy_bar=8,
-            number=9,
-            exp_bar =10,
-            energy_bar=11,
-            level_text=12,
-            exp_text=13
+        tiny_ship1 = 0,//change name
+        //tex_green_ship = 1,
+        tiny_ship17 = 1,//change name
+        tex_stars = 2,
+        tex_explo = 3,
+        item = 4,//new texture for item
+        tex_orb = 5,
+        in_player = 6,//new texture for invincible player
+        projectile = 7,//new texture for shooter
+        healthy_bar = 8,
+        number = 9,
+        exp_bar = 10,
+        energy_bar = 11,
+        level_text = 12,
+        exp_text = 13,
+        tex_ex_minion = 14,
+        tex_items = 15
     };
     textures.push_back("/textures/tiny_ship1.png"); //change file
     //textures.push_back("/textures/destroyer_green.png"); 
@@ -108,6 +110,8 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/Energy_bar.png");
     textures.push_back("/textures/level.png");
     textures.push_back("/textures/exp.png");
+    textures.push_back("/textures/tiny_ship3.png");
+    textures.push_back("/textures/IP+E+I+C (16 x 16).png");
 
     // Load textures
     LoadTextures(textures);
@@ -141,14 +145,14 @@ void Game::SetupGameWorld(void)
     hud_->SetExp(80);
     hud_->SetMax_Exp(100);
     // Setup enemy objects
-    game_objects_.push_back(new EnemyGameObject(glm::vec3(2.0f, -2.0f, 0.0f), sprite_, &sprite_shader_, tex_[tiny_ship1],1, Circle(),0,rand()%100));//change texture,add hitpoint, circle, random number for different moving mode
-    game_objects_.push_back(new EnemyGameObject(glm::vec3(1.0f, 2.5f, 0.0f), sprite_, &sprite_shader_, tex_[tiny_ship1],1, Circle(),0.0f, rand() % 100));//change texture£¬add hitpoint, circle
-    game_objects_[2]->SetScale(glm::vec2(0.5,0.8));//set the scale
+    game_objects_.push_back(new EnemyGameObject(glm::vec3(2.0f, -2.0f, 0.0f), sprite_, &sprite_shader_, tex_[tiny_ship1],Circle(),current_time_,0,91));//change texture,add hitpoint, circle, random number for different moving mode
+    //game_objects_.push_back(new EnemyGameObject(glm::vec3(1.0f, 2.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_ex_minion],Circle(),current_time_, 0,92));//change texture£¬add hitpoint, circle
+
 
 
 
     //setup item object
-
+    game_objects_.push_back(new CollectibleGameObject(glm::vec3(1.0f, 1.0f, 0.0f), sprite_, &number_shader_, tex_[tex_items], Circle(), 14));
     
 
     //set circle radius for each
@@ -244,7 +248,7 @@ void Game::HandleControls(double delta_time)
     }
     if (glfwGetKey(window_, GLFW_KEY_J) == GLFW_PRESS) {//press J to shoot
         if(shooter_timer.Finished()){//cooldown 
-            game_objects_.insert(game_objects_.begin() + 1, new Projectile(player->GetPosition(), sprite_, &sprite_shader_, tex_[7], Circle(), angle));
+            game_objects_.insert(game_objects_.begin() + 1, new Projectile(player->GetPosition(), sprite_, &sprite_shader_, tex_[7], Circle(), angle,1));
             //the projectile is start at the player current position, and faster velocity with same direction as player
             game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
             shooter_timer.Start(0.5f);//cooldown
@@ -279,12 +283,12 @@ void Game::Update(double delta_time)
                 {//player=1; colliable=2, enemy=3; projectile=4,defult=0
                 case 1://current type is player. player can colliable with collectible, enemy
                     if (distance < 0.8f * (current_game_object->GetCircle()->get_r() + other_game_object->GetCircle()->get_r())) {
-                        if (other_game_object->GetType() == 3)//if it is enemy
+                        if (other_game_object->GetType() >90)//if it is enemy
                         {
                             //if the two obj has a distance smaller than 0.8 *(sum of the radius), then it there is a collisoin
                             // This is where you would perform collision response between objects
-                            other_game_object->Get_Collision();//current and other obj get collision.
-                            current_game_object->Get_Collision();
+                            other_game_object->Get_Collision(delta_time);//current and other obj get collision.
+                            current_game_object->Get_Collision(delta_time);
                             // Play the sound when collision
                             if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
                                 am.PlaySound(explosion_music_index);
@@ -293,19 +297,33 @@ void Game::Update(double delta_time)
                                 am.PlaySound(explosion_music_index);
                             }
                         }
-                        else if (other_game_object->GetType() == 2 ) {//if it is collect
-                            other_game_object->Get_Collision();//item change color
+                        else if ((other_game_object->GetType() >10 ) && (other_game_object->GetType() < 20) ){//if it is collect
+                            other_game_object->Get_Collision(delta_time);//item change color
                             current_game_object->CollectItem();//player item++
+                        }
+                        else if (other_game_object->GetType() == 4) {//(other_game_object->GetType() > 50) && (other_game_object->GetType() < 60)
+                            if (other_game_object->getFrom() != 1) {
+                                other_game_object->Get_Collision(delta_time);//current and other obj get collision.
+                                current_game_object->Get_Collision(delta_time);
+                                // Play the sound when collision
+                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                    am.PlaySound(explosion_music_index);
+                                }
+                                else {//stop it first then replay it
+                                    am.StopSound(explosion_music_index);
+                                    am.PlaySound(explosion_music_index);
+                                }
+                            }
                         }
                     }
 
                     break;
                 case 4://current type is projectile
-                    if (other_game_object->GetType() == 3) {
+                    if (other_game_object->GetType() >current_game_object->getFrom()) {
                         if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
                             //get enemy position, enemy circle radius, and the delta_time
-                            other_game_object->Get_Collision();//current and other obj get collision.
-                            current_game_object->Get_Collision();
+                            other_game_object->Get_Collision(delta_time);//current and other obj get collision.
+                            current_game_object->Get_Collision(delta_time);
                             // Play the sound when collision
                             if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
                                 am.PlaySound(explosion_music_index);
@@ -317,6 +335,7 @@ void Game::Update(double delta_time)
                         }
                     }
                     break;
+
                 default:
                     break;
                 }
@@ -339,7 +358,7 @@ void Game::Update(double delta_time)
     //delete all die object
     for (int i = 0;i < (game_objects_.size()-1);i++) {
         GameObject* current_game_object = game_objects_[i];
-        if ( (!current_game_object->GetAlive()) && (current_game_object->GetType()!=2)) {// (!current_game_object->GetAlive()) && (!current_game_object->GetCollectible())
+        if ( (!current_game_object->GetAlive()) ) {// (!current_game_object->GetAlive()) && (!current_game_object->GetCollectible())
             //we now cannot delete the collection
             if (i == 0) {//player die
                 delete game_objects_[i];//delete player
@@ -348,7 +367,15 @@ void Game::Update(double delta_time)
                 glfwSetWindowShouldClose(window_, GLFW_TRUE);//set the window, it need to be shutdown
                 return;//jump out of the function
             }
-            else if ((current_game_object->GetType() != 4) && (current_game_object->GetType() != -1)) {
+            else if ( (current_game_object->GetType() > 10) && (current_game_object->GetType() < 20)) {
+                if (!current_game_object->GetCollectible()) {
+                    delete game_objects_[i];//delete the obj
+                    game_objects_.erase(game_objects_.begin() + i);//shrink vector
+                    std::cout << "item delete!" << std::endl;//print delete
+                    continue;
+                }
+            }
+            else if ((current_game_object->GetType()>90) && (current_game_object->GetType()<94)) {
 
                 glm::vec3 posi = current_game_object->GetPosition();
                 GameObject* expo = new Expo_obj(posi, sprite_, &animate_shader_, tex_[3]);
@@ -357,10 +384,10 @@ void Game::Update(double delta_time)
                 delete game_objects_[i];
                 game_objects_.erase(game_objects_.begin() + i);//shrink vector
                 game_objects_.insert(game_objects_.begin() + 1, expo);
-                GameObject* c1 = new CollectibleGameObject(glm::vec3(posi.x+0.2,posi.y,posi.z), sprite_, &sprite_shader_, tex_[4], Circle());
-                GameObject* c2 = new CollectibleGameObject(glm::vec3(posi.x - 0.2, posi.y, posi.z), sprite_, &sprite_shader_, tex_[4], Circle());
-                GameObject* c3 = new CollectibleGameObject(glm::vec3(posi.x, posi.y+0.2, posi.z), sprite_, &sprite_shader_, tex_[4], Circle());
-                GameObject* c4 = new CollectibleGameObject(glm::vec3(posi.x, posi.y-0.2, posi.z), sprite_, &sprite_shader_, tex_[4], Circle());
+                GameObject* c1 = new CollectibleGameObject(glm::vec3(posi.x+0.2,posi.y,posi.z), sprite_, &sprite_shader_, tex_[4], Circle(),11);
+                GameObject* c2 = new CollectibleGameObject(glm::vec3(posi.x - 0.2, posi.y, posi.z), sprite_, &sprite_shader_, tex_[4], Circle(),12);
+                GameObject* c3 = new CollectibleGameObject(glm::vec3(posi.x, posi.y+0.2, posi.z), sprite_, &sprite_shader_, tex_[4], Circle(),13);
+                GameObject* c4 = new CollectibleGameObject(glm::vec3(posi.x, posi.y-0.2, posi.z), sprite_, &sprite_shader_, tex_[4], Circle(),14);
                 c1->SetScale(glm::vec2(0.3, 0.3));
                 c2->SetScale(glm::vec2(0.3, 0.3));
                 c3->SetScale(glm::vec2(0.3, 0.3));
@@ -381,24 +408,60 @@ void Game::Update(double delta_time)
 
     }
 
+    //new enemy
     if (timer.Finished()) {//if the timer is finished, then span new enemy  
         //std::cout <<"Create new !" << std::endl;
-        glm::vec3 random_position= generateRandomPosition();//random position in the window
 
-        game_objects_.insert(game_objects_.begin()+ 1, new EnemyGameObject(random_position, sprite_, &sprite_shader_, tex_[0], 1,Circle(),delta_time, rand() % 100));//new enemy
-        //insert it just after the player in vector
-        game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
-        game_objects_[1]->SetPlayer(game_objects_[0]); // set player pointer
-      //  std::cout << "Create new GameObject at position ("//print function
-       //     << random_position.x << ", "
-        //    << random_position.y << ")" << std::endl;
-        timer.Start(10.0);//start the timer again
+        generateDifferentEnemy();
+        timer.Start(2.0);//start the timer again
     }
-        
+    //enemy shoot
+    for (int i = 0;i < (game_objects_.size() - 1);i++) {
+        GameObject* current_game_object = game_objects_[i];
+        if (current_game_object->GetType() > 90) {
+            switch (current_game_object->GetType())
+            {
+            case 91:
+            case 92:
+                if (current_game_object->getShoot()) {
+                    game_objects_.insert(game_objects_.begin() + 1, new Projectile(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[7], Circle(), current_game_object->GetRotation(), current_game_object->GetType()));
+                    game_objects_[1]->SetScale(glm::vec2(0.5, 0.2));
+                    game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
+                    current_game_object->setWant(false);
+                }
+                break;
+                default:
+                    break;
+            }
+        }
+    }
     hud_->SetHP(game_objects_[0]->GetHP());
     hud_->Update(delta_time);
 }
+void Game::generateDifferentEnemy() {
+    glm::vec3 random_position = generateRandomPosition();//random position in the window
+    int r1 = rand() % 100;
+    int r2 = rand() % 100;
+    GameObject* new_enemy;
+    if (r1<=70) {
+        if ((r2+(int)current_time_) <= 70) {
+            new_enemy = new EnemyGameObject(random_position, sprite_, &sprite_shader_, tex_[0], Circle(), current_time_, 0, 91);
+        }
+        else {
+            new_enemy = new EnemyGameObject(random_position, sprite_, &sprite_shader_, tex_[14], Circle(), current_time_, 0, 92);
+        }
+        new_enemy->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
+        new_enemy->SetPlayer(game_objects_[0]); // set player pointer
+        game_objects_.insert(game_objects_.begin() + 1, new_enemy);//new enemy
+    }
 
+
+
+    //  std::cout << "Create new GameObject at position ("//print function
+     //     << random_position.x << ", "
+      //    << random_position.y << ")" << std::endl;
+
+}
 glm::vec3 Game::generateRandomPosition() {
     float x_num = (rand() % 100) / 100.0;//random number 0~1
     float y_num = (rand() % 100) / 100.0;//random number 0~1

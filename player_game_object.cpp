@@ -53,7 +53,7 @@ float PlayerGameObject::GetSpeed() {
 	 return speed; 
 }
 //collision function
-void  PlayerGameObject::Get_Collision() {
+void  PlayerGameObject::Get_Collision(double delta_time) {
 	//std::cout << " Get Collision" << std::endl;
 	if (state != 1) {//normal state
 		if (hitpoint > 0) {// get collision, hitpoint - 1

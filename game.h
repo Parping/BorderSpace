@@ -35,6 +35,14 @@ namespace game {
             void MainLoop(void); 
             //random position generator
             glm::vec3 generateRandomPosition();
+
+            //
+            void generateDifferentEnemy();
+
+            //when enemy dies, items drop at the position, different type drop different random items.
+            //this function create new items and push them into the game_object_list
+            void generateEnemyDrops(glm::vec3 position,int type);
+
         private:
             // Main window: pointer to the GLFW window structure
             GLFWwindow *window_;

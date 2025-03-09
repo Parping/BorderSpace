@@ -9,7 +9,7 @@ namespace game {
     class Projectile : public GameObject {
 
     public:
-        Projectile(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, Circle circle,float angle);
+        Projectile(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, Circle circle,float angle,int from);
         Circle* GetCircle()override;
         //getters
 
@@ -17,7 +17,7 @@ namespace game {
 
         void Init();//init the velocity
 
-        void Get_Collision()override;//when collision, disappear
+        void Get_Collision(double delta_time)override;//when collision, disappear
         bool GetAlive()override;
         bool GetColliable();
         glm::vec3 Projectile::GetVelocity(void) override;
@@ -26,6 +26,8 @@ namespace game {
         void Update(double delta_time) override;
         //check collision by ray to circle
         bool RayToCircleCheck(glm::vec3 position, float r, double deltatime) override;
+
+        int getFrom() override { return from_id_; };
     private:
         bool colliable;
         Circle circle;
@@ -34,6 +36,7 @@ namespace game {
         float speed;
         double t_;//time passed
         glm::vec3 startPosition;//position that it start
+        int from_id_;
 
 
 

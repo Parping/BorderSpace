@@ -22,7 +22,7 @@ namespace game {
              int GetState()override;
              float GetSpeed()override;
             
-             void Get_Collision()override;//when collision, hitpoint --, if hitpoint to 0, explosion
+             void Get_Collision(double delta_time)override;//when collision, hitpoint --, if hitpoint to 0, explosion
              void Explosion() override;//change texture and count 5 s
              void CollectItem() override;
              void Invincible()override;

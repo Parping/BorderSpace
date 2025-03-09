@@ -15,6 +15,27 @@ namespace game {
     /*
         GameObject is responsible for handling the rendering and updating of one object in the game world
         The update and render methods are virtual, so you can inherit them from GameObject and override the update or render functionality (see PlayerGameObject for reference)
+
+        explosion -1
+        normal 0
+        player 1
+        collectible: 
+            11 - Invisible Point
+            12 - Energy
+            13 - Iron
+            l4 - Coin
+        enemy:
+            91 - minion
+            92 - ex-minion
+            93 - BBB
+            94 - Fortress //specific function
+            95 - Monster
+            100 - BOSS
+        projictile : -> from player? or other ones
+            51 - basic projectile
+            52 - lazer
+            53 - bomb
+        
     */
 
 
@@ -72,11 +93,12 @@ namespace game {
             virtual int GetItem() { return 0; };
             virtual int GetState() { return -1; };
             virtual float GetSpeed() { return 0; };
+            virtual int getFrom() { return -2; }
 
             virtual bool RayToCircleCheck(glm::vec3 position, float r,double deltatime) { return false; };
             
             //vitrual function, won't implimentation in this class
-            virtual void Get_Collision() {};
+            virtual void Get_Collision(double delta_time) {};
             virtual void Explosion() {};
             virtual void SetColliable(bool a) {};
             virtual void SetAlive(bool a) {};
@@ -96,6 +118,11 @@ namespace game {
             int GetCurrentFrame() { return current_frame; }
             int GetBar_Percent();
             virtual void SetOffset(int o) { offset = o; }
+
+            virtual void setWant(bool s) { };
+            virtual bool getShoot() { return false; }
+
+
 
         protected:
             // Object's Transform Variables

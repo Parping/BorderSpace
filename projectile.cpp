@@ -1,7 +1,7 @@
 #include "projectile.h"
 #include <iostream>
 namespace game {
-	Projectile::Projectile(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, Circle circle,float angle)
+	Projectile::Projectile(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, Circle circle,float angle,int from)
 		: GameObject(position, geom, shader, texture) {
 		circle = circle;
 		colliable = true;
@@ -15,6 +15,7 @@ namespace game {
 		speed = 15.0;
 		Init();
 		t_ = 0;
+		from_id_ = from;
 		startPosition = position;//initialy, currentposition=startposition
 	}
 	Circle* Projectile::GetCircle() {
@@ -25,7 +26,7 @@ namespace game {
 		velocity_ = speed * GetBearing();//init the velocity with the direction and speed
 	}
 
-	void  Projectile::Get_Collision() {
+	void  Projectile::Get_Collision(double delta_time) {
 		
 		alive = false;
 		colliable = false;

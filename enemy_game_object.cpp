@@ -2,25 +2,115 @@
 #include "enemy_game_object.h"
 #include <iostream>
 namespace game {
-    EnemyGameObject::EnemyGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, int hp, Circle circle,double t,int statue) 
+    struct E
+    {
+        int hp_;
+        int type_;
+        float speed_;
+        float size_scale_;
+        float react_;
+        int shoot_desire_;
+        float reload_;
+    };
+    E minion = {
+        1,
+        91,
+        1.5f,
+        1,
+        2.0f,
+        20,
+        1.0f
+    };
+    E ex_minion = {
+        5,
+        92,
+        1.8f,
+        1.0,
+        0.5f,
+        50,
+        0.7
+    };
+    EnemyGameObject::EnemyGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, Circle circle,double t,int statue, int ty) 
         : GameObject(position, geom, shader, texture) {
-            hitpoint = hp;
+            InitType(ty);
             circle = circle;
             alive = true;
             colliable = true;
             t_ = t;
             timer_react = Timer();
-            speed = 2;//set unit of speed =2
-            if ((statue % 5)!=0) {//random choose the starting moving mode
+            want_shoot = false;
+
+    }
+
+    void EnemyGameObject::InitType(int t) {
+        int random = rand() % 100;
+        switch (t)
+        {
+        case 91:
+            hitpoint = minion.hp_;
+            type = minion.type_;
+            speed = minion.speed_;
+            scale_ = glm::vec2(minion.size_scale_, minion.size_scale_);
+            react = minion.react_;
+            shoot_desire = minion.shoot_desire_;
+            reload = minion.reload_;
+            if ((random % 5) != 0) {//random choose the starting moving mode
                 Init(2);//each 50% 
             }
             else {
                 Init(3);
             }
-
-
+            
+            break;
+        case 92:
+            hitpoint = ex_minion.hp_;
+            type = ex_minion.type_;
+            speed = ex_minion.speed_;
+            scale_ = glm::vec2(ex_minion.size_scale_, ex_minion.size_scale_);
+            react = ex_minion.react_;
+            shoot_desire = ex_minion.shoot_desire_;
+            reload = ex_minion.reload_;
+            if ((random % 5) != 0) {//random choose the starting moving mode
+                Init(2);//each 50% 
+            }
+            else {
+                Init(3);
+            }
+            break;
+        
+        
+        default:
+            break;
+        }
 
     }
+
+    void EnemyGameObject::Init(int s) {
+
+        if (s == 2) {
+            statue = 2;//set the statue to patrolling
+            center_ = position_;//the center is the given position
+            width = 1;
+            height = 2;
+            glm::vec2 P = glm::vec2(center_);
+            glm::vec2 D = P + glm::vec2(
+                (this->width / 2.0f) * cos(speed * t_),
+                (this->height / 2.0f) * sin(speed * t_));
+            //calculate the position on the ellipse with given width, height and center
+            glm::vec3 position = glm::vec3(D.x, D.y, 0);
+            position_ = position;//set the new position as the starting position
+        }
+        else {
+            statue = 3;//just set the statue to intercepting
+            center_ = position_;
+            width = 0.5;
+            height = 0.5;
+
+        }
+    }
+
+
+
     Circle* EnemyGameObject::GetCircle() {
         return &circle;
     }
@@ -63,36 +153,15 @@ namespace game {
         height=a;
     }
 
-    void EnemyGameObject::Init(int s) {
 
-        if (s == 2) {
-            statue = 2;//set the statue to patrolling
-            type = 3;
-            center_ = position_;//the center is the given position
-            width = 1;
-            height = 2;
-            glm::vec2 P = glm::vec2(center_);
-            glm::vec2 D = P + glm::vec2(
-                (this->width / 2.0f) * cos(speed * t_),
-                (this->height / 2.0f) * sin(speed * t_));
-            //calculate the position on the ellipse with given width, height and center
-            glm::vec3 position = glm::vec3(D.x, D.y, 0);
-            position_ = position;//set the new position as the starting position
-        }
-        else {
-            statue = 3;//just set the statue to intercepting
-            type = 3;
-            center_ = position_;
-            width = 0.5;
-            height = 0.5;
-
-        }
-    }
-    void EnemyGameObject::Get_Collision() {//when collision, hitpoint --, if hitpoint to 0, explosion
-        //std::cout << " Get Collision" << std::endl;
-
-        if (hitpoint > 0) {// get collision, hitpoint - 1
-            hitpoint--;
+    void EnemyGameObject::Get_Collision(double delta_time) {//when collision, hitpoint --, if hitpoint to 0, explosion
+        if (collision_timer.Finished()) {
+            std::cout << " Get Collision" << std::endl;
+            collision_timer.Start((float)delta_time);
+            if (hitpoint > 0) {// get collision, hitpoint - 1
+                hitpoint--;
+            }
+            collision_timer.Start(delta_time);
         }
         
     
@@ -130,23 +199,42 @@ namespace game {
         glm::vec2 Myposition, Target, Player_position;
         glm::vec2 direction,velocity;        
         
-        if (timer_react.Finished()) {//adjust velocity every 2s 
-            Myposition = glm::vec2(GetPosition().x, GetPosition().y);
-            Player_position = glm::vec2(player_->GetPosition().x, player_->GetPosition().y);
-            velocity = glm::vec2(GetVelocity().x, GetVelocity().y);
-            velocity = speed * (Player_position - Myposition) / glm::length(Player_position - Myposition);
-            //calculate the velocity and adjust it with unit of speed
-            /*
-            glm::vec2 a;
-            a = Player_position - Myposition - velocity;
-            velocity = velocity - a *(float)delta_time;
-            if (glm::length(velocity) > speed) {
-                velocity = speed * velocity / glm::length(velocity);
+        switch (type)
+        {
+        case 91:
+            if (timer_react.Finished()) {//adjust velocity every 2s 
+                Myposition = glm::vec2(GetPosition().x, GetPosition().y);
+                Player_position = glm::vec2(player_->GetPosition().x, player_->GetPosition().y);
+                velocity = glm::vec2(GetVelocity().x, GetVelocity().y);
+                velocity = speed * (Player_position - Myposition) / glm::length(Player_position - Myposition);
+                SetVelocity(glm::vec3(velocity, 0));//set new velocity
+                timer_react.Start(react);//restart the timer
             }
-            */
-            SetVelocity(glm::vec3(velocity, 0));//set new velocity
-           timer_react.Start(2);//restart the timer
+            break;
+        case 92:
+            if (timer_react.Finished()) {//adjust velocity every 
+                Myposition = glm::vec2(GetPosition().x, GetPosition().y);
+                Player_position = glm::vec2(player_->GetPosition().x, player_->GetPosition().y);
+                velocity = glm::vec2(GetVelocity().x, GetVelocity().y);
+                //calculate the velocity and adjust it with unit of speed
+                velocity = speed * (Player_position - Myposition) / glm::length(Player_position - Myposition);
+                glm::vec2 a;
+                a = Player_position - Myposition - velocity;
+                velocity = velocity + a *(float)delta_time;
+                if (glm::length(velocity) > speed) {
+                    velocity = speed * velocity / glm::length(velocity);
+                }
+                
+                SetVelocity(glm::vec3(velocity, 0));//set new velocity
+                if (glm::dot(Player_position,velocity)==0) {
+                    timer_react.Start(react);//restart the timer
+                }
+            }
+            break;
+        default:
+            break;
         }
+
 
     }
     void EnemyGameObject::SetVelocity(const glm::vec3& velocity) {
@@ -163,6 +251,14 @@ namespace game {
             SetRotation(-angle);//adjust the angle
         }
         //std::cout << "Update velocity"<< velocity_.x << std::endl;
+    }
+    void EnemyGameObject::setWant(bool s) {
+        want_shoot = s; 
+       // std::cout << "set shoot :" << s << std::endl;
+    }
+    bool EnemyGameObject::getShoot(){
+       // std::cout << "want shoot :" << want_shoot << std::endl;
+        return want_shoot; 
     }
     // Update function for moving the player object around
     // Update status
@@ -189,10 +285,21 @@ namespace game {
                 patrolling();
                 if (findPlayer()) {//if it see player, change state to intercepting
                     statue = 3;
+                    reload_timer.Start(reload);
                 }
                 break;
             case 3:
                 intercepting(delta_time);//change velocity by intercepting
+                if (reload_timer.Finished()) {
+                    if (!getShoot()) {
+                        int random = rand() % 100;
+                        if (random>shoot_desire) {
+                            setWant(true);
+                        }
+                        reload_timer.Start(reload);
+                    }
+
+                }
                 break;
 
             default:
@@ -205,6 +312,7 @@ namespace game {
             T = Myposition + (float)delta_time * velocity;//calculate the new position by new velocity
             SetPosition(glm::vec3(T.x, T.y, 0));//set the new position
         }
+
 
 
 

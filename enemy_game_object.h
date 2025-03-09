@@ -9,7 +9,8 @@ namespace game {
     class EnemyGameObject : public GameObject {
 
     public:
-        EnemyGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, int hp, Circle circle,double t_,int statue);
+
+        EnemyGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, Circle circle,double t_,int statue, int type);
         Circle* GetCircle()override;
         //getters
         bool GetAlive()override;
@@ -32,9 +33,10 @@ namespace game {
 
 
 
-        void Get_Collision()override;//when collision, hitpoint --, if hitpoint to 0, explosion
+        void Get_Collision(double delta_time)override;//when collision, hitpoint --, if hitpoint to 0, explosion
         void Explosion() override;//change texture and count 5 s
 
+        void InitType(int t);
         void Init(int statue);//init randomly in different statue here.
 
         // Update function for moving the player object around
@@ -44,6 +46,10 @@ namespace game {
         void patrolling();//one mode for moving
         void intercepting(double delta_time);//another mode for moving
         bool findPlayer();//see if player is closer to this obj
+
+        void setWant(bool s) override;
+        bool getShoot() override;
+        int Get_Shoot_Desire() { return shoot_desire; };
     private:
         int hitpoint;
         int statue;//0 normal, 1 invincible, 2 patrolling, 3 intercepting
@@ -57,6 +63,12 @@ namespace game {
         double t_;//time passed
         float speed;//unit speed for moving
         Timer timer_react;//timer to simulate their slow reaction tim
+        float react;
+        Timer collision_timer;
+        bool want_shoot;
+        int shoot_desire;
+        Timer reload_timer;
+        float reload;
 
 
 
