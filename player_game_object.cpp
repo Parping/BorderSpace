@@ -21,6 +21,16 @@ PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Sh
 	t_ = 0;//time passed
 	max_velocity = 2.0f;//max velocity is 2 unit
 	velocity_ = glm::vec3(0,0,0);
+
+	invisible_point_=0;
+	energy_=100;
+	iron_=0;
+	coin_=0;
+	experience_=0;
+	level_=1;
+	max_exp=100;
+	max_hp=hp;
+	max_energy=100;
 }
 
 //gettters and setters
@@ -71,15 +81,47 @@ void PlayerGameObject::Explosion() {
 	colliable = false;// when it's explosing, it's not colliable.
 }
 
-void PlayerGameObject::CollectItem() {
-	item += 1;//item++ when call this function
-	std::cout << " item "<< item << std::endl;
+void PlayerGameObject::CollectItem(int type) {
+	switch (type)
+	{
+	case 11:
+		invisible_point_++;
+
+		break;
+	case 12:
+		if ((energy_ + 10) > max_energy) {
+			energy_ = max_energy;
+		}
+		else {
+			energy_ += 10;
+		}
+		break;
+	case 13:
+		iron_++;
+		break;
+	case 14:
+		coin_++;
+		break;
+	default:
+		break;
+	}
 }
 void PlayerGameObject::Invincible() {
 	state = 1;//change state
 	std::cout << " Get Invincible" << std::endl;
 	timer_invi.Start(10);//timer
 }
+
+void PlayerGameObject::Add_Exp(int a) {
+	experience_ += a;
+}
+void PlayerGameObject::Level_up() {
+
+	experience_ -= max_exp;
+	level_++;
+	max_exp += 50;
+}
+
 
 // Update function for moving the player object around
 void PlayerGameObject::Update(double delta_time) {
@@ -105,11 +147,14 @@ void PlayerGameObject::Update(double delta_time) {
 			state = 0;//return to normal state
 		}
 	}
-	if (this->GetItem() == 5) {//if it has 5 item then it changes it state
+	if (this->Get_INPoint() >= 5) {//if it has 5 item then it changes it state
 		Invincible();
-		item = 0;//reset the item collision
+		invisible_point_=0;//reset the item collision
 	}
-
+	if (Get_Exper() >= Get_Max_Exp()) {
+		Level_up();
+		hitpoint = max_hp;
+	}
 
 
 /*	// Special player updates go here

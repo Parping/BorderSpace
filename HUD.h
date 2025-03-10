@@ -10,7 +10,7 @@ namespace game {
     class HUD  {
 
     public:
-        HUD(GameObject* hp,GameObject* num,GameObject* energy,GameObject* exp_bar,GameObject* exp_text,GameObject* lv_text);
+        HUD(GameObject* hp,GameObject* num,GameObject* energy,GameObject* exp_bar,GameObject* exp_text,GameObject* lv_text, GameObject* player);
         
         void Init();
 
@@ -74,6 +74,8 @@ namespace game {
         GameObject* exp_spirt;
         GameObject* exp_text;
         GameObject* lv_text;
+
+        GameObject* player_;
 
         
 

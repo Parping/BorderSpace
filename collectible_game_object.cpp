@@ -11,6 +11,7 @@ namespace game {
 		//std::cout << " collectible created!" << std::endl;
 		ghost = false;
 		num_frame = glm::vec2(4,1);
+		scale_ = glm::vec2(0.5, 0.5);
 		switch (ty)
 		{
 		case 11:

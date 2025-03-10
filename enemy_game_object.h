@@ -21,7 +21,7 @@ namespace game {
         //setters
         void SetColliable(bool a)override;
         void SetAlive(bool a)override;
-        void SetStatue(int a);
+        void SetStatue(int a) override;
         void SetPlayer(GameObject* a)override;
         inline void SetCenter(glm::vec3& a)override;
         void SetWidth(float a)override;
@@ -47,9 +47,15 @@ namespace game {
         void intercepting(double delta_time);//another mode for moving
         bool findPlayer();//see if player is closer to this obj
 
+        void back(glm::vec3 posi) override;
+
         void setWant(bool s) override;
         bool getShoot() override;
         int Get_Shoot_Desire() { return shoot_desire; };
+
+        void Run(double delta_time);
+
+        bool getBack() override { return back_; }
     private:
         int hitpoint;
         int statue;//0 normal, 1 invincible, 2 patrolling, 3 intercepting
@@ -69,6 +75,10 @@ namespace game {
         int shoot_desire;
         Timer reload_timer;
         float reload;
+        glm::vec3 target;
+
+        int max_hp;
+        bool back_;
 
 
 

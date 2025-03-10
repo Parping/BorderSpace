@@ -34,6 +34,21 @@ const glm::vec3 viewport_background_color_g(0.0, 0.0, 1.0);
 // Directory with game resources such as textures
 const std::string resources_directory_g = RESOURCES_DIRECTORY;
 
+struct EnemyDrop {
+    int ip_;
+    int energy_;
+    int iron_;
+    int exp_;
+    int coin_;
+    float percent_;
+};
+
+EnemyDrop Minion = {2,5,1,10,0,50};
+EnemyDrop EX_Minion = { 5,5,3,20,0,70 };
+EnemyDrop BBB = { 5, 20, 20, 50,10,0 };
+EnemyDrop Fortress = { 20,5,5,200,10,0 };
+EnemyDrop Monster = { 5, 20, 20, 50,10,0 };
+
 class Background : public Sprite {//add a new sprite setting for background
 public:
     void CreateGeometry() override {
@@ -92,7 +107,10 @@ void Game::SetupGameWorld(void)
         level_text = 12,
         exp_text = 13,
         tex_ex_minion = 14,
-        tex_items = 15
+        tex_items = 15,
+        tex_for = 16,
+        tex_bbb = 17,
+        tex_monster = 18
     };
     textures.push_back("/textures/tiny_ship1.png"); //change file
     //textures.push_back("/textures/destroyer_green.png"); 
@@ -112,6 +130,9 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/exp.png");
     textures.push_back("/textures/tiny_ship3.png");
     textures.push_back("/textures/IP+E+I+C (16 x 16).png");
+    textures.push_back("/textures/Fortress.png");
+    textures.push_back("/textures/blue_ship.png");
+    textures.push_back("/textures/monster.png");
 
     // Load textures
     LoadTextures(textures);
@@ -134,23 +155,20 @@ void Game::SetupGameWorld(void)
 
 
 
-    hud_ = new HUD(hp_spirt,num_spirt, energy_spirt,exp_spirt, exp_text_s, lv_text_s);
-    game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tiny_ship17],3,Circle()));//change texture, add hitpoint, circle
+    
+    game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tiny_ship17],100,Circle()));//change texture, add hitpoint, circle
+    hud_ = new HUD(hp_spirt, num_spirt, energy_spirt, exp_spirt, exp_text_s, lv_text_s, game_objects_[0]);
+    
 
     float pi_over_two = glm::pi<float>() / 2.0f;
-    hud_->SetHP(game_objects_[0]->GetHP());
-    hud_->SetMax_HP(game_objects_[0]->GetHP());
-    hud_->SetEnergy(30);
-    hud_->SetMax_Energy(100);
-    hud_->SetExp(80);
-    hud_->SetMax_Exp(100);
+
     // Setup enemy objects
-    game_objects_.push_back(new EnemyGameObject(glm::vec3(2.0f, -2.0f, 0.0f), sprite_, &sprite_shader_, tex_[tiny_ship1],Circle(),current_time_,0,91));//change texture,add hitpoint, circle, random number for different moving mode
-    //game_objects_.push_back(new EnemyGameObject(glm::vec3(1.0f, 2.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_ex_minion],Circle(),current_time_, 0,92));//change texture£¬add hitpoint, circle
-
-
-
-
+    game_objects_.push_back(new EnemyGameObject(glm::vec3(2.0f, -2.0f, 0.0f), sprite_, &number_shader_, tex_[tex_monster],Circle(),current_time_,0,95));//change texture,add hitpoint, circle, random number for different moving mode
+    game_objects_.push_back(new EnemyGameObject(glm::vec3(1.0f, 2.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_bbb],Circle(),current_time_, 0,93));//change texture£¬add hitpoint, circle
+    
+    fortress_exist_ = true;
+    fortress_ = new EnemyGameObject(glm::vec3(6.0f, 10.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_for], Circle(), current_time_, 0, 94);
+    game_objects_.push_back(fortress_);//change texture£¬add hitpoint, circle
     //setup item object
     game_objects_.push_back(new CollectibleGameObject(glm::vec3(1.0f, 1.0f, 0.0f), sprite_, &number_shader_, tex_[tex_items], Circle(), 14));
     
@@ -161,6 +179,8 @@ void Game::SetupGameWorld(void)
         game_objects_[i]->SetRotation(pi_over_two);
         game_objects_[i]->SetPlayer(game_objects_[0]);//set player pointer for each enemy
     }
+
+    
 
     // Setup background
     // In this specific implementation, the background is always the
@@ -260,7 +280,7 @@ void Game::HandleControls(double delta_time)
 void Game::Update(double delta_time)
 {
     current_time_ += delta_time;
-
+    GameObject* player = game_objects_[0];
     // Update all game objects
     for (int i = 0; i < game_objects_.size(); i++) {
         // Get the current game object
@@ -299,7 +319,7 @@ void Game::Update(double delta_time)
                         }
                         else if ((other_game_object->GetType() >10 ) && (other_game_object->GetType() < 20) ){//if it is collect
                             other_game_object->Get_Collision(delta_time);//item change color
-                            current_game_object->CollectItem();//player item++
+                            current_game_object->CollectItem(other_game_object->GetType());//player item++
                         }
                         else if (other_game_object->GetType() == 4) {//(other_game_object->GetType() > 50) && (other_game_object->GetType() < 60)
                             if (other_game_object->getFrom() != 1) {
@@ -319,7 +339,10 @@ void Game::Update(double delta_time)
 
                     break;
                 case 4://current type is projectile
-                    if (other_game_object->GetType() >current_game_object->getFrom()) {
+                    if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
+                    
+                    }
+                    else if (other_game_object->GetType() !=current_game_object->getFrom()) {
                         if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
                             //get enemy position, enemy circle radius, and the delta_time
                             other_game_object->Get_Collision(delta_time);//current and other obj get collision.
@@ -375,8 +398,28 @@ void Game::Update(double delta_time)
                     continue;
                 }
             }
-            else if ((current_game_object->GetType()>90) && (current_game_object->GetType()<94)) {
-
+            else if ((current_game_object->GetType()>90) && (current_game_object->GetType()<100)) {
+                switch (current_game_object->GetType())
+                {
+                case 91:
+                    player->Add_Exp(Minion.exp_);
+                    break;
+                case 92:
+                    player->Add_Exp(EX_Minion.exp_);
+                    break;
+                case 93:
+                    player->Add_Exp(BBB.exp_);
+                    break;
+                case 94:
+                    player->Add_Exp(Fortress.exp_);
+                    break;
+                case 95:
+                    player->Add_Exp(Monster.exp_);
+                    break;
+                default:
+                    break;
+                }
+                int type_enemy = current_game_object->GetType();
                 glm::vec3 posi = current_game_object->GetPosition();
                 GameObject* expo = new Expo_obj(posi, sprite_, &animate_shader_, tex_[3]);
                 expo->SetNumFrame(glm::vec2(8, 1));
@@ -384,26 +427,23 @@ void Game::Update(double delta_time)
                 delete game_objects_[i];
                 game_objects_.erase(game_objects_.begin() + i);//shrink vector
                 game_objects_.insert(game_objects_.begin() + 1, expo);
-                GameObject* c1 = new CollectibleGameObject(glm::vec3(posi.x+0.2,posi.y,posi.z), sprite_, &sprite_shader_, tex_[4], Circle(),11);
-                GameObject* c2 = new CollectibleGameObject(glm::vec3(posi.x - 0.2, posi.y, posi.z), sprite_, &sprite_shader_, tex_[4], Circle(),12);
-                GameObject* c3 = new CollectibleGameObject(glm::vec3(posi.x, posi.y+0.2, posi.z), sprite_, &sprite_shader_, tex_[4], Circle(),13);
-                GameObject* c4 = new CollectibleGameObject(glm::vec3(posi.x, posi.y-0.2, posi.z), sprite_, &sprite_shader_, tex_[4], Circle(),14);
-                c1->SetScale(glm::vec2(0.3, 0.3));
-                c2->SetScale(glm::vec2(0.3, 0.3));
-                c3->SetScale(glm::vec2(0.3, 0.3));
-                c4->SetScale(glm::vec2(0.3, 0.3));
-                game_objects_.insert(game_objects_.begin() + 1, c1);
-                game_objects_.insert(game_objects_.begin() + 1, c2);
-                game_objects_.insert(game_objects_.begin() + 1, c3);
-                game_objects_.insert(game_objects_.begin() + 1, c4);
+                generateEnemyDrops(posi, type_enemy);
 
             }
             else {//otherthing die
+
                 delete game_objects_[i];//delete the obj
                 game_objects_.erase(game_objects_.begin() + i);//shrink vector
                 std::cout << "delete!" << std::endl;//print delete
                 continue;
             }
+        }
+        else if (current_game_object->getBack()) {
+            delete game_objects_[i];//delete the obj
+            game_objects_.erase(game_objects_.begin() + i);//shrink vector
+            std::cout << "delete!" << std::endl;//print delete
+            fortress_->SetStatue(9);
+            continue;
         }
 
     }
@@ -430,12 +470,27 @@ void Game::Update(double delta_time)
                     current_game_object->setWant(false);
                 }
                 break;
+            case 94:
+                if (current_game_object->getShoot() && current_game_object->GetState() == 9) {
+                    game_objects_.insert(game_objects_.begin() + 1, new Projectile(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[7], Circle(), current_game_object->GetRotation(), current_game_object->GetType()));
+                    game_objects_[1]->SetScale(glm::vec2(1, 0.2));
+                    game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
+                    current_game_object->setWant(false);
+                }
                 default:
                     break;
             }
         }
     }
-    hud_->SetHP(game_objects_[0]->GetHP());
+
+    for (int i = 0;i < (game_objects_.size() - 1);i++) {
+        GameObject* current_game_object = game_objects_[i];
+        if (current_game_object->GetType() == 93) {
+            if (current_game_object->GetState() == 6) {
+                current_game_object->back(fortress_->GetPosition());
+            }
+        }
+    }
     hud_->Update(delta_time);
 }
 void Game::generateDifferentEnemy() {
@@ -454,6 +509,9 @@ void Game::generateDifferentEnemy() {
         new_enemy->SetPlayer(game_objects_[0]); // set player pointer
         game_objects_.insert(game_objects_.begin() + 1, new_enemy);//new enemy
     }
+    else {
+        new_enemy = new EnemyGameObject(random_position, sprite_, &sprite_shader_, tex_[16], Circle(), current_time_, 0, 94);
+    }
 
 
 
@@ -462,6 +520,126 @@ void Game::generateDifferentEnemy() {
       //    << random_position.y << ")" << std::endl;
 
 }
+
+void Game::generateEnemyDrops(glm::vec3 position, int type) {
+    int random = rand() % 100;
+    switch (type)
+    {
+    case 91:
+        for (int i = 0; i < Minion.ip_;i++) {
+            if (random > i * Minion.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x + 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 11));
+            }
+        }
+        for (int i = 0; i < Minion.energy_;i++) {
+            if (random > i * Minion.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x-0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 12));
+            }
+        }
+        for (int i = 0; i < Minion.iron_;i++) {
+            if (random > i * Minion.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y+0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 13));
+            }
+        }
+        for (int i = 0; i < Minion.coin_;i++) {
+            if (random > i * Minion.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 14));
+            }
+        }
+        break;
+    case 92:
+        for (int i = 0; i < EX_Minion.ip_;i++) {
+            if (random > i * EX_Minion.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x + 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 11));
+            }
+        }
+        for (int i = 0; i < EX_Minion.energy_;i++) {
+            if (random > i * EX_Minion.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x - 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 12));
+            }
+        }
+        for (int i = 0; i < EX_Minion.iron_;i++) {
+            if (random > i * EX_Minion.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 13));
+            }
+        }
+        for (int i = 0; i < EX_Minion.coin_;i++) {
+            if (random > i * EX_Minion.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 14));
+            }
+        }
+        break;
+    case 93:
+        for (int i = 0; i < BBB.ip_;i++) {
+            if (random > i * BBB.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x + 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 11));
+            }
+        }
+        for (int i = 0; i < BBB.energy_;i++) {
+            if (random > i * BBB.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x - 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 12));
+            }
+        }
+        for (int i = 0; i < BBB.iron_;i++) {
+            if (random > i * BBB.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 13));
+            }
+        }
+        for (int i = 0; i < BBB.coin_;i++) {
+            if (random > i * BBB.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 14));
+            }
+        }
+        break;
+    case 94:
+        for (int i = 0; i < Fortress.ip_;i++) {
+            if (random > i * Fortress.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x + 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 11));
+            }
+        }
+        for (int i = 0; i < Fortress.energy_;i++) {
+            if (random > i * Fortress.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x - 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 12));
+            }
+        }
+        for (int i = 0; i < Fortress.iron_;i++) {
+            if (random > i * Fortress.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 13));
+            }
+        }
+        for (int i = 0; i < Fortress.coin_;i++) {
+            if (random > i * Fortress.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 14));
+            }
+        }
+        break;
+    case 95:
+        for (int i = 0; i < Monster.ip_;i++) {
+            if (random > i * Monster.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x + 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 11));
+            }
+        }
+        for (int i = 0; i < Monster.energy_;i++) {
+            if (random > i * Monster.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x - 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 12));
+            }
+        }
+        for (int i = 0; i < Monster.iron_;i++) {
+            if (random > i * Monster.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 13));
+            }
+        }
+        for (int i = 0; i < Monster.coin_;i++) {
+            if (random > i * Monster.percent_) {
+                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 14));
+            }
+        }
+        break;
+    default:
+        break;
+    }
+}
+
 glm::vec3 Game::generateRandomPosition() {
     float x_num = (rand() % 100) / 100.0;//random number 0~1
     float y_num = (rand() % 100) / 100.0;//random number 0~1

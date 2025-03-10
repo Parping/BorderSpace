@@ -62,8 +62,9 @@ namespace game {
             int GetType() { return type; }
             virtual glm::vec3 GetVelocity(void) { return glm::vec3(0, 0, 0); };
 
-
-
+            virtual void back(glm::vec3 posi) {};
+            virtual void SetStatue(int a) {};
+            virtual bool getBack() { return false; }
             // Get bearing direction (direction in which the game object
             // is facing)
             glm::vec3 GetBearing(void) const;
@@ -103,7 +104,7 @@ namespace game {
             virtual void SetColliable(bool a) {};
             virtual void SetAlive(bool a) {};
             virtual void SetCollectible(bool a) {};
-            virtual void CollectItem() {};
+            virtual void CollectItem(int type) {};
             virtual void Invincible() {};
             virtual void SetState() {};
             virtual void SetPlayer(GameObject* a) {};
@@ -122,7 +123,18 @@ namespace game {
             virtual void setWant(bool s) { };
             virtual bool getShoot() { return false; }
 
+            virtual int Get_INPoint() { return -1; }
+            virtual int Get_Energy() { return -1; }
+            virtual int Get_Iron() { return -1; }
+            virtual int Get_Coin() { return -1; }
+            virtual int Get_Exper() { return -1; }
+            virtual int Get_Level() { return -1; }
 
+            virtual void Add_Exp(int a) {};
+            virtual void Level_up() {};
+            virtual int Get_Max_Exp() { return -1; }
+            virtual int Get_Max_Hp() { return -1; }
+            virtual int Get_Max_Energy() { return -1; }
 
         protected:
             // Object's Transform Variables

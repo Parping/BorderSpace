@@ -71,6 +71,9 @@ namespace game {
             // List of game objects
             std::vector<GameObject*> game_objects_;
 
+            GameObject* fortress_;
+            bool fortress_exist_;
+
 
             // Keep track of time
             double current_time_;

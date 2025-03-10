@@ -3,7 +3,7 @@
 #include <string> // for string and to_string()
 #include <math.h>
 namespace game {
-	HUD::HUD(GameObject* h,GameObject*number,GameObject* e,GameObject* exp_bar, GameObject* exp_t, GameObject* lv_t)
+	HUD::HUD(GameObject* h,GameObject*number,GameObject* e,GameObject* exp_bar, GameObject* exp_t, GameObject* lv_t, GameObject* player)
 		 {
          hp=0;
          energy=0;
@@ -19,6 +19,8 @@ namespace game {
          exp_spirt = exp_bar;
          exp_text = exp_t;
          lv_text = lv_t;
+
+         player_ = player;
          Init();
 
 	}
@@ -38,6 +40,20 @@ namespace game {
         exp_spirt->SetNumFrame(glm::vec2(2, 1));
         exp_text->SetScale(glm::vec2(0.4, 0.4));
         lv_text->SetScale(glm::vec2(0.4, 0.4));
+
+
+        hp = player_->GetHP();
+        max_hp = player_->Get_Max_Hp();
+
+        energy = player_->Get_Energy();
+        max_energy = player_->Get_Max_Energy();
+
+        exp = player_->Get_Exper();
+        max_exp = player_->Get_Max_Exp();
+        level = player_->Get_Level();
+        money = player_->Get_Coin();
+
+
     }
 
     void HUD:: Render(glm::mat4 view_matrix, double current_time) {
@@ -68,7 +84,7 @@ namespace game {
         lv_text->Render(LV_T_M, current_time);
 
         LV_T_M= glm::translate(LV_T_M, glm::vec3(lv_text->GetScale().x, 0, 0));
-        RenderNumber(LV_T_M, current_time, 123);
+        RenderNumber(LV_T_M, current_time, GetLevel());
         
     }
 
@@ -154,7 +170,16 @@ namespace game {
         return 0;
     }
 	void  HUD::Update(double delta_time) {
+        hp = player_->GetHP();
+        max_hp = player_->Get_Max_Hp();
 
+        energy = player_->Get_Energy();
+        max_energy = player_->Get_Max_Energy();
+
+        exp = player_->Get_Exper();
+        max_exp = player_->Get_Max_Exp();
+        level = player_->Get_Level();
+        money = player_->Get_Coin();
 
 
 	}

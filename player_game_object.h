@@ -24,7 +24,7 @@ namespace game {
             
              void Get_Collision(double delta_time)override;//when collision, hitpoint --, if hitpoint to 0, explosion
              void Explosion() override;//change texture and count 5 s
-             void CollectItem() override;
+             void CollectItem(int type) override;
              void Invincible()override;
              void AddVelocity(glm::vec3 a)override;//add new vec3 to the current velocity
 
@@ -33,6 +33,27 @@ namespace game {
             // Update status
             void Update(double delta_time) override;
             void SetVelocity(const glm::vec3& velocity)override;
+
+            int Get_INPoint() override { return invisible_point_; }
+            int Get_Energy() override { return energy_; }
+            int Get_Iron() override { return iron_; }
+            int Get_Coin() override { return coin_; }
+            int Get_Exper()override { return experience_; }
+            int Get_Level() override { return level_; }
+
+            void Set_INPoint(int i) { invisible_point_ = i; }
+            void Set_Energy(int e) { energy_ = e; }
+            void Set_Iron(int i) { iron_ = i; }
+            void Set_Coin(int c) { coin_ = c; }
+            void Set_Exper(int e) { experience_ = e; }
+            void Set_Level(int l) { level_ = l; }
+            
+            void Add_Exp(int a) override;
+            void Level_up() override;
+
+            int Get_Max_Exp() override { return max_exp; }
+            int Get_Max_Hp() override { return max_hp; }
+            int Get_Max_Energy() override { return max_energy; }
     private:
         int hitpoint;
         int item;//internal item counter
@@ -44,6 +65,16 @@ namespace game {
         float speed;//speed for moving
         double t_;//time passed
         float max_velocity;//max velocity it can reach
+
+        int invisible_point_;
+        int energy_;
+        int iron_;
+        int coin_;
+        int experience_;
+        int level_;
+        int max_exp;
+        int max_hp;
+        int max_energy;
 
 
 
