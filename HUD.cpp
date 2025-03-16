@@ -57,7 +57,10 @@ namespace game {
     }
 
     void HUD:: Render(glm::mat4 view_matrix, double current_time) {
-
+       // std::cout <<view_matrix[0].x<<" " << view_matrix[0].r << " " << view_matrix[0].s << " " << view_matrix[0].y<< std::endl;
+        //std::cout << view_matrix[1].x << " " << view_matrix[1].r << " " << view_matrix[1].s << " " << view_matrix[1].y << std::endl;
+        //std::cout << view_matrix[2].x << " " << view_matrix[2].r << " " << view_matrix[2].s << " " << view_matrix[2].y << std::endl;
+        //std::cout << view_matrix[3].x << " " << view_matrix[3].r << " " << view_matrix[3].s << " " << view_matrix[3].y << std::endl;
         glm::mat4 HP_matrix= glm::translate(view_matrix, glm::vec3(-4.25f, 3.25f, 0));
 
         glm::mat4 Energy_matrix = glm::translate(view_matrix, glm::vec3(-4.25f, 3.2f, 0));

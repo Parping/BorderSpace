@@ -21,6 +21,11 @@ enemy_game_object.h
 projectile.h
 HUD.h
 expo_obj.h
+blue_game_object.h
+fortress_object.h
+monster_object.h
+lazer.h
+bomb.h
 )
  
 set(SRCS
@@ -39,6 +44,11 @@ enemy_game_object.cpp
 projectile.cpp
 HUD.cpp
 expo_obj.cpp
+blue_game_object.cpp
+fortress_object.cpp
+monster_object.cpp
+lazer.cpp
+bomb.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     number_fragement_shader.glsl

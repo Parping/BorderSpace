@@ -14,8 +14,10 @@
 #include "shader.h"
 #include "player_game_object.h"
 #include "collectible_game_object.h"
+#include "blue_game_object.h"
 #include "expo_obj.h"
 #include "enemy_game_object.h"
+#include "fortress_object.h"
 #include "projectile.h"
 #include "game.h"
 
@@ -34,20 +36,9 @@ const glm::vec3 viewport_background_color_g(0.0, 0.0, 1.0);
 // Directory with game resources such as textures
 const std::string resources_directory_g = RESOURCES_DIRECTORY;
 
-struct EnemyDrop {
-    int ip_;
-    int energy_;
-    int iron_;
-    int exp_;
-    int coin_;
-    float percent_;
-};
+;
 
-EnemyDrop Minion = {2,5,1,10,0,50};
-EnemyDrop EX_Minion = { 5,5,3,20,0,70 };
-EnemyDrop BBB = { 5, 20, 20, 50,10,0 };
-EnemyDrop Fortress = { 20,5,5,200,10,0 };
-EnemyDrop Monster = { 5, 20, 20, 50,10,0 };
+
 
 class Background : public Sprite {//add a new sprite setting for background
 public:
@@ -159,18 +150,19 @@ void Game::SetupGameWorld(void)
     game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tiny_ship17],100,Circle()));//change texture, add hitpoint, circle
     hud_ = new HUD(hp_spirt, num_spirt, energy_spirt, exp_spirt, exp_text_s, lv_text_s, game_objects_[0]);
     
-
     float pi_over_two = glm::pi<float>() / 2.0f;
 
     // Setup enemy objects
     game_objects_.push_back(new EnemyGameObject(glm::vec3(2.0f, -2.0f, 0.0f), sprite_, &number_shader_, tex_[tex_monster],Circle(),current_time_,0,95));//change texture,add hitpoint, circle, random number for different moving mode
-    game_objects_.push_back(new EnemyGameObject(glm::vec3(1.0f, 2.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_bbb],Circle(),current_time_, 0,93));//change texture£¬add hitpoint, circle
+    game_objects_.push_back(new BlueGameObject(glm::vec3(1.0f, 2.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_bbb],Circle(),current_time_, 0,93));//change texture£¬add hitpoint, circle
     
     fortress_exist_ = true;
-    fortress_ = new EnemyGameObject(glm::vec3(6.0f, 10.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_for], Circle(), current_time_, 0, 94);
+    fortress_ = new FortressObject(glm::vec3(6.0f, 10.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_for], Circle(), current_time_, 0, 94);
     game_objects_.push_back(fortress_);//change texture£¬add hitpoint, circle
+    game_objects_[2]->setFortress(game_objects_[3]);
+    
     //setup item object
-    game_objects_.push_back(new CollectibleGameObject(glm::vec3(1.0f, 1.0f, 0.0f), sprite_, &number_shader_, tex_[tex_items], Circle(), 14));
+    game_objects_.push_back(new CollectibleGameObject(glm::vec3(5.2f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[tex_items], Circle(), 14));
     
 
     //set circle radius for each
@@ -180,7 +172,7 @@ void Game::SetupGameWorld(void)
         game_objects_[i]->SetPlayer(game_objects_[0]);//set player pointer for each enemy
     }
 
-    
+    game_objects_[3]->GetCircle()->SetRadius(game_objects_[3]->GetScale().x*0.6);
 
     // Setup background
     // In this specific implementation, the background is always the
@@ -303,7 +295,7 @@ void Game::Update(double delta_time)
                 {//player=1; colliable=2, enemy=3; projectile=4,defult=0
                 case 1://current type is player. player can colliable with collectible, enemy
                     if (distance < 0.8f * (current_game_object->GetCircle()->get_r() + other_game_object->GetCircle()->get_r())) {
-                        if (other_game_object->GetType() >90)//if it is enemy
+                        if (other_game_object->GetType() >90 && other_game_object->GetType() != 94)//if it is enemy
                         {
                             //if the two obj has a distance smaller than 0.8 *(sum of the radius), then it there is a collisoin
                             // This is where you would perform collision response between objects
@@ -316,6 +308,22 @@ void Game::Update(double delta_time)
                                 am.StopSound(explosion_music_index);
                                 am.PlaySound(explosion_music_index);
                             }
+                        }
+                        else if (other_game_object->GetType() == 94&& other_game_object->GetState() == 9) {
+
+                            other_game_object->Get_Collision(delta_time);//current and other obj get collision.
+                            current_game_object->Get_Collision(delta_time);
+                            // Play the sound when collision
+                            if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                am.PlaySound(explosion_music_index);
+                            }
+                            else {//stop it first then replay it
+                                am.StopSound(explosion_music_index);
+                                am.PlaySound(explosion_music_index);
+                            }
+                            
+
+                            
                         }
                         else if ((other_game_object->GetType() >10 ) && (other_game_object->GetType() < 20) ){//if it is collect
                             other_game_object->Get_Collision(delta_time);//item change color
@@ -439,10 +447,11 @@ void Game::Update(double delta_time)
             }
         }
         else if (current_game_object->getBack()) {
+            current_game_object->getFortress()->become_angry();
             delete game_objects_[i];//delete the obj
             game_objects_.erase(game_objects_.begin() + i);//shrink vector
             std::cout << "delete!" << std::endl;//print delete
-            fortress_->SetStatue(9);
+
             continue;
         }
 
@@ -453,7 +462,7 @@ void Game::Update(double delta_time)
         //std::cout <<"Create new !" << std::endl;
 
         generateDifferentEnemy();
-        timer.Start(2.0);//start the timer again
+        timer.Start(10.0);//start the timer again
     }
     //enemy shoot
     for (int i = 0;i < (game_objects_.size() - 1);i++) {
@@ -487,7 +496,7 @@ void Game::Update(double delta_time)
         GameObject* current_game_object = game_objects_[i];
         if (current_game_object->GetType() == 93) {
             if (current_game_object->GetState() == 6) {
-                current_game_object->back(fortress_->GetPosition());
+                current_game_object->back();
             }
         }
     }
@@ -498,6 +507,7 @@ void Game::generateDifferentEnemy() {
     int r1 = rand() % 100;
     int r2 = rand() % 100;
     GameObject* new_enemy;
+    float pi_over_two = glm::pi<float>() / 2.0f;
     if (r1<=70) {
         if ((r2+(int)current_time_) <= 70) {
             new_enemy = new EnemyGameObject(random_position, sprite_, &sprite_shader_, tex_[0], Circle(), current_time_, 0, 91);
@@ -507,10 +517,33 @@ void Game::generateDifferentEnemy() {
         }
         new_enemy->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
         new_enemy->SetPlayer(game_objects_[0]); // set player pointer
+        new_enemy->SetRotation(pi_over_two);
         game_objects_.insert(game_objects_.begin() + 1, new_enemy);//new enemy
     }
+    else if(r1<=90) {
+        new_enemy = new FortressObject(random_position, sprite_, &sprite_shader_, tex_[16], Circle(), current_time_, 0, 94);
+        new_enemy->GetCircle()->SetRadius(new_enemy->GetScale().x *0.6);//set the circle radius
+        new_enemy->SetPlayer(game_objects_[0]); // set player pointer
+        new_enemy->SetRotation(pi_over_two);
+        game_objects_.insert(game_objects_.begin() + 1, new_enemy);//new enemy
+        GameObject* new_small_enemy;
+      //    std::cout << "Create new Fortress at position ("//print function
+      //<< random_position.x << ", "
+      //<< random_position.y << ")" << std::endl;
+        for (int i = 0;i < 4; i++) {
+            random_position = generateRandomPosition();
+            new_small_enemy = new BlueGameObject(random_position, sprite_, &sprite_shader_, tex_[17], Circle(), current_time_, 0, 93);
+            new_small_enemy->GetCircle()->SetRadius(new_small_enemy->GetScale().x / 2);//set the circle radius
+            new_small_enemy->SetPlayer(game_objects_[0]); // set player pointer
+            new_small_enemy->setFortress(new_enemy);
+            game_objects_.insert(game_objects_.begin() + 1, new_small_enemy);
+           // std::cout << "Create new BBB at position ("//print function
+             //   << random_position.x << ", "
+               // << random_position.y << ")" << std::endl;
+        }
+    }
     else {
-        new_enemy = new EnemyGameObject(random_position, sprite_, &sprite_shader_, tex_[16], Circle(), current_time_, 0, 94);
+    
     }
 
 
@@ -522,132 +555,89 @@ void Game::generateDifferentEnemy() {
 }
 
 void Game::generateEnemyDrops(glm::vec3 position, int type) {
-    int random = rand() % 100;
+
     switch (type)
     {
     case 91:
-        for (int i = 0; i < Minion.ip_;i++) {
-            if (random > i * Minion.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x + 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 11));
-            }
-        }
-        for (int i = 0; i < Minion.energy_;i++) {
-            if (random > i * Minion.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x-0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 12));
-            }
-        }
-        for (int i = 0; i < Minion.iron_;i++) {
-            if (random > i * Minion.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y+0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 13));
-            }
-        }
-        for (int i = 0; i < Minion.coin_;i++) {
-            if (random > i * Minion.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 14));
-            }
-        }
+        generateEnemyDrops(position, Minion);
         break;
     case 92:
-        for (int i = 0; i < EX_Minion.ip_;i++) {
-            if (random > i * EX_Minion.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x + 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 11));
-            }
-        }
-        for (int i = 0; i < EX_Minion.energy_;i++) {
-            if (random > i * EX_Minion.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x - 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 12));
-            }
-        }
-        for (int i = 0; i < EX_Minion.iron_;i++) {
-            if (random > i * EX_Minion.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 13));
-            }
-        }
-        for (int i = 0; i < EX_Minion.coin_;i++) {
-            if (random > i * EX_Minion.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 14));
-            }
-        }
-        break;
+        generateEnemyDrops(position, EX_Minion);
+         break;
     case 93:
-        for (int i = 0; i < BBB.ip_;i++) {
-            if (random > i * BBB.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x + 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 11));
-            }
-        }
-        for (int i = 0; i < BBB.energy_;i++) {
-            if (random > i * BBB.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x - 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 12));
-            }
-        }
-        for (int i = 0; i < BBB.iron_;i++) {
-            if (random > i * BBB.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 13));
-            }
-        }
-        for (int i = 0; i < BBB.coin_;i++) {
-            if (random > i * BBB.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 14));
-            }
-        }
-        break;
+        generateEnemyDrops(position, BBB);
+         break;
     case 94:
-        for (int i = 0; i < Fortress.ip_;i++) {
-            if (random > i * Fortress.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x + 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 11));
-            }
-        }
-        for (int i = 0; i < Fortress.energy_;i++) {
-            if (random > i * Fortress.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x - 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 12));
-            }
-        }
-        for (int i = 0; i < Fortress.iron_;i++) {
-            if (random > i * Fortress.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 13));
-            }
-        }
-        for (int i = 0; i < Fortress.coin_;i++) {
-            if (random > i * Fortress.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 14));
-            }
-        }
+        generateEnemyDrops(position, Fortress);
         break;
     case 95:
-        for (int i = 0; i < Monster.ip_;i++) {
-            if (random > i * Monster.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x + 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 11));
-            }
-        }
-        for (int i = 0; i < Monster.energy_;i++) {
-            if (random > i * Monster.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x - 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 12));
-            }
-        }
-        for (int i = 0; i < Monster.iron_;i++) {
-            if (random > i * Monster.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 13));
-            }
-        }
-        for (int i = 0; i < Monster.coin_;i++) {
-            if (random > i * Monster.percent_) {
-                game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 14));
-            }
-        }
-        break;
+        generateEnemyDrops(position, Monster);
+         break;
     default:
         break;
     }
 }
 
+void Game::generateEnemyDrops(glm::vec3 position, EnemyDrop s) {
+    int random = rand() % 100;
+    for (int i = 0; i < s.ip_;i++) {
+        if (random > i * s.percent_) {
+            game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x + 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 11));
+        }
+    }
+    for (int i = 0; i < s.energy_;i++) {
+        if (random > i * s.percent_) {
+            game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x - 0.2, position.y, position.z), sprite_, &number_shader_, tex_[15], Circle(), 12));
+        }
+    }
+    for (int i = 0; i < s.iron_;i++) {
+        if (random > i * s.percent_) {
+            game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 13));
+        }
+    }
+    for (int i = 0; i < s.coin_;i++) {
+        if (random > i * s.percent_) {
+            game_objects_.insert(game_objects_.begin() + 1, new CollectibleGameObject(glm::vec3(position.x, position.y + 0.1, position.z), sprite_, &number_shader_, tex_[15], Circle(), 14));
+        }
+    }
+}
+float  Game::randRange(float min, float max) {
+    return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
+}
 glm::vec3 Game::generateRandomPosition() {
-    float x_num = (rand() % 100) / 100.0;//random number 0~1
-    float y_num = (rand() % 100) / 100.0;//random number 0~1
-    float X_value = x_num * 2 * 5 - 5.0;//calculate between -5~5
-    float Y_value = y_num * 2 * 4 - 4.0;//calculate between -4~4
+    float x, y;
+    int edge = rand() % 4; // 0=l, 1=r, 2=u, 3=d
+    float x_p = game_objects_[0]->GetPosition().x;
+    float y_p = game_objects_[0]->GetPosition().y;
 
+    switch (edge) {
+        case 0: // left
+            x = randRange(-10, -5);
+            y = randRange(-4, 4);
+            x += x_p;
+            y += y_p;
+            break;
+        case 1: // right
+            x = randRange(5, 10);
+            y = randRange(-4, 4);
+            x += x_p;
+            y += y_p;
+            break;
+        case 2: // up
+            x = randRange(-5, 5);
+            y = randRange(4, 10);
+            x += x_p;
+            y += y_p;
+            break;
+        case 3: // down
+            x = randRange(-5, 5);
+            y = randRange(-10, -4);
+            x += x_p;
+            y += y_p;
+            break;
+    }
 
-    return glm::vec3(X_value, Y_value, 0.0f);//return the position
+    return glm::vec3(x, y, 0.0f);//return the position
 }
 void Game::Render(void){
 

@@ -41,12 +41,70 @@ namespace game {
 
 
 
+
+
     class GameObject {
 
         public:
             // Constructor
             GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture);
 
+            struct E
+            {
+                int hp_;
+                int type_;
+                float speed_;
+                float size_scale_;
+                float react_;
+                int shoot_desire_;
+                float reload_;
+            };
+
+            E bbb = {
+                10,
+                93,
+                2.1f,
+                0.8,
+                0.5,
+                0,
+                0
+            };
+            E fortress = {
+                10,
+                94,
+                0,
+                5.0,
+                5,
+                80,
+                1.0f
+            };
+            E minion = {
+                1,
+                91,
+                1.5f,
+                1,
+                2.0f,
+                20,
+                1.0f
+            };
+            E ex_minion = {
+                5,
+                92,
+                1.8f,
+                1.0,
+                0.5f,
+                50,
+                0.7
+            };
+            E monster = {
+                10,
+                95,
+                0,
+                2.0,
+                0.5,
+                30,
+                10
+            };
 
 
             // Update the GameObject's state. Can be overriden in children
@@ -62,7 +120,7 @@ namespace game {
             int GetType() { return type; }
             virtual glm::vec3 GetVelocity(void) { return glm::vec3(0, 0, 0); };
 
-            virtual void back(glm::vec3 posi) {};
+            virtual void back() {};
             virtual void SetStatue(int a) {};
             virtual bool getBack() { return false; }
             // Get bearing direction (direction in which the game object
@@ -135,6 +193,11 @@ namespace game {
             virtual int Get_Max_Exp() { return -1; }
             virtual int Get_Max_Hp() { return -1; }
             virtual int Get_Max_Energy() { return -1; }
+            virtual void setFortress(GameObject* f) {};
+            virtual void become_angry() {};
+
+            virtual GameObject* getFortress() { return NULL; };
+            virtual void heal() {};
 
         protected:
             // Object's Transform Variables

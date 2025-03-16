@@ -1,20 +1,22 @@
-#ifndef ENEMY_GAME_OBJECT_H_
-#define ENEMY_GAME_OBJECT_H_
+#ifndef BLUE_GAME_OBJECT_H_
+#define BLUE_GAME_OBJECT_H_
 
 #include "game_object.h"
+#include "fortress_object.h"
 
 namespace game {
 
     // Inherits from GameObject
-    class EnemyGameObject : public GameObject {
+    class BlueGameObject : public GameObject {
 
     public:
 
-        EnemyGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, Circle circle,double t_,int statue, int type);
+        BlueGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, Circle circle, double t_, int statue, int type);
         Circle* GetCircle()override;
         //getters
         bool GetAlive()override;
         bool GetColliable() override;
+
         int GetHP() override;
         int GetState()override;
         float GetSpeed()override;
@@ -26,9 +28,13 @@ namespace game {
         inline void SetCenter(glm::vec3& a)override;
         void SetWidth(float a)override;
         void SetHeight(float a)override;
-        void SetVelocity(const glm::vec3& velocity) override ;
+        void SetVelocity(const glm::vec3& velocity) override;
 
-        glm::vec3 EnemyGameObject::GetVelocity(void) override{ return velocity_; };
+        void setFortress(GameObject* f) override;
+        GameObject* getFortress()override { return fortress_; };
+
+        glm::vec3 GetVelocity(void) override { return velocity_; };
+
 
 
 
@@ -63,6 +69,7 @@ namespace game {
         bool colliable;
         Circle circle;
         GameObject* player_;//player pointer
+        GameObject* fortress_;//player pointer
         glm::vec3 center_;//center for the obj patrolling
         float width;//ellipse width for patrolling
         float height;//ellipse  height for patrolling
@@ -83,8 +90,8 @@ namespace game {
 
 
 
-    }; // class EnemyGameObject
+    }; // class BlueGameObject
 
 } // namespace game
 
-#endif // ENEMY_GAME_OBJECT_H_
+#endif // BLUE_GAME_OBJECT_H_

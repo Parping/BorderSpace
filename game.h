@@ -34,6 +34,20 @@ namespace game {
             // Run the game (keep the game active)
             void MainLoop(void); 
             //random position generator
+
+            struct EnemyDrop {
+                int ip_;
+                int energy_;
+                int iron_;
+                int exp_;
+                int coin_;
+                float percent_;
+            };
+            EnemyDrop Minion = { 2,5,1,10,0,50 };
+            EnemyDrop EX_Minion = { 5,5,3,20,0,70 };
+            EnemyDrop BBB = { 5, 20, 20, 50,10,0 };
+            EnemyDrop Fortress = { 20,5,5,200,10,0 };
+            EnemyDrop Monster = { 5, 20, 20, 50,10,0 };
             glm::vec3 generateRandomPosition();
 
             //
@@ -42,6 +56,9 @@ namespace game {
             //when enemy dies, items drop at the position, different type drop different random items.
             //this function create new items and push them into the game_object_list
             void generateEnemyDrops(glm::vec3 position,int type);
+
+            void generateEnemyDrops(glm::vec3 position,EnemyDrop s);
+            float  randRange(float min, float max);
 
         private:
             // Main window: pointer to the GLFW window structure

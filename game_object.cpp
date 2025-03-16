@@ -6,6 +6,7 @@
 
 namespace game {
 
+
 GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture) 
 {
 

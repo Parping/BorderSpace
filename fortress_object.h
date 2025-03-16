@@ -1,16 +1,17 @@
-#ifndef ENEMY_GAME_OBJECT_H_
-#define ENEMY_GAME_OBJECT_H_
+#ifndef FORTRESS_OBJECT_H_
+#define FORTRESS_OBJECT_H_
 
 #include "game_object.h"
+#include "blue_game_object.h"
 
 namespace game {
 
     // Inherits from GameObject
-    class EnemyGameObject : public GameObject {
+    class FortressObject : public GameObject {
 
     public:
 
-        EnemyGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, Circle circle,double t_,int statue, int type);
+        FortressObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, Circle circle, double t_, int statue, int type);
         Circle* GetCircle()override;
         //getters
         bool GetAlive()override;
@@ -26,9 +27,9 @@ namespace game {
         inline void SetCenter(glm::vec3& a)override;
         void SetWidth(float a)override;
         void SetHeight(float a)override;
-        void SetVelocity(const glm::vec3& velocity) override ;
+        void SetVelocity(const glm::vec3& velocity) override;
 
-        glm::vec3 EnemyGameObject::GetVelocity(void) override{ return velocity_; };
+        glm::vec3 GetVelocity(void) override { return velocity_; };
 
 
 
@@ -47,15 +48,18 @@ namespace game {
         void intercepting(double delta_time);//another mode for moving
         bool findPlayer();//see if player is closer to this obj
 
-        void back() override;
+
 
         void setWant(bool s) override;
         bool getShoot() override;
         int Get_Shoot_Desire() { return shoot_desire; };
 
-        void Run(double delta_time);
+
 
         bool getBack() override { return back_; }
+
+        void become_angry()override;
+        void heal()override;
     private:
         int hitpoint;
         int statue;//0 normal, 1 invincible, 2 patrolling, 3 intercepting
@@ -79,12 +83,14 @@ namespace game {
 
         int max_hp;
         bool back_;
+        Timer get_angry;
+        bool isAngry;
 
 
 
 
-    }; // class EnemyGameObject
+    }; // class Fortress_object
 
 } // namespace game
 
-#endif // ENEMY_GAME_OBJECT_H_
+#endif // FORTRESS_OBJECT_H_
