@@ -18,6 +18,7 @@
 #include "expo_obj.h"
 #include "enemy_game_object.h"
 #include "fortress_object.h"
+#include "fortress_shooter.h"
 #include "projectile.h"
 #include "game.h"
 
@@ -101,7 +102,8 @@ void Game::SetupGameWorld(void)
         tex_items = 15,
         tex_for = 16,
         tex_bbb = 17,
-        tex_monster = 18
+        tex_monster = 18,
+        tex_for_s = 19
     };
     textures.push_back("/textures/tiny_ship1.png"); //change file
     //textures.push_back("/textures/destroyer_green.png"); 
@@ -124,6 +126,7 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/Fortress.png");
     textures.push_back("/textures/blue_ship.png");
     textures.push_back("/textures/monster.png");
+    textures.push_back("/textures/fortress_shooter.png");
 
     // Load textures
     LoadTextures(textures);
@@ -158,8 +161,13 @@ void Game::SetupGameWorld(void)
     
     fortress_exist_ = true;
     fortress_ = new FortressObject(glm::vec3(6.0f, 10.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_for], Circle(), current_time_, 0, 94);
+
+    GameObject* fortress_shooter_ = new FortressShooter(glm::vec3(-0.9f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_for_s], fortress_);
+    game_objects_.push_back(fortress_shooter_);
     game_objects_.push_back(fortress_);//change texture£¬add hitpoint, circle
-    game_objects_[2]->setFortress(game_objects_[3]);
+    game_objects_[2]->setFortress(game_objects_[4]);
+    game_objects_[4]->SetShooter(game_objects_[3]);
+
     
     //setup item object
     game_objects_.push_back(new CollectibleGameObject(glm::vec3(5.2f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[tex_items], Circle(), 14));
@@ -172,7 +180,7 @@ void Game::SetupGameWorld(void)
         game_objects_[i]->SetPlayer(game_objects_[0]);//set player pointer for each enemy
     }
 
-    game_objects_[3]->GetCircle()->SetRadius(game_objects_[3]->GetScale().x*0.6);
+    game_objects_[4]->GetCircle()->SetRadius(game_objects_[4]->GetScale().x*0.6);
 
     // Setup background
     // In this specific implementation, the background is always the
@@ -481,7 +489,9 @@ void Game::Update(double delta_time)
                 break;
             case 94:
                 if (current_game_object->getShoot() && current_game_object->GetState() == 9) {
-                    game_objects_.insert(game_objects_.begin() + 1, new Projectile(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[7], Circle(), current_game_object->GetRotation(), current_game_object->GetType()));
+                    glm::vec3 po = glm::vec3(current_game_object->getShooter().x, current_game_object->getShooter().y, current_game_object->getShooter().z);
+                    float an = current_game_object->getShooter().w;
+                    game_objects_.insert(game_objects_.begin() + 1, new Projectile(po, sprite_, &sprite_shader_, tex_[7], Circle(), an, current_game_object->GetType()));
                     game_objects_[1]->SetScale(glm::vec2(1, 0.2));
                     game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
                     current_game_object->setWant(false);
@@ -525,7 +535,13 @@ void Game::generateDifferentEnemy() {
         new_enemy->GetCircle()->SetRadius(new_enemy->GetScale().x *0.6);//set the circle radius
         new_enemy->SetPlayer(game_objects_[0]); // set player pointer
         new_enemy->SetRotation(pi_over_two);
+        GameObject* fortress_shooter_ = new FortressShooter(glm::vec3(-0.9f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[19], new_enemy);
+       
+  
+        new_enemy->SetShooter(fortress_shooter_);
         game_objects_.insert(game_objects_.begin() + 1, new_enemy);//new enemy
+        game_objects_.insert(game_objects_.begin() + 1, fortress_shooter_);
+        
         GameObject* new_small_enemy;
       //    std::cout << "Create new Fortress at position ("//print function
       //<< random_position.x << ", "
@@ -662,6 +678,7 @@ void Game::Render(void){
     glm::vec3 player_position = game_objects_[0]->GetPosition();//get player position
     glm::vec3 camera_position = glm::vec3(player_position.x, player_position.y, 1.0f);//camera center is the player
     glm::mat4 camera_trans = glm::translate(glm::mat4(1.0f),-game_objects_[0]->GetPosition());//calculate the matrix
+    //camera_trans = glm::rotate(glm::mat4(1.0f),game_objects_[0]->GetRotation(), glm::vec3(0,0,1))* camera_trans;
     // Set view to zoom out, centered by default at 0,0
     float camera_zoom = 0.25f;
     glm::mat4 camera_zoom_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(camera_zoom, camera_zoom, camera_zoom));

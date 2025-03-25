@@ -21,6 +21,7 @@ namespace game {
         back_ = false;
         get_angry = Timer();
         isAngry = false;
+        
 
     }
 
@@ -165,10 +166,10 @@ namespace game {
         dp2 /= glm::length(velocity_);
         float angle = acos(dp);//calculate the angle, can only show 0~180
         if (dp2 >= 0) {//if it is in x>=0 
-            SetRotation(angle);
+            shooter->SetRotation(angle);
         }
         else {//it is in x<=0
-            SetRotation(-angle);//adjust the angle
+            shooter->SetRotation(-angle);//adjust the angle
         }
         //std::cout << "Update velocity"<< velocity_.x << std::endl;
     }
@@ -186,10 +187,19 @@ namespace game {
         isAngry = true;
         GetCircle()->SetRadius(GetScale().x / 4);
     }
+
+    glm::vec4 FortressObject::getShooter() {
+        glm::vec3 P, F;
+        float A;
+        A = shooter->GetRotation();
+        P = shooter->GetPosition();
+        F = position_ + glm::vec3(0,P.x,0);
+        return glm::vec4(F, A);
+    }
     // Update function for moving the player object around
     // Update status
     void FortressObject::Update(double delta_time) {
-        glm::vec2 Myposition, velocity, T, Player;
+        glm::vec2 Myposition, velocity, T, Player,V;
         Player = glm::vec2(player_->GetPosition().x, player_->GetPosition().y);
         Myposition = glm::vec2(position_.x, position_.y);
         if (this->GetHP() < 1) {//same as player
@@ -250,10 +260,13 @@ namespace game {
                 heal();
                 break;
             case 9:
+                V = (Player - Myposition) / glm::length(Player - Myposition);
+
+                SetVelocity(glm::vec3(V,0));
                 if (reload_timer.Finished()) {
                     if (!getShoot()) {
-                        int random = rand() % 100;
-                        if (random > shoot_desire) {
+                        int random =  rand() % 100;
+                        if (random < shoot_desire) {
                             setWant(true);
                         }
                         reload_timer.Start(reload);

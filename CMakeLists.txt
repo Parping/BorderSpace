@@ -26,6 +26,7 @@ fortress_object.h
 monster_object.h
 lazer.h
 bomb.h
+fortress_shooter.h
 )
  
 set(SRCS
@@ -49,11 +50,13 @@ fortress_object.cpp
 monster_object.cpp
 lazer.cpp
 bomb.cpp
+fortress_shooter.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     number_fragement_shader.glsl
     bar_fragement_shader.glsl
 animate_fragment_shader.glsl
+child_fragment_shader.glsl
  
 )
 

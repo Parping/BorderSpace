@@ -199,6 +199,9 @@ namespace game {
             virtual GameObject* getFortress() { return NULL; };
             virtual void heal() {};
 
+            virtual void SetShooter(GameObject* s) {};
+            virtual glm::vec4 getShooter() { return glm::vec4(0,0,0,0); };
+
         protected:
             // Object's Transform Variables
             glm::vec3 position_;

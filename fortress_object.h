@@ -3,6 +3,7 @@
 
 #include "game_object.h"
 #include "blue_game_object.h"
+#include "fortress_shooter.h"
 
 namespace game {
 
@@ -29,8 +30,10 @@ namespace game {
         void SetHeight(float a)override;
         void SetVelocity(const glm::vec3& velocity) override;
 
-        glm::vec3 GetVelocity(void) override { return velocity_; };
+        void SetShooter(GameObject* s)override { shooter = s; };
 
+        glm::vec3 GetVelocity(void) override { return velocity_; };
+        glm::vec4 getShooter()override ;
 
 
 
@@ -60,6 +63,8 @@ namespace game {
 
         void become_angry()override;
         void heal()override;
+
+
     private:
         int hitpoint;
         int statue;//0 normal, 1 invincible, 2 patrolling, 3 intercepting
@@ -85,6 +90,7 @@ namespace game {
         bool back_;
         Timer get_angry;
         bool isAngry;
+        GameObject* shooter;
 
 
 
