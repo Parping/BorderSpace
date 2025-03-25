@@ -21,6 +21,7 @@
 #include "fortress_shooter.h"
 #include "projectile.h"
 #include "game.h"
+#include "monster_object.h"
 
 
 namespace game {
@@ -156,7 +157,7 @@ void Game::SetupGameWorld(void)
     float pi_over_two = glm::pi<float>() / 2.0f;
 
     // Setup enemy objects
-    game_objects_.push_back(new EnemyGameObject(glm::vec3(2.0f, -2.0f, 0.0f), sprite_, &number_shader_, tex_[tex_monster],Circle(),current_time_,0,95));//change texture,add hitpoint, circle, random number for different moving mode
+    game_objects_.push_back(new MonsterObject(glm::vec3(2.0f, -2.0f, 0.0f), sprite_, &number_shader_, tex_[tex_monster],Circle(),current_time_,0,95));//change texture,add hitpoint, circle, random number for different moving mode
     game_objects_.push_back(new BlueGameObject(glm::vec3(1.0f, 2.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_bbb],Circle(),current_time_, 0,93));//change texture£¬add hitpoint, circle
     
     fortress_exist_ = true;
@@ -514,7 +515,7 @@ void Game::Update(double delta_time)
 }
 void Game::generateDifferentEnemy() {
     glm::vec3 random_position = generateRandomPosition();//random position in the window
-    int r1 = rand() % 100;
+    int r1 = 101;//rand() % 100
     int r2 = rand() % 100;
     GameObject* new_enemy;
     float pi_over_two = glm::pi<float>() / 2.0f;
@@ -559,7 +560,11 @@ void Game::generateDifferentEnemy() {
         }
     }
     else {
-    
+        new_enemy = new MonsterObject(random_position, sprite_, &number_shader_, tex_[18], Circle(), current_time_, 0, 95);
+        new_enemy->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
+        new_enemy->SetPlayer(game_objects_[0]); // set player pointer
+        new_enemy->SetRotation(pi_over_two);
+        game_objects_.insert(game_objects_.begin() + 1, new_enemy);
     }
 
 

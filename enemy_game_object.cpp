@@ -320,6 +320,7 @@ namespace game {
 
                 case 2:
                     patrolling();
+                    break;
                 case 3:
                     intercepting(delta_time);//change velocity by intercepting
                     if (reload_timer.Finished()) {
@@ -332,6 +333,7 @@ namespace game {
                         }
 
                     }
+                    break;
                 default:
                     break;
             }

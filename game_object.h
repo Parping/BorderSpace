@@ -99,7 +99,7 @@ namespace game {
             E monster = {
                 10,
                 95,
-                0,
+                0.5f,
                 2.0,
                 0.5,
                 30,
