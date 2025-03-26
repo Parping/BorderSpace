@@ -30,7 +30,7 @@ namespace game {
 
         glm::vec3 MonsterObject::GetVelocity(void) override { return velocity_; };
 
-
+        void Get_Collision_Pro(double delta_time, int pro_type, int attacker)override;
 
 
         void Get_Collision(double delta_time)override;//when collision, hitpoint --, if hitpoint to 0, explosion

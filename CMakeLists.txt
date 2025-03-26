@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 
 # Name of project
-set(PROJ_NAME Assignment3)
+set(PROJ_NAME Borderspace)
 project(${PROJ_NAME})
 
 # Specify project files: header files and source files
@@ -27,6 +27,7 @@ monster_object.h
 lazer.h
 bomb.h
 fortress_shooter.h
+effect.h
 )
  
 set(SRCS
@@ -51,6 +52,7 @@ monster_object.cpp
 lazer.cpp
 bomb.cpp
 fortress_shooter.cpp
+effect.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     number_fragement_shader.glsl
@@ -109,3 +111,4 @@ if(WIN32)
     # Set the default project in VS
     set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT ${PROJ_NAME})
 endif(WIN32)
+

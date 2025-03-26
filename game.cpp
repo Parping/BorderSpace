@@ -22,6 +22,8 @@
 #include "projectile.h"
 #include "game.h"
 #include "monster_object.h"
+#include "lazer.h"
+#include "effect.h"
 
 
 namespace game {
@@ -104,7 +106,11 @@ void Game::SetupGameWorld(void)
         tex_for = 16,
         tex_bbb = 17,
         tex_monster = 18,
-        tex_for_s = 19
+        tex_for_s = 19,
+        tex_boss = 20,
+        tex_bomb = 21,
+        tex_beam = 22,
+        tex_shield = 23
     };
     textures.push_back("/textures/tiny_ship1.png"); //change file
     //textures.push_back("/textures/destroyer_green.png"); 
@@ -128,6 +134,11 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/blue_ship.png");
     textures.push_back("/textures/monster.png");
     textures.push_back("/textures/fortress_shooter.png");
+    textures.push_back("/textures/boss.png");
+    textures.push_back("/textures/bomb.png");
+    textures.push_back("/textures/Beam_Big_Blue.png");
+    textures.push_back("/textures/shield.png");
+
 
     // Load textures
     LoadTextures(textures);
@@ -152,6 +163,8 @@ void Game::SetupGameWorld(void)
 
     
     game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tiny_ship17],100,Circle()));//change texture, add hitpoint, circle
+
+    
     hud_ = new HUD(hp_spirt, num_spirt, energy_spirt, exp_spirt, exp_text_s, lv_text_s, game_objects_[0]);
     
     float pi_over_two = glm::pi<float>() / 2.0f;
@@ -174,6 +187,7 @@ void Game::SetupGameWorld(void)
     game_objects_.push_back(new CollectibleGameObject(glm::vec3(5.2f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[tex_items], Circle(), 14));
     
 
+
     //set circle radius for each
     for (int i = 0;i < game_objects_.size();i++) {
         game_objects_[i]->GetCircle()->SetRadius(game_objects_[i]->GetScale().x / 2);//set the circle radius as scale/2
@@ -181,6 +195,12 @@ void Game::SetupGameWorld(void)
         game_objects_[i]->SetPlayer(game_objects_[0]);//set player pointer for each enemy
     }
 
+    GameObject* lazer_ = new Lazer(glm::vec3(2.3f, 0.0f, 0.0f), sprite_, &animate_shader_, tex_[tex_beam], game_objects_[0]);
+    lazer_->SetNumFrame(glm::vec2(2, 1));
+    game_objects_.push_back(lazer_);
+    GameObject* shield = new Effect(glm::vec3(0.0f, 0.0f, -1.0f), sprite_, &animate_shader_, tex_[tex_shield], game_objects_[0], 31);
+    shield->SetNumFrame(glm::vec2(5, 1));
+    game_objects_.push_back(shield);
     game_objects_[4]->GetCircle()->SetRadius(game_objects_[4]->GetScale().x*0.6);
 
     // Setup background
@@ -269,11 +289,33 @@ void Game::HandleControls(double delta_time)
     }
     if (glfwGetKey(window_, GLFW_KEY_J) == GLFW_PRESS) {//press J to shoot
         if(shooter_timer.Finished()){//cooldown 
-            game_objects_.insert(game_objects_.begin() + 1, new Projectile(player->GetPosition(), sprite_, &sprite_shader_, tex_[7], Circle(), angle,1));
+            game_objects_.insert(game_objects_.begin() + 1, new Projectile(player->GetPosition(), sprite_, &sprite_shader_, tex_[7], Circle(), angle,1,51));
             //the projectile is start at the player current position, and faster velocity with same direction as player
             game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
             shooter_timer.Start(0.5f);//cooldown
         }
+    }
+    if (glfwGetKey(window_, GLFW_KEY_K) == GLFW_PRESS) {//press K to shoot bomb
+        if (shooter_timer.Finished()) {//cooldown 
+            game_objects_.insert(game_objects_.begin() + 1, new Projectile(player->GetPosition(), sprite_, &animate_shader_, tex_[21], Circle(), angle, 1,53));
+            //the projectile is start at the player current position, and faster velocity with same direction as player
+            game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
+            shooter_timer.Start(0.5f);//cooldown
+        }
+    }
+    if (glfwGetKey(window_, GLFW_KEY_L) == GLFW_PRESS) {//press J to shoot
+
+        player->Set_Lazer_On(true);
+        
+    }
+    if (glfwGetKey(window_, GLFW_KEY_L) == GLFW_RELEASE) {
+        player->Set_Lazer_On(false);
+    }
+    if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_PRESS) {//press J to shoot
+        player->Set_Shield_On(true);
+    }
+    if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_RELEASE) {
+        player->Set_Shield_On(false);
     }
 }
 
@@ -293,7 +335,7 @@ void Game::Update(double delta_time)
         // Check for collision with other game objects
         // Note the loop bounds: we avoid testing the last object since
         // it's the background covering the whole game world
-        for (int j = i + 1; j < (game_objects_.size()-1); j++) {
+        for (int j = i + 1; j < (game_objects_.size()); j++) {
             GameObject* other_game_object = game_objects_[j];
 
             // Compute distance between object i and object j
@@ -338,10 +380,10 @@ void Game::Update(double delta_time)
                             other_game_object->Get_Collision(delta_time);//item change color
                             current_game_object->CollectItem(other_game_object->GetType());//player item++
                         }
-                        else if (other_game_object->GetType() == 4) {//(other_game_object->GetType() > 50) && (other_game_object->GetType() < 60)
+                        else if ((other_game_object->GetType() > 50) && (other_game_object->GetType() < 60)) {//(other_game_object->GetType() > 50) && (other_game_object->GetType() < 60)
                             if (other_game_object->getFrom() != 1) {
                                 other_game_object->Get_Collision(delta_time);//current and other obj get collision.
-                                current_game_object->Get_Collision(delta_time);
+                                current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
                                 // Play the sound when collision
                                 if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
                                     am.PlaySound(explosion_music_index);
@@ -355,15 +397,15 @@ void Game::Update(double delta_time)
                     }
 
                     break;
-                case 4://current type is projectile
+                case 51://current type is projectile
                     if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
-                    
+
                     }
-                    else if (other_game_object->GetType() !=current_game_object->getFrom()) {
+                    else if (other_game_object->GetType() != current_game_object->getFrom()) {
                         if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
                             //get enemy position, enemy circle radius, and the delta_time
-                            other_game_object->Get_Collision(delta_time);//current and other obj get collision.
-                            current_game_object->Get_Collision(delta_time);
+                            current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                            other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
                             // Play the sound when collision
                             if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
                                 am.PlaySound(explosion_music_index);
@@ -371,6 +413,65 @@ void Game::Update(double delta_time)
                             else {//stop it first then replay it
                                 am.StopSound(explosion_music_index);
                                 am.PlaySound(explosion_music_index);
+                            }
+                        }
+                    }
+                    break;
+                case 52:
+                    if (other_game_object->GetType() != current_game_object->getFrom()) {
+                        if (current_game_object->Ract_Circle_Collition(other_game_object->GetPosition(), other_game_object->GetCircle()->get_r(), delta_time)) {
+                            //get enemy position, enemy circle radius, and the delta_time
+                            other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
+                            // Play the sound when collision
+                            if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                am.PlaySound(explosion_music_index);
+                            }
+                            else {//stop it first then replay it
+                                am.StopSound(explosion_music_index);
+                                am.PlaySound(explosion_music_index);
+                            }
+                        }
+                    }
+                    break;
+                case 53:
+                    if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
+                    
+                    }
+                    else if (other_game_object->GetType() !=current_game_object->getFrom()) {
+                        if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
+                            //get enemy position, enemy circle radius, and the delta_time
+                            current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                            other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
+                            // Play the sound when collision
+                            if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                am.PlaySound(explosion_music_index);
+                            }
+                            else {//stop it first then replay it
+                                am.StopSound(explosion_music_index);
+                                am.PlaySound(explosion_music_index);
+                            }
+                        }
+                    }
+                    break;
+                case 91:
+                case 92:
+                case 93:
+                case 94:
+                case 95:
+                case 100:
+                    if (other_game_object->GetType() == 52) {
+                        if (current_game_object->GetType() != other_game_object->getFrom()) {
+                            if (other_game_object->Ract_Circle_Collition(current_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {
+                                //get enemy position, enemy circle radius, and the delta_time
+                                current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                                // Play the sound when collision
+                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                    am.PlaySound(explosion_music_index);
+                                }
+                                else {//stop it first then replay it
+                                    am.StopSound(explosion_music_index);
+                                    am.PlaySound(explosion_music_index);
+                                }
                             }
                         }
                     }
@@ -482,7 +583,7 @@ void Game::Update(double delta_time)
             case 91:
             case 92:
                 if (current_game_object->getShoot()) {
-                    game_objects_.insert(game_objects_.begin() + 1, new Projectile(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[7], Circle(), current_game_object->GetRotation(), current_game_object->GetType()));
+                    game_objects_.insert(game_objects_.begin() + 1, new Projectile(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[7], Circle(), current_game_object->GetRotation(), current_game_object->GetType(),51));
                     game_objects_[1]->SetScale(glm::vec2(0.5, 0.2));
                     game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
                     current_game_object->setWant(false);
@@ -492,7 +593,7 @@ void Game::Update(double delta_time)
                 if (current_game_object->getShoot() && current_game_object->GetState() == 9) {
                     glm::vec3 po = glm::vec3(current_game_object->getShooter().x, current_game_object->getShooter().y, current_game_object->getShooter().z);
                     float an = current_game_object->getShooter().w;
-                    game_objects_.insert(game_objects_.begin() + 1, new Projectile(po, sprite_, &sprite_shader_, tex_[7], Circle(), an, current_game_object->GetType()));
+                    game_objects_.insert(game_objects_.begin() + 1, new Projectile(po, sprite_, &sprite_shader_, tex_[7], Circle(), an, current_game_object->GetType(),51));
                     game_objects_[1]->SetScale(glm::vec2(1, 0.2));
                     game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
                     current_game_object->setWant(false);
@@ -514,8 +615,9 @@ void Game::Update(double delta_time)
     hud_->Update(delta_time);
 }
 void Game::generateDifferentEnemy() {
+    if (game_objects_.size() > 100) { return; }
     glm::vec3 random_position = generateRandomPosition();//random position in the window
-    int r1 = 101;//rand() % 100
+    int r1 = rand() % 100;//
     int r2 = rand() % 100;
     GameObject* new_enemy;
     float pi_over_two = glm::pi<float>() / 2.0f;
@@ -526,7 +628,7 @@ void Game::generateDifferentEnemy() {
         else {
             new_enemy = new EnemyGameObject(random_position, sprite_, &sprite_shader_, tex_[14], Circle(), current_time_, 0, 92);
         }
-        new_enemy->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
+        new_enemy->GetCircle()->SetRadius(new_enemy->GetScale().x / 2);//set the circle radius
         new_enemy->SetPlayer(game_objects_[0]); // set player pointer
         new_enemy->SetRotation(pi_over_two);
         game_objects_.insert(game_objects_.begin() + 1, new_enemy);//new enemy
@@ -561,7 +663,7 @@ void Game::generateDifferentEnemy() {
     }
     else {
         new_enemy = new MonsterObject(random_position, sprite_, &number_shader_, tex_[18], Circle(), current_time_, 0, 95);
-        new_enemy->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
+        new_enemy->GetCircle()->SetRadius(new_enemy->GetScale().x / 2);//set the circle radius
         new_enemy->SetPlayer(game_objects_[0]); // set player pointer
         new_enemy->SetRotation(pi_over_two);
         game_objects_.insert(game_objects_.begin() + 1, new_enemy);
@@ -788,6 +890,8 @@ void Game::Init(void)
     
     //give a special random seed for each init world
     srand(time(NULL));
+
+
 
 
 }

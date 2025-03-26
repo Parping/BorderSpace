@@ -32,6 +32,7 @@ void Shader::Init(const char *vertPath, const char *fragPath)
     glShaderSource(vs, 1, &source_vp, NULL);
     glCompileShader(vs);
 
+
     // Check if shader compiled successfully
     GLint status;
     glGetShaderiv(vs, GL_COMPILE_STATUS, &status);

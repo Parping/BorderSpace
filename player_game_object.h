@@ -23,6 +23,9 @@ namespace game {
              float GetSpeed()override;
             
              void Get_Collision(double delta_time)override;//when collision, hitpoint --, if hitpoint to 0, explosion
+
+             void Get_Collision_Pro(double delta_time, int pro_type, int attacker)override;
+
              void Explosion() override;//change texture and count 5 s
              void CollectItem(int type) override;
              void Invincible()override;
@@ -54,6 +57,13 @@ namespace game {
             int Get_Max_Exp() override { return max_exp; }
             int Get_Max_Hp() override { return max_hp; }
             int Get_Max_Energy() override { return max_energy; }
+
+            bool Get_Lazer_On() override { return lazer_act_; }
+            bool Get_Shield_On() override { return shield_act_; }
+            void Set_Lazer_On(bool a) override;
+            void Set_Shield_On(bool a) override;
+
+            void Set_Rest(bool a)override { rest_ = a; }
     private:
         int hitpoint;
         int item;//internal item counter
@@ -75,6 +85,14 @@ namespace game {
         int max_exp;
         int max_hp;
         int max_energy;
+        Timer collision_timer;
+        Timer rest_timer;
+        Timer act_timer;
+
+        bool lazer_act_;
+        bool shield_act_;
+
+        bool rest_;
 
 
 

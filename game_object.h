@@ -105,7 +105,29 @@ namespace game {
                 30,
                 10
             };
+            E boss = {
+                200,
+                100,
+                1,
+                15.0f,
+                50,
+                10,
+                10
 
+
+
+            };
+            struct Pro {
+                int hp_;
+                int speed_;
+                glm::vec2 size_;
+                float life_span_;
+                int pro_type_;
+                int killer_point;
+            };
+            Pro pro_base{ 1,15,glm::vec2(0.5,0.2),5,51,1 };
+            Pro pro_lazer{ -1,15,glm::vec2(1,1),-1,52,5 };
+            Pro pro_bomb{ 5,3,glm::vec2(1,0.8f),20,53,5 };
 
             // Update the GameObject's state. Can be overriden in children
             virtual void Update(double delta_time);
@@ -155,6 +177,7 @@ namespace game {
             virtual int getFrom() { return -2; }
 
             virtual bool RayToCircleCheck(glm::vec3 position, float r,double deltatime) { return false; };
+            virtual bool Ract_Circle_Collition(glm::vec3 position, float r, double deltatime) { return false; }
             
             //vitrual function, won't implimentation in this class
             virtual void Get_Collision(double delta_time) {};
@@ -201,6 +224,14 @@ namespace game {
 
             virtual void SetShooter(GameObject* s) {};
             virtual glm::vec4 getShooter() { return glm::vec4(0,0,0,0); };
+
+            virtual void Get_Collision_Pro(double delta_time, int pro_type, int attacker) {};
+
+            virtual bool Get_Lazer_On() { return false; };
+            virtual bool Get_Shield_On() { return false; };
+            virtual void Set_Lazer_On(bool a)  {};
+            virtual void Set_Shield_On(bool a)  {};
+            virtual void Set_Rest(bool a) {};
 
         protected:
             // Object's Transform Variables

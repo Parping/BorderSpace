@@ -1,29 +1,53 @@
 #include "projectile.h"
 #include <iostream>
 namespace game {
-	Projectile::Projectile(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, Circle circle,float angle,int from)
+	Projectile::Projectile(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, Circle circle,float angle,int from,int ty)
 		: GameObject(position, geom, shader, texture) {
 		circle = circle;
 		colliable = true;
 		exist_timer= Timer();
-		exist_timer.Start(2.0);//start counting lifespan
-		type = 4;//shooter is type 4
-		velocity_ = glm::vec3(0, 0, 0);
 		//std::cout << " Projectile created!" << std::endl;
 		alive = true;
 		angle_ = angle;
-		speed = 15.0;
-		Init();
-		t_ = 0;
+		t_ = 0;		
+		type = ty;
 		from_id_ = from;
 		startPosition = position;//initialy, currentposition=startposition
+		Init();
 	}
 	Circle* Projectile::GetCircle() {
 		return &circle;
 	}
 	//gettters and setters
 	void Projectile::Init() {
-		velocity_ = speed * GetBearing();//init the velocity with the direction and speed
+		switch (type)
+		{
+		case 51:
+			hitpoint = pro_base.hp_;
+			scale_ = pro_base.size_;
+			exist_timer.Start(pro_base.life_span_);//start counting lifespan
+			speed = pro_base.speed_;
+			velocity_ = speed * GetBearing();//init the velocity with the direction and speed
+			break;
+		case 52:
+			hitpoint = pro_lazer.hp_;
+			scale_ = pro_lazer.size_;
+			exist_timer.Start(pro_lazer.life_span_);//start counting lifespan
+			speed = pro_lazer.speed_;
+			velocity_ = speed * GetBearing();//init the velocity with the direction and speed
+			break;
+		case 53:
+			hitpoint = pro_bomb.hp_;
+			scale_ = pro_bomb.size_;
+			exist_timer.Start(pro_bomb.life_span_);//start counting lifespan
+			speed = pro_bomb.speed_;
+			velocity_ = speed * GetBearing();//init the velocity with the direction and speed
+			num_frame = glm::vec2(2, 1);
+			break;
+		default:
+			break;
+		}
+
 	}
 
 	void  Projectile::Get_Collision(double delta_time) {
@@ -31,6 +55,28 @@ namespace game {
 		alive = false;
 		colliable = false;
 	}
+
+	void Projectile::Get_Collision_Pro(double delta_time, int pro_type, int attacker) {
+		if ((from_id_ != 1) && (attacker != 1) ){return;}
+
+		if (hitpoint > 0) {// get collision, hitpoint - 1
+			if (collision_timer.Finished()) {
+				if (pro_type != 52) {
+					if (type <= pro_type) {
+						hitpoint == 0;
+						alive = false;
+						colliable = false;
+					}
+					else if (type > pro_type) {
+						hitpoint--;
+					}
+				}
+				collision_timer.Start(delta_time);
+			}
+		}
+	}
+
+
 	bool Projectile::GetAlive() {
 		return alive;
 	}

@@ -9,6 +9,7 @@ in vec2 uv_interp;
 uniform sampler2D onetex;
 uniform float time;
 uniform vec2 frame;
+uniform int ghost;
 uniform int current_frame;
 // Color modifier: we multiply each component of the color by each
 // component of this modifier
@@ -27,12 +28,15 @@ void main()
     vec4 color = texture2D(onetex, uv);
 
     // Assign color to fragment
-
     gl_FragColor = vec4(color.r, color.g, color.b, color.a);
+
 
     // Check for transparency
     if(color.a < 1.0)
     {
          discard;
+    }
+    if(ghost==1){
+        discard;
     }
 }

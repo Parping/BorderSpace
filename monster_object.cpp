@@ -61,6 +61,39 @@ namespace game {
         height = a;
     }
 
+    void MonsterObject::Get_Collision_Pro(double delta_time, int pro_type, int attacker) {
+        if (attacker != 1) { return; }
+
+        if (hitpoint > 0) {// get collision, hitpoint - 1
+            if (collision_timer.Finished()) {
+                switch (pro_type)
+                {
+                case 51:
+                    hitpoint -= pro_base.killer_point;
+                    break;
+                case 52:
+                    if (statue == 0) {
+                        hitpoint -= floor(pro_lazer.killer_point * 0.2);
+                    }
+                    else {
+                        hitpoint -= floor(pro_lazer.killer_point * 1.2);
+                    }
+                    break;
+                case 53:
+                    if (statue == 0) {
+                        hitpoint -= floor(pro_bomb.killer_point * 1.2);
+                    }
+                    else {
+                        hitpoint -= floor(pro_bomb.killer_point * 0.2);
+                    }
+                default:
+                    break;
+                }
+                collision_timer.Start(delta_time);
+            }
+        }
+    }
+
     void MonsterObject::Get_Collision(double delta_time) {//when collision, hitpoint --, if hitpoint to 0, explosion
         if (collision_timer.Finished()) {
             std::cout << " Get Collision" << std::endl;

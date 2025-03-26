@@ -35,7 +35,7 @@ namespace game {
         glm::vec3 GetVelocity(void) override { return velocity_; };
         glm::vec4 getShooter()override ;
 
-
+        void Get_Collision_Pro(double delta_time, int pro_type, int attacker)override;
 
         void Get_Collision(double delta_time)override;//when collision, hitpoint --, if hitpoint to 0, explosion
         void Explosion() override;//change texture and count 5 s

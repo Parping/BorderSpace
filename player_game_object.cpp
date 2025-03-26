@@ -31,6 +31,9 @@ PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Sh
 	max_exp=100;
 	max_hp=hp;
 	max_energy=100;
+	lazer_act_ = false;
+	shield_act_ = false;
+	rest_ = false;
 }
 
 //gettters and setters
@@ -72,6 +75,33 @@ void  PlayerGameObject::Get_Collision(double delta_time) {
 		//if (hitpoint <= 0) {//if it is <= 0, then it is dying and get explosion
 		//	Explosion();
 		//}
+	}
+}
+
+void PlayerGameObject::Get_Collision_Pro(double delta_time, int pro_type,int attacker) {
+	if (attacker == 1) { return; }
+	if (state == 1) { return; }
+	if (shield_act_) {
+		energy_-=5;
+		return;
+	}
+	if (hitpoint > 0) {// get collision, hitpoint - 1
+		if (collision_timer.Finished()) {
+			switch (pro_type)
+			{
+			case 51:
+				hitpoint -= pro_base.killer_point * (attacker - 50);
+				break;
+			case 52:
+				hitpoint -= floor(pro_lazer.killer_point * (attacker - 50) * 1.2);
+				break;
+			case 53:
+				hitpoint -= floor(pro_bomb.killer_point * 0.2);
+			default:
+				break;
+			}
+			collision_timer.Start(delta_time);
+		}
 	}
 }
 
@@ -121,7 +151,16 @@ void PlayerGameObject::Level_up() {
 	level_++;
 	max_exp += 50;
 }
+void PlayerGameObject::Set_Lazer_On(bool a)  { 
+	if (energy_ <= 0 && a == true) {
+		return;
+	}
+	lazer_act_ = a;
+}
+void PlayerGameObject::Set_Shield_On(bool a)  { 
 
+	shield_act_ = a; 
+}
 
 // Update function for moving the player object around
 void PlayerGameObject::Update(double delta_time) {
@@ -154,6 +193,32 @@ void PlayerGameObject::Update(double delta_time) {
 	if (Get_Exper() >= Get_Max_Exp()) {
 		Level_up();
 		hitpoint = max_hp;
+	}
+
+
+	if (rest_timer.Finished()) {
+			if (energy_ < max_energy) {
+				energy_++;
+			}
+	}
+	if (shield_act_) {
+
+		rest_timer.Start(5);
+		if (energy_ <= 0) {
+			shield_act_ = false;
+		}
+	}
+	if (lazer_act_) {
+		rest_timer.Start(5);
+		if (act_timer.Finished()) {
+			if (energy_ > 0) {
+				energy_ -= 1;
+			}
+			else {
+				lazer_act_ = false;
+			}
+			act_timer.Start(0.05);
+		}
 	}
 
 
