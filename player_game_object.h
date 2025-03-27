@@ -64,6 +64,9 @@ namespace game {
             void Set_Shield_On(bool a) override;
 
             void Set_Rest(bool a)override { rest_ = a; }
+            glm::mat4 GetTransformation() override;
+            glm::mat4 GetLocalTransformation();
+
     private:
         int hitpoint;
         int item;//internal item counter

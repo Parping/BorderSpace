@@ -112,7 +112,9 @@ void Game::SetupGameWorld(void)
         tex_bomb = 21,
         tex_beam = 22,
         tex_shield = 23,
-        tex_arm1 = 24
+        tex_arm1 = 24,
+        tex_arm2 = 25,
+        tex_arm3 = 26
     };
     textures.push_back("/textures/tiny_ship1.png"); //change file
     //textures.push_back("/textures/destroyer_green.png"); 
@@ -141,6 +143,8 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/Beam_Big_Blue.png");
     textures.push_back("/textures/shield.png");
     textures.push_back("/textures/arm1.png");
+    textures.push_back("/textures/arm2.png");
+    textures.push_back("/textures/arm3.png");
 
 
     // Load textures
@@ -205,8 +209,16 @@ void Game::SetupGameWorld(void)
     shield->SetNumFrame(glm::vec2(5, 1));
     game_objects_.push_back(shield);
     game_objects_[4]->GetCircle()->SetRadius(game_objects_[4]->GetScale().x*0.6);
-    GameObject* arm1 = new Arm1(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_arm1], game_objects_[0]);
+    GameObject* arm1 = new Arm1(glm::vec3(0.5f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_arm1], game_objects_[0]);
+    arm1->SetScale(glm::vec2(1, 0.375));
+    GameObject* arm2 = new Arm1(glm::vec3(1.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_arm2], arm1);
+    GameObject* arm3 = new Arm1(glm::vec3(1.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_arm3], arm2);
+    arm2->SetScale(glm::vec2(1, 0.375));
+    arm3->SetScale(glm::vec2(0.5, 0.5));
+    arm3->SetMyTarget(glm::vec3(2, 0,0));
     game_objects_.push_back(arm1);
+    game_objects_.push_back(arm2);
+    game_objects_.push_back(arm3);
 
     // Setup background
     // In this specific implementation, the background is always the
@@ -406,6 +418,9 @@ void Game::Update(double delta_time)
                     if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
 
                     }
+                    else if ((other_game_object->GetType() > 80)&&(other_game_object->GetType()<90) ){
+                        break;
+                    }
                     else if (other_game_object->GetType() != current_game_object->getFrom()) {
                         if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
                             //get enemy position, enemy circle radius, and the delta_time
@@ -437,6 +452,9 @@ void Game::Update(double delta_time)
                             }
                         }
                     }
+                    else if ((other_game_object->GetType() > 80) && (other_game_object->GetType() < 90)) {
+                        break;
+                    }
                     break;
                 case 53:
                     if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
@@ -457,6 +475,11 @@ void Game::Update(double delta_time)
                             }
                         }
                     }
+                    else if ((other_game_object->GetType() > 80) && (other_game_object->GetType() < 90)) {
+                        break;
+                    }
+                    break;
+                case 80:
                     break;
                 case 91:
                 case 92:

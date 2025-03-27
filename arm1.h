@@ -31,7 +31,11 @@ namespace game {
         void setTarget(glm::vec3 p) override { target_ = p; };
 
         void MovingTo(double delta_time) override;
-        glm::mat4 GetTransformation();
+        glm::mat4 GetTransformation() override;
+
+        glm::mat4 GetLocalTransformation();
+        void SetTOO(glm::vec2 to) override ;
+        void SetMyTarget(glm::vec3 t)override;
     private:
 
         GameObject* parent_;

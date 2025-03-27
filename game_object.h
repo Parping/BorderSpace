@@ -238,6 +238,9 @@ namespace game {
             virtual void setTarget(glm::vec3 p) {};
             virtual void MovingTo(double delta_time) {};
 
+            virtual glm::mat4 GetTransformation() { return glm::mat4(1.0f); };
+            virtual void SetTOO(glm::vec2 to) {};
+            virtual void SetMyTarget(glm::vec3 t) {};
         protected:
             // Object's Transform Variables
             glm::vec3 position_;

@@ -77,6 +77,7 @@ void GameObject::Update(double delta_time) {
         
 }
 
+
 void GameObject::Render(glm::mat4 view_matrix, double current_time){
 
     // Set up the shader
