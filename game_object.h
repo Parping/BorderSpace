@@ -9,6 +9,7 @@
 #include "geometry.h"
 #include "timer.h"
 #include "circle.h"
+#include "ract.h"
 
 namespace game {
 
@@ -232,6 +233,10 @@ namespace game {
             virtual void Set_Lazer_On(bool a)  {};
             virtual void Set_Shield_On(bool a)  {};
             virtual void Set_Rest(bool a) {};
+
+            virtual Ract* GetRact() { return &Ract(); };
+            virtual void setTarget(glm::vec3 p) {};
+            virtual void MovingTo(double delta_time) {};
 
         protected:
             // Object's Transform Variables

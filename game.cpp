@@ -24,6 +24,7 @@
 #include "monster_object.h"
 #include "lazer.h"
 #include "effect.h"
+#include "arm1.h"
 
 
 namespace game {
@@ -110,7 +111,8 @@ void Game::SetupGameWorld(void)
         tex_boss = 20,
         tex_bomb = 21,
         tex_beam = 22,
-        tex_shield = 23
+        tex_shield = 23,
+        tex_arm1 = 24
     };
     textures.push_back("/textures/tiny_ship1.png"); //change file
     //textures.push_back("/textures/destroyer_green.png"); 
@@ -138,6 +140,7 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/bomb.png");
     textures.push_back("/textures/Beam_Big_Blue.png");
     textures.push_back("/textures/shield.png");
+    textures.push_back("/textures/arm1.png");
 
 
     // Load textures
@@ -202,6 +205,8 @@ void Game::SetupGameWorld(void)
     shield->SetNumFrame(glm::vec2(5, 1));
     game_objects_.push_back(shield);
     game_objects_[4]->GetCircle()->SetRadius(game_objects_[4]->GetScale().x*0.6);
+    GameObject* arm1 = new Arm1(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_arm1], game_objects_[0]);
+    game_objects_.push_back(arm1);
 
     // Setup background
     // In this specific implementation, the background is always the

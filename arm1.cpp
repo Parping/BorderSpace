@@ -1,38 +1,70 @@
+#include "arm1.h"
 #include "player_game_object.h"
-#include "lazer.h"
 
 #include <iostream>
 
 namespace game {
-    Lazer::Lazer(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, GameObject* parent)
+    Arm1::Arm1(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, GameObject* parent)
         : GameObject(position, geom, shader, texture) {
         parent_ = parent;
-        scale_ = glm::vec2(5, 1);
+        scale_ = glm::vec2(1, 0.375);
         from_id_ = parent_->GetType();
-        type = 52;
+        type = 80;
         ract_ = Ract(1, 1);
+        target_ = glm::vec3(2, 0, 0);
+        speed = 5;
+        angle_ = 0;
+        toO_ = glm::vec2(0.5,0);
     }
-    void Lazer::Update(double delta_time) {
 
-        
-        
-        
+    void Arm1::MovingTo(double delta_time) {
+        glm::vec2 O, E, T;
+        float target_angle, actual_angle;
+        ract_.SetParent_Transformation_matrix(GetTransformation());
+
+        E = ract_.get_point(5);    // 机械臂的顶点位置
+        T = glm::vec2(target_.x, target_.y);  // 目标点位置
+
+        // 计算方向向量
+        glm::vec2 direction_target = glm::normalize(T - E);
+
+
+        // 计算角度（atan2 计算向量的方向）
+        target_angle = glm::atan(direction_target.y, direction_target.x);
+
+
+
+
+        SetRotation(angle_+target_angle);
+
+
+
+
+
+        std::cout << "E: " << E.x << ", " << E.y << std::endl;
+        std::cout << "T: " << T.x << ", " << T.y << std::endl;
+        std::cout << "target angle: " << target_angle << std::endl;
+
+    }
+
+    void Arm1::Update(double delta_time) {
+
         if (parent_->Get_Lazer_On()) {
             ghost = false;
         }
         else {
             ghost = true;
         }
+        MovingTo(delta_time);
         GameObject::Update(delta_time);
     }
-    bool Lazer::Ract_Circle_Collition(glm::vec3 position, float r, double deltatime) {
+    bool Arm1::Ract_Circle_Collition(glm::vec3 position, float r, double deltatime) {
         if (!parent_->Get_Lazer_On()) { return false; }
         if (ghost) { return false; }
 
         glm::vec2 p1, p2, p3, p4;
         glm::vec2 Circle_Center, Ract_Center;
         ract_.SetParent_Transformation_matrix(GetTransformation());
-        ract_.Print();
         p1 = ract_.get_point(0);
         p2 = ract_.get_point(1);
         p3 = ract_.get_point(2);
@@ -56,29 +88,29 @@ namespace game {
         glm::vec2 closestPoint = Ract_Center + clampedX * xAxis + clampedY * yAxis;
         float distance = glm::length(Circle_Center - closestPoint);
 
-        
-        
-       
-        std::cout << "Ract_Center.x: " << Ract_Center.x << " Ract_Center.y: " << Ract_Center.y << std::endl;
-        /*
-                std::cout << "Ract_Center.x: " << Ract_Center.x << " Ract_Center.y: " << Ract_Center.y << std::endl;
-        std::cout << "Center.x: " << Circle_Center.x << " Center.y: " << Circle_Center.y << std::endl;
-        Ract_Min = worldPoints[2];
-        Ract_Max = worldPoints[0];
-        Closest= glm::clamp(Circle_Center, Ract_Max,Ract_Min );
-        float distance = glm::length(Closest-Circle_Center);
-        */
+
+
+
+        // std::cout << "Ract_Center.x: " << Ract_Center.x << " Ract_Center.y: " << Ract_Center.y << std::endl;
+         /*
+                 std::cout << "Ract_Center.x: " << Ract_Center.x << " Ract_Center.y: " << Ract_Center.y << std::endl;
+         std::cout << "Center.x: " << Circle_Center.x << " Center.y: " << Circle_Center.y << std::endl;
+         Ract_Min = worldPoints[2];
+         Ract_Max = worldPoints[0];
+         Closest= glm::clamp(Circle_Center, Ract_Max,Ract_Min );
+         float distance = glm::length(Closest-Circle_Center);
+         */
         if (distance <= r) {
-           // std::cout << "succ!" << std::endl;
+            // std::cout << "succ!" << std::endl;
             return true;
         }
         else {
             //std::cout << "fail!" << std::endl;
-                return false;
+            return false;
         }
 
     }
-    void Lazer::Render(glm::mat4 view_matrix, double current_time) {
+    void Arm1::Render(glm::mat4 view_matrix, double current_time) {
         // Set up the shader
         shader_->Enable();
         if (ghost) {
@@ -107,9 +139,9 @@ namespace game {
         glm::mat4 parent_rotation_matrix = glm::rotate(glm::mat4(1.0f), parent_->GetRotation(), glm::vec3(0.0, 0.0, 1.0));
         glm::mat4 parent_translation_matrix = glm::translate(glm::mat4(1.0f), parent_->GetPosition());
         glm::mat4 parent_transformation_matrix = parent_translation_matrix * parent_rotation_matrix;
-
+        glm::mat4 T_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(toO_.x, toO_.y, 0.0));
         // Setup the transformation matrix for the shader
-        glm::mat4 transformation_matrix = parent_transformation_matrix * translation_matrix * rotation_matrix * scaling_matrix;
+        glm::mat4 transformation_matrix = parent_transformation_matrix * translation_matrix * rotation_matrix * scaling_matrix* T_matrix;
 
         // Set the transformation matrix in the shader
         shader_->SetUniformMat4("transformation_matrix", transformation_matrix);
@@ -127,7 +159,7 @@ namespace game {
         glDrawElements(GL_TRIANGLES, geometry_->GetSize(), GL_UNSIGNED_INT, 0);
     }
 
-    glm::mat4 Lazer::GetTransformation() {
+    glm::mat4 Arm1::GetTransformation() {
         glm::mat4 scaling_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale_.x, scale_.y, 1.0));
 
         // Setup the rotation matrix for the shader
@@ -135,6 +167,7 @@ namespace game {
 
         // Set up the translation matrix for the shader
         glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), position_);
+        glm::mat4 T_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(toO_.x,toO_.y, 0.0));
 
         // Set up the parent transformation matrix
         glm::mat4 parent_rotation_matrix = glm::rotate(glm::mat4(1.0f), parent_->GetRotation(), glm::vec3(0.0, 0.0, 1.0));
@@ -142,7 +175,7 @@ namespace game {
         glm::mat4 parent_transformation_matrix = parent_translation_matrix * parent_rotation_matrix;
 
         // Setup the transformation matrix for the shader
-        glm::mat4 transformation_matrix = parent_transformation_matrix * translation_matrix * rotation_matrix * scaling_matrix;
+        glm::mat4 transformation_matrix = parent_transformation_matrix * translation_matrix * rotation_matrix * scaling_matrix* T_matrix;
         return transformation_matrix;
     }
 }

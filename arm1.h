@@ -1,17 +1,16 @@
-#ifndef LAZER_H_
-#define LAZER_H_
+#ifndef ARM1_H_
+#define ARM1_H_
 
 #include "game_object.h"
-
 
 namespace game {
 
     // Inherits from GameObject
-    class Lazer : public GameObject {
+    class Arm1 : public GameObject {
 
     public:
 
-        Lazer(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, GameObject* parent_);
+        Arm1(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, GameObject* parent_);
 
         Circle* GetCircle()override { return parent_->GetCircle(); };
         //getters
@@ -21,7 +20,6 @@ namespace game {
         int GetState()override { return parent_->GetState(); }
         float GetSpeed()override { return parent_->GetSpeed(); };
 
-        Ract* GetRact()override { return &ract_; };
 
         void Update(double delta_time) override;
 
@@ -30,12 +28,18 @@ namespace game {
         void Render(glm::mat4 view_matrix, double current_time);
         int getFrom() override { return from_id_; };
 
+        void setTarget(glm::vec3 p) override { target_ = p; };
+
+        void MovingTo(double delta_time) override;
         glm::mat4 GetTransformation();
     private:
 
         GameObject* parent_;
         int from_id_;
         Ract ract_;
+        glm::vec3 target_;
+        float speed;
+        glm::vec2 toO_;
 
 
 

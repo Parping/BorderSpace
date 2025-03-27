@@ -28,6 +28,8 @@ lazer.h
 bomb.h
 fortress_shooter.h
 effect.h
+arm1.h
+ract.h
 )
  
 set(SRCS
@@ -53,6 +55,8 @@ lazer.cpp
 bomb.cpp
 fortress_shooter.cpp
 effect.cpp
+arm1.cpp
+ract.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     number_fragement_shader.glsl
