@@ -13,6 +13,13 @@ namespace game {
     public:
 
         FortressObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, Circle circle, double t_, int statue, int type);
+       
+        ~FortressObject() {
+            child_1->N_Parent();
+            child_2->N_Parent();
+            arms_->N_Parent();
+        }
+        
         Circle* GetCircle()override;
         //getters
         bool GetAlive()override;
@@ -64,7 +71,14 @@ namespace game {
         void become_angry()override;
         void heal()override;
 
+        void SetArm(GameObject* a) override { arms_ = a; };
+        glm::mat4 GetTransformation() override;
+        glm::mat4 GetLocalTransformation();
 
+        void SetChild1(GameObject* a) override { child_1 = a; };
+        void SetChild2(GameObject* a) override { child_2 = a; };
+
+        
     private:
         int hitpoint;
         int statue;//0 normal, 1 invincible, 2 patrolling, 3 intercepting
@@ -91,6 +105,10 @@ namespace game {
         Timer get_angry;
         bool isAngry;
         GameObject* shooter;
+        GameObject* arms_;
+        GameObject* child_1;
+        GameObject* child_2;
+
 
 
 

@@ -202,20 +202,22 @@ void Game::SetupGameWorld(void)
         game_objects_[i]->SetPlayer(game_objects_[0]);//set player pointer for each enemy
     }
 
-    GameObject* lazer_ = new Lazer(glm::vec3(2.3f, 0.0f, 0.0f), sprite_, &animate_shader_, tex_[tex_beam], game_objects_[0]);
+    GameObject* lazer_ = new Lazer(glm::vec3(1.0f, 0.0f, 0.0f), sprite_, &animate_shader_, tex_[tex_beam], game_objects_[0]);
     lazer_->SetNumFrame(glm::vec2(2, 1));
     game_objects_.push_back(lazer_);
     GameObject* shield = new Effect(glm::vec3(0.0f, 0.0f, -1.0f), sprite_, &animate_shader_, tex_[tex_shield], game_objects_[0], 31);
     shield->SetNumFrame(glm::vec2(5, 1));
     game_objects_.push_back(shield);
     game_objects_[4]->GetCircle()->SetRadius(game_objects_[4]->GetScale().x*0.6);
-    GameObject* arm1 = new Arm1(glm::vec3(0.5f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_arm1], game_objects_[0]);
+    GameObject* arm1 = new Arm1(glm::vec3(1.0f, 1.0f, -1.0f), sprite_, &sprite_shader_, tex_[tex_arm1], game_objects_[4]);
     arm1->SetScale(glm::vec2(1, 0.375));
-    GameObject* arm2 = new Arm1(glm::vec3(1.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_arm2], arm1);
-    GameObject* arm3 = new Arm1(glm::vec3(1.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_arm3], arm2);
+    GameObject* arm2 = new Arm1(glm::vec3(1.0f, 0.0f, -1.0f), sprite_, &sprite_shader_, tex_[tex_arm2], arm1);
+    GameObject* arm3 = new Arm1(glm::vec3(1.0f, 0.0f, -1.0f), sprite_, &sprite_shader_, tex_[tex_arm3], arm2);
     arm2->SetScale(glm::vec2(1, 0.375));
     arm3->SetScale(glm::vec2(0.5, 0.5));
-    arm3->SetMyTarget(glm::vec3(2, 0,0));
+    game_objects_[4]->SetArm(arm3);
+    game_objects_[4]->SetChild1(arm1);
+    game_objects_[4]->SetChild2(arm2);
     game_objects_.push_back(arm1);
     game_objects_.push_back(arm2);
     game_objects_.push_back(arm3);
@@ -441,6 +443,7 @@ void Game::Update(double delta_time)
                     if (other_game_object->GetType() != current_game_object->getFrom()) {
                         if (current_game_object->Ract_Circle_Collition(other_game_object->GetPosition(), other_game_object->GetCircle()->get_r(), delta_time)) {
                             //get enemy position, enemy circle radius, and the delta_time
+                            std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
                             other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
                             // Play the sound when collision
                             if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
@@ -491,6 +494,7 @@ void Game::Update(double delta_time)
                         if (current_game_object->GetType() != other_game_object->getFrom()) {
                             if (other_game_object->Ract_Circle_Collition(current_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {
                                 //get enemy position, enemy circle radius, and the delta_time
+                                std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
                                 current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
                                 // Play the sound when collision
                                 if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
@@ -672,7 +676,20 @@ void Game::generateDifferentEnemy() {
         new_enemy->SetShooter(fortress_shooter_);
         game_objects_.insert(game_objects_.begin() + 1, new_enemy);//new enemy
         game_objects_.insert(game_objects_.begin() + 1, fortress_shooter_);
-        
+        GameObject* arm1 = new Arm1(glm::vec3(1.0f, 1.0f, -1.0f), sprite_, &sprite_shader_, tex_[24], new_enemy);
+        arm1->SetScale(glm::vec2(1, 0.375));
+        GameObject* arm2 = new Arm1(glm::vec3(1.0f, 0.0f, -1.0f), sprite_, &sprite_shader_, tex_[25], arm1);
+        GameObject* arm3 = new Arm1(glm::vec3(1.0f, 0.0f, -1.0f), sprite_, &sprite_shader_, tex_[26], arm2);
+        arm2->SetScale(glm::vec2(1, 0.375));
+        arm3->SetScale(glm::vec2(0.5, 0.5));
+        new_enemy->SetArm(arm3);
+        new_enemy->SetChild1(arm1);
+        new_enemy->SetChild2(arm2);
+        game_objects_.insert(game_objects_.begin() + 1, arm3);
+        game_objects_.insert(game_objects_.begin() + 1, arm2);
+        game_objects_.insert(game_objects_.begin() + 1, arm1);
+
+
         GameObject* new_small_enemy;
       //    std::cout << "Create new Fortress at position ("//print function
       //<< random_position.x << ", "

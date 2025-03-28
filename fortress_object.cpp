@@ -83,6 +83,10 @@ namespace game {
     }
     void FortressObject::SetAlive(bool a) {
         alive = a;
+        shooter->SetAlive(a);
+        arms_->SetAlive(a);
+        child_1->SetAlive(a);
+        child_2->SetAlive(a);
     }
     void FortressObject::SetStatue(int a) {
         statue = a;
@@ -101,7 +105,15 @@ namespace game {
     }
 
     void FortressObject::heal() {
-        std::cout << " heal" << std::endl;
+        //
+        arms_->setTarget(player_->GetPosition());
+        glm::vec2 P1, P2;
+        P1 = glm::vec2(arms_->GetPosition().x, arms_->GetPosition().y);
+        P2 = glm::vec2(player_->GetPosition().x, player_->GetPosition().y);
+        if (glm::distance( P1,P2) <0.4f) {
+            player_->getHeal();
+            std::cout << " heal" << std::endl;
+        }
 
     }
 
@@ -193,12 +205,13 @@ namespace game {
         float dp2 = glm::dot(velocity_, glm::vec3(0, 1, 0));//dot product with velocity and y axis
         dp /= glm::length(velocity_);//normalized
         dp2 /= glm::length(velocity_);
-        float angle = acos(dp);//calculate the angle, can only show 0~180
+        float angle = glm::atan(velocity_.y, velocity_.x);//calculate the angle, can only show 0~180
+
         if (dp2 >= 0) {//if it is in x>=0 
-            shooter->SetRotation(angle);
+            shooter->SetRotation(angle- angle_);
         }
         else {//it is in x<=0
-            shooter->SetRotation(-angle);//adjust the angle
+            shooter->SetRotation(angle- angle_);//adjust the angle
         }
         //std::cout << "Update velocity"<< velocity_.x << std::endl;
     }
@@ -219,11 +232,15 @@ namespace game {
 
     glm::vec4 FortressObject::getShooter() {
         glm::vec3 P, F;
+        glm::vec4 temp;
         float A;
-        A = shooter->GetRotation();
+        A = angle_ +shooter->GetRotation() ;
+       
+       // temp = glm::vec4(shooter->GetPosition(), 1);
+        //temp = GetTransformation() * temp;
         P = shooter->GetPosition();
-        F = position_ + glm::vec3(0,P.x,0);
-        return glm::vec4(F, A);
+        //F = position_ + glm::vec3(0,P.x,0);
+        return glm::vec4(P, A);
     }
     // Update function for moving the player object around
     // Update status
@@ -236,12 +253,12 @@ namespace game {
                 this->SetAlive(false);
                 //Explosion();
             }
-            else {
-                if (timer_exp.Finished()) {
-                    this->SetAlive(false);
-                    return;
-                }
-            }
+          //  else {
+          //      if (timer_exp.Finished()) {
+           //         this->SetAlive(false);
+          //          return;
+            //    }
+         //   }
         }
 
         else {//if not died
@@ -259,10 +276,12 @@ namespace game {
             case 8:
                 if (isAngry) {
                     statue = 9;
+                    arms_->setTarget(position_);
                     break;
                 }
                 if (glm::length(Player-Myposition) > (player_->GetCircle()->get_r()+GetCircle()->get_r())) {
                     statue = 0;
+                    arms_->setTarget(position_);
                     break;
                 }
                 
@@ -315,6 +334,23 @@ namespace game {
 
         t_ += delta_time;//update the t_
 
+    }
+
+    glm::mat4 FortressObject::GetTransformation() {
+
+
+        // Setup the rotation matrix for the shader
+        glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle_, glm::vec3(0.0, 0.0, 1.0));
+
+        // Set up the translation matrix for the shader
+        glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), position_);
+        glm::mat4 transformation_matrix = translation_matrix * rotation_matrix;
+        return transformation_matrix;
+    }
+    glm::mat4 FortressObject::GetLocalTransformation() {
+        glm::mat4 scaling_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale_.x, scale_.y, 1.0));
+        glm::mat4 transformation_matrix = GetTransformation() * scaling_matrix;
+        return transformation_matrix;
     }
 
 }// namespace game

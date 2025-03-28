@@ -66,6 +66,8 @@ namespace game {
             void Set_Rest(bool a)override { rest_ = a; }
             glm::mat4 GetTransformation() override;
             glm::mat4 GetLocalTransformation();
+            void getHeal() override;
+
 
     private:
         int hitpoint;

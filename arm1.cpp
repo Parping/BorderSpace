@@ -15,8 +15,13 @@ namespace game {
         speed = 5;
         angle_ = 0;
         toO_ = glm::vec2(0.5,0);
+        alive_ = true;
     }
-
+    glm::vec3 Arm1::GetPosition() {
+        glm::vec4 tran_pos = GetLocalTransformation() * glm::vec4(position_, 1.0f);
+        glm::vec3 actual_pos_ = glm::vec3(tran_pos.x, tran_pos.y, -1.0f);
+        return actual_pos_;
+    }
     void Arm1::MovingTo(double delta_time) {
 
         glm::vec2 O, E, T,E_P;
@@ -28,7 +33,7 @@ namespace game {
         T = glm::vec2(target_.x, target_.y);  // 目标点位置
 
 
-        glm::vec2 T_parent = T - glm::normalize(T - E_P);
+        glm::vec2 T_parent = T - glm::normalize(T - E_P)*scale_.x;
         parent_->setTarget(glm::vec3(T_parent,0));
 
         // 计算方向向量
@@ -51,22 +56,25 @@ namespace game {
             SetRotation(angle_ - angle_increment);
 
         }
-        std::cout << "O: " << O.x << ", " << O.y << std::endl;
-        std::cout << "E: " << E.x << ", " << E.y << std::endl;
-        std::cout << "T: " << T.x << ", " << T.y << std::endl;
+      //  std::cout << "O: " << O.x << ", " << O.y << std::endl;
+     //   std::cout << "E: " << E.x << ", " << E.y << std::endl;
+       // std::cout << "T: " << T.x << ", " << T.y << std::endl;
 
 
     }
 
-    void Arm1::Update(double delta_time) {
+    void Arm1::Get_Collision(double delta_time) {
+        parent_->become_angry();
+    }
 
+    void Arm1::Update(double delta_time) {
+        if (!alive_) { return; }
 
         MovingTo(delta_time);
         GameObject::Update(delta_time);
     }
     bool Arm1::Ract_Circle_Collition(glm::vec3 position, float r, double deltatime) {
-        if (!parent_->Get_Lazer_On()) { return false; }
-        if (ghost) { return false; }
+
 
         glm::vec2 p1, p2, p3, p4;
         glm::vec2 Circle_Center, Ract_Center;
@@ -118,6 +126,7 @@ namespace game {
     }
     void Arm1::Render(glm::mat4 view_matrix, double current_time) {
         // Set up the shader
+        if (!alive_) { return; }
         shader_->Enable();
         if (ghost) {
             shader_->SetUniform1i("ghost", 1);//if so, send 1 to ghost
@@ -147,7 +156,7 @@ namespace game {
         glm::mat4 parent_transformation_matrix =parent_->GetTransformation();
         glm::mat4 T_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(toO_.x, toO_.y, 0.0));
         // Setup the transformation matrix for the shader
-        glm::mat4 transformation_matrix = parent_transformation_matrix * translation_matrix * rotation_matrix * scaling_matrix* T_matrix;
+        glm::mat4 transformation_matrix = GetLocalTransformation();
 
         // Set the transformation matrix in the shader
         shader_->SetUniformMat4("transformation_matrix", transformation_matrix);
@@ -171,7 +180,7 @@ namespace game {
         return transformation_matrix;
     }
     glm::mat4 Arm1::GetTransformation() {
-
+        if (!alive_) { return glm::mat4(1.0f); }
 
         // Setup the rotation matrix for the shader
         glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle_, glm::vec3(0.0, 0.0, 1.0));

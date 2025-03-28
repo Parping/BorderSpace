@@ -12,15 +12,21 @@ namespace game {
 
         Arm1(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, GameObject* parent_);
 
-        Circle* GetCircle()override { return parent_->GetCircle(); };
+
         //getters
-        bool GetAlive()override { return parent_->GetAlive(); };
-        bool GetColliable() override { return parent_->GetColliable(); };
-        int GetHP() override { return parent_->GetHP(); };
-        int GetState()override { return parent_->GetState(); }
-        float GetSpeed()override { return parent_->GetSpeed(); };
+        glm::vec3 GetPosition()override;
+        void SetAlive(bool a)override { alive_ = a; }
+        bool GetAlive()override { 
+            
+            return alive_;
+        };
+        bool GetColliable() override { 
+            if (alive_ ) { return parent_->GetColliable(); }
+            return false;
+        };
 
 
+        void Get_Collision(double delta_time)override;
         void Update(double delta_time) override;
 
         bool Ract_Circle_Collition(glm::vec3 position, float r, double deltatime) override;
@@ -36,6 +42,9 @@ namespace game {
         glm::mat4 GetLocalTransformation();
         void SetTOO(glm::vec2 to) override ;
         void SetMyTarget(glm::vec3 t)override;
+
+        GameObject* GetParent() override { return parent_; };
+        void N_Parent() override { parent_ = nullptr; };
     private:
 
         GameObject* parent_;
@@ -44,6 +53,7 @@ namespace game {
         glm::vec3 target_;
         float speed;
         glm::vec2 toO_;
+        bool alive_;
 
 
 

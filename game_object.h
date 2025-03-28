@@ -137,9 +137,9 @@ namespace game {
             virtual void Render(glm::mat4 view_matrix, double current_time);
 
             // Getters
-            inline glm::vec3 GetPosition(void) const { return position_; }
+            virtual glm::vec3 GetPosition(void)  { return position_; }
             inline glm::vec2 GetScale(void) const { return scale_; }//change it to vec2
-            inline float GetRotation(void) const { return angle_; }
+            virtual float GetRotation(void) { return angle_; }
             int GetType() { return type; }
             virtual glm::vec3 GetVelocity(void) { return glm::vec3(0, 0, 0); };
 
@@ -241,6 +241,14 @@ namespace game {
             virtual glm::mat4 GetTransformation() { return glm::mat4(1.0f); };
             virtual void SetTOO(glm::vec2 to) {};
             virtual void SetMyTarget(glm::vec3 t) {};
+
+            virtual void SetArm(GameObject* a) {};
+            virtual void SetChild1(GameObject* a) {};
+            virtual void SetChild2(GameObject* a) {};
+            virtual GameObject* GetParent() { return NULL; };
+            virtual void N_Parent() {};
+
+            virtual void getHeal() {};
         protected:
             // Object's Transform Variables
             glm::vec3 position_;

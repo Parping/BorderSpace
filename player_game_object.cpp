@@ -264,7 +264,9 @@ void PlayerGameObject::AddVelocity(glm::vec3 a) {
 		velocity_=new_velocity;
 	}
 }
-
+void PlayerGameObject::getHeal() {
+	hitpoint += 1;
+}
 glm::mat4 PlayerGameObject::GetTransformation() {
 	
 

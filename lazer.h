@@ -13,10 +13,18 @@ namespace game {
 
         Lazer(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, GameObject* parent_);
 
-        Circle* GetCircle()override { return parent_->GetCircle(); };
+
         //getters
-        bool GetAlive()override { return parent_->GetAlive(); };
-        bool GetColliable() override { return parent_->GetColliable(); };
+        glm::vec3 GetPosition()override;
+        void SetAlive(bool a)override { alive_ = a; }
+        bool GetAlive()override {
+
+            return alive_;
+        };
+        bool GetColliable() override {
+            if (alive_) { return parent_->GetColliable(); }
+            return false;
+        };
         int GetHP() override { return parent_->GetHP(); };
         int GetState()override { return parent_->GetState(); }
         float GetSpeed()override { return parent_->GetSpeed(); };
@@ -30,12 +38,17 @@ namespace game {
         void Render(glm::mat4 view_matrix, double current_time);
         int getFrom() override { return from_id_; };
 
-        glm::mat4 GetTransformation();
+        glm::mat4 GetTransformation() override;
+
+        glm::mat4 GetLocalTransformation();
+
     private:
 
         GameObject* parent_;
         int from_id_;
         Ract ract_;
+        bool alive_;
+        glm::vec2 toO_;
 
 
 

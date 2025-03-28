@@ -60,4 +60,32 @@ namespace game {
         // Draw the entity
         glDrawElements(GL_TRIANGLES, geometry_->GetSize(), GL_UNSIGNED_INT, 0);
     }
+
+    float FortressShooter::GetRotation() {
+        return angle_;
+    }
+    glm::mat4 FortressShooter::GetLocalTransformation() {
+        glm::mat4 scaling_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale_.x, scale_.y, 1.0));
+        glm::mat4 T_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0,0, 0.0));
+        glm::mat4 transformation_matrix = GetTransformation() * scaling_matrix * T_matrix;
+        return transformation_matrix;
+    }
+    glm::mat4 FortressShooter::GetTransformation() {
+        if (!alive_) { return glm::mat4(1.0f); }
+
+        // Setup the rotation matrix for the shader
+        glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle_, glm::vec3(0.0, 0.0, 1.0));
+
+        // Set up the translation matrix for the shader
+        glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), position_);
+
+
+        // Set up the parent transformation matrix
+        glm::mat4 parent_transformation_matrix = parent_->GetTransformation();
+
+        // Setup the transformation matrix for the shader
+        glm::mat4 transformation_matrix = parent_transformation_matrix * translation_matrix * rotation_matrix;
+        return transformation_matrix;
+    }
+
 }
