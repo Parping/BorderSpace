@@ -81,7 +81,7 @@ namespace game {
 
             void generateEnemyDrops(glm::vec3 position,EnemyDrop s);
             float  randRange(float min, float max);
-
+            void RenderMiniMap();
         private:
             // Main window: pointer to the GLFW window structure
             GLFWwindow *window_;
@@ -96,12 +96,13 @@ namespace game {
             Shader animate_shader_;
             // Shader for rendering text
             Shader text_shader_;
+            Shader drawing_shader_;
 
             // References to textures
             // This needs to be a pointer
             GLuint *tex_;
 
-            HUD *hud_;
+
             //add timer and audio
             Timer timer;
             Timer shooter_timer;
@@ -112,6 +113,7 @@ namespace game {
             // List of game objects
             std::vector<GameObject*> game_objects_;
             std::vector<GameObject*> hud_objects_;
+            std::vector<GameObject*> enemy_objects_;
 
             GameObject* fortress_;
             bool fortress_exist_;

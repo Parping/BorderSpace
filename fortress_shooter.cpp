@@ -13,6 +13,7 @@ namespace game {
     }
 
     void FortressShooter::Render(glm::mat4 view_matrix, double current_time) {
+        if (!alive_) { return; }
         // Set up the shader
         shader_->Enable();
         if (ghost) {

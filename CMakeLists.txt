@@ -33,6 +33,8 @@ ract.h
 bar.h
 Value_Object.h
 text_game_object.h
+mini_map_Object.h
+drawing_game_object.h
 )
  
 set(SRCS
@@ -62,6 +64,8 @@ arm1.cpp
 ract.cpp
 Value_Object.cpp
 text_game_object.cpp
+mini_map_Object.cpp
+drawing_game_object.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     number_fragement_shader.glsl
@@ -69,6 +73,7 @@ text_game_object.cpp
 animate_fragment_shader.glsl
 child_fragment_shader.glsl
 text_fragment_shader.glsl
+drawing_fragment_shader.glsl
 bar.cpp
 )
 

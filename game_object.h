@@ -12,6 +12,8 @@
 #include "ract.h"
 #include <string>
 
+#include <vector>
+
 namespace game {
 
     /*
@@ -264,6 +266,18 @@ namespace game {
             virtual void SetText(std::string text) {}
             virtual void SetZoom(float f) {}
             virtual float getZoom() { return 0.25f; };
+
+            virtual void RenderMap(glm::mat4 view_matrix, double current_time) {};
+            virtual void emptyChild() {};
+            virtual GameObject* GetChild(int i) { return NULL; };
+
+            virtual void SetPlayerSp(GameObject* p) {};
+            virtual void SetEnemySp(GameObject* p) {};
+
+            virtual void SetRGB(float r, float g, float b, float a) {
+                rgba_ = glm::vec4(r, g, b, a);
+            }
+            virtual void SetAllChild(std::vector<GameObject*> a) {};
         protected:
             // Object's Transform Variables
             glm::vec3 position_;
@@ -292,7 +306,7 @@ namespace game {
 
             //物体在屏幕上相对的位置
             glm::vec2 place_screen_;
-
+            glm::vec4 rgba_;
             glm::vec2 toOrigin_;
 
 
