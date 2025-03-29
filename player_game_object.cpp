@@ -54,6 +54,14 @@ void PlayerGameObject::SetColliable(bool a) {
 }
 void PlayerGameObject::SetAlive(bool a) {
 	alive = a;
+	for (int i = 0; i < chile_game_objects_.size(); i++) {
+		chile_game_objects_[i]->SetAlive(a);
+		chile_game_objects_[i]->SetGhost(!a);
+	}
+	
+}
+void PlayerGameObject::AddChild(GameObject* child) {
+	chile_game_objects_.push_back(child);
 }
 //updated getters and setters
 int PlayerGameObject::GetItem() {

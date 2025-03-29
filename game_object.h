@@ -10,6 +10,7 @@
 #include "timer.h"
 #include "circle.h"
 #include "ract.h"
+#include <string>
 
 namespace game {
 
@@ -239,7 +240,7 @@ namespace game {
             virtual void MovingTo(double delta_time) {};
 
             virtual glm::mat4 GetTransformation() { return glm::mat4(1.0f); };
-            virtual void SetTOO(glm::vec2 to) {};
+            virtual void SetTOO(glm::vec2 to) { toOrigin_ = to; };
             virtual void SetMyTarget(glm::vec3 t) {};
 
             virtual void SetArm(GameObject* a) {};
@@ -249,6 +250,20 @@ namespace game {
             virtual void N_Parent() {};
 
             virtual void getHeal() {};
+
+            virtual void AddChild(GameObject* child) {};
+            virtual void SetWindowHeight(int w) {};
+            virtual void SetWindowWidth(int h) {};
+
+            virtual void SetPlace_Screen(float a, float b) { place_screen_ = glm::vec2(a, b); };
+            glm::vec2 GetPlace_Screen() { return place_screen_; };
+
+            virtual void UpdateValue(int index_1, int index_2, int index_3, float value) {};
+
+            virtual void SetValue(float a) {};
+            virtual void SetText(std::string text) {}
+            virtual void SetZoom(float f) {}
+            virtual float getZoom() { return 0.25f; };
         protected:
             // Object's Transform Variables
             glm::vec3 position_;
@@ -274,6 +289,13 @@ namespace game {
 
             // Object's texture reference
             GLuint texture_;
+
+            //物体在屏幕上相对的位置
+            glm::vec2 place_screen_;
+
+            glm::vec2 toOrigin_;
+
+
             
 
 

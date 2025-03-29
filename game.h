@@ -35,6 +35,26 @@ namespace game {
             void MainLoop(void); 
             //random position generator
 
+            //hp,energy,exp,level
+            //money.score, max_hp,max_energy,max_exp
+            //buff, collect
+            struct HUDValue {
+                int hp;
+                int energy;
+                int exp;
+                int level;
+                int money;
+                int score;
+                int max_hp;
+                int max_energy;
+                int max_exp;
+                int ip;
+                int iron;
+                
+                bool buff;
+                bool collect;
+
+            };
             struct EnemyDrop {
                 int ip_;
                 int energy_;
@@ -48,6 +68,8 @@ namespace game {
             EnemyDrop BBB = { 5, 20, 20, 50,10,0 };
             EnemyDrop Fortress = { 20,5,5,200,10,0 };
             EnemyDrop Monster = { 5, 20, 20, 50,10,0 };
+
+
             glm::vec3 generateRandomPosition();
 
             //
@@ -72,6 +94,8 @@ namespace game {
             Shader number_shader_;
             Shader bar_shader_;
             Shader animate_shader_;
+            // Shader for rendering text
+            Shader text_shader_;
 
             // References to textures
             // This needs to be a pointer
@@ -87,10 +111,22 @@ namespace game {
 
             // List of game objects
             std::vector<GameObject*> game_objects_;
+            std::vector<GameObject*> hud_objects_;
 
             GameObject* fortress_;
             bool fortress_exist_;
 
+            GameObject* minimap_;
+
+            //hp,energy,exp,level
+            //money.score, max_hp,max_energy,max_exp
+            //buff, collect
+            HUDValue HUDValue_;
+
+            void Setup_HUD_Value();
+            void Update_HUD_Value();
+
+            void Setup_HUD_Bar(GameObject* h);
 
             // Keep track of time
             double current_time_;
@@ -112,6 +148,8 @@ namespace game {
 
             // Load all textures
             void LoadTextures(std::vector<std::string> &textures);
+
+            
     }; // class Game
 
 } // namespace game

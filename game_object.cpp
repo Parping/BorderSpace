@@ -25,6 +25,8 @@ GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader
     num_frame = glm::vec2(1,1);
     current_frame = 0;
     bar_percent = 1.0;
+    place_screen_ = glm::vec2(0, 0);
+    toOrigin_ = glm::vec2(0, 0);
 }
 
 glm::vec3 GameObject::GetBearing(void) const {
@@ -109,7 +111,9 @@ void GameObject::Render(glm::mat4 view_matrix, double current_time){
     glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), position_);
 
     // Setup the transformation matrix for the shader
-    glm::mat4 transformation_matrix = translation_matrix * rotation_matrix * scaling_matrix;
+    glm::mat4 T_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(toOrigin_.x, toOrigin_.y, 0.0));
+
+    glm::mat4 transformation_matrix = translation_matrix * rotation_matrix * scaling_matrix* T_matrix;
 
     // Set the transformation matrix in the shader
     shader_->SetUniformMat4("transformation_matrix", transformation_matrix);

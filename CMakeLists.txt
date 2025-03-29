@@ -30,6 +30,9 @@ fortress_shooter.h
 effect.h
 arm1.h
 ract.h
+bar.h
+Value_Object.h
+text_game_object.h
 )
  
 set(SRCS
@@ -57,13 +60,16 @@ fortress_shooter.cpp
 effect.cpp
 arm1.cpp
 ract.cpp
+Value_Object.cpp
+text_game_object.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     number_fragement_shader.glsl
     bar_fragement_shader.glsl
 animate_fragment_shader.glsl
 child_fragment_shader.glsl
- 
+text_fragment_shader.glsl
+bar.cpp
 )
 
 # Add path name to configuration file

@@ -2,15 +2,17 @@
 #define PLAYER_GAME_OBJECT_H_
 
 #include "game_object.h"
-
+#include <vector>
 namespace game {
 
     // Inherits from GameObject
     class PlayerGameObject : public GameObject {
 
         public:
-            PlayerGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture,int hp,Circle circle);
-            Circle* GetCircle()override;
+             PlayerGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture,int hp,Circle circle);
+             
+             ~PlayerGameObject();
+             Circle* GetCircle()override;
             //getters
              bool GetAlive()override ;
              bool GetColliable() override ;
@@ -67,7 +69,7 @@ namespace game {
             glm::mat4 GetTransformation() override;
             glm::mat4 GetLocalTransformation();
             void getHeal() override;
-
+            void AddChild(GameObject* child) override;
 
     private:
         int hitpoint;
@@ -98,6 +100,7 @@ namespace game {
         bool shield_act_;
 
         bool rest_;
+        std::vector<GameObject*> chile_game_objects_;//内部的所有小东西
 
 
 

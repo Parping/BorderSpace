@@ -26,6 +26,10 @@
 #include "effect.h"
 #include "arm1.h"
 
+#include "bar.h"
+#include "Value_Object.h"
+
+#include "text_game_object.h"
 
 namespace game {
 
@@ -33,7 +37,7 @@ namespace game {
 // They are written here as global variables, but ideally they should be loaded from a configuration file
 
 // Globals that define the OpenGL window and viewport
-const char *window_title_g = "Assignment 3"; //change name to assignment 3
+const char *window_title_g = "Borderspace"; //change name to assignment 3
 const unsigned int window_width_g = 800;
 const unsigned int window_height_g = 600;
 const glm::vec3 viewport_background_color_g(0.0, 0.0, 1.0);
@@ -114,7 +118,9 @@ void Game::SetupGameWorld(void)
         tex_shield = 23,
         tex_arm1 = 24,
         tex_arm2 = 25,
-        tex_arm3 = 26
+        tex_arm3 = 26,
+        tex_font = 27,
+        tex_test = 28
     };
     textures.push_back("/textures/tiny_ship1.png"); //change file
     //textures.push_back("/textures/destroyer_green.png"); 
@@ -145,6 +151,8 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/arm1.png");
     textures.push_back("/textures/arm2.png");
     textures.push_back("/textures/arm3.png");
+    textures.push_back("/textures/font8x8.png");
+    textures.push_back("/textures/test.png");
 
 
     // Load textures
@@ -158,13 +166,7 @@ void Game::SetupGameWorld(void)
     // Setup the player object (position, texture, vertex count,hp,circle)
     // Note that, in this specific implementation, the player object should always be the first object in the game object vector 
 
-    //Setup HUD stuff
-    GameObject* hp_spirt = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &bar_shader_, tex_[healthy_bar]);
-    GameObject* energy_spirt = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &bar_shader_, tex_[energy_bar]);
-    GameObject* exp_spirt = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &bar_shader_, tex_[exp_bar]);
-    GameObject* num_spirt = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[number]);
-    GameObject* exp_text_s = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[exp_text]);
-    GameObject* lv_text_s = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[level_text]);
+
 
 
 
@@ -172,7 +174,7 @@ void Game::SetupGameWorld(void)
     game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tiny_ship17],100,Circle()));//change texture, add hitpoint, circle
 
     
-    hud_ = new HUD(hp_spirt, num_spirt, energy_spirt, exp_spirt, exp_text_s, lv_text_s, game_objects_[0]);
+   // hud_ = new HUD(hp_spirt, num_spirt, energy_spirt, exp_spirt, exp_text_s, lv_text_s, game_objects_[0]);
     
     float pi_over_two = glm::pi<float>() / 2.0f;
 
@@ -202,7 +204,7 @@ void Game::SetupGameWorld(void)
         game_objects_[i]->SetPlayer(game_objects_[0]);//set player pointer for each enemy
     }
 
-    GameObject* lazer_ = new Lazer(glm::vec3(1.0f, 0.0f, 0.0f), sprite_, &animate_shader_, tex_[tex_beam], game_objects_[0]);
+    GameObject* lazer_ = new Lazer(glm::vec3(1.0f, 0.0f, -1.0f), sprite_, &animate_shader_, tex_[tex_beam], game_objects_[0]);
     lazer_->SetNumFrame(glm::vec2(2, 1));
     game_objects_.push_back(lazer_);
     GameObject* shield = new Effect(glm::vec3(0.0f, 0.0f, -1.0f), sprite_, &animate_shader_, tex_[tex_shield], game_objects_[0], 31);
@@ -221,6 +223,21 @@ void Game::SetupGameWorld(void)
     game_objects_.push_back(arm1);
     game_objects_.push_back(arm2);
     game_objects_.push_back(arm3);
+    game_objects_[0]->AddChild(lazer_);
+    game_objects_[0]->AddChild(shield);
+
+    GameObject* BarObj = new Bar(glm::vec3(0.0f, 0.0f, -1.0f), sprite_, &sprite_shader_, tex_[28], game_objects_[0]);
+    game_objects_.push_back(BarObj);
+    Setup_HUD_Bar(BarObj);
+    game_objects_[0]->AddChild(BarObj);
+
+
+
+
+    
+
+
+
 
     // Setup background
     // In this specific implementation, the background is always the
@@ -241,9 +258,225 @@ void Game::SetupGameWorld(void)
     am.SetSoundPosition(background_music_index, -10.0, 0.0, 0.0);
     am.SetLoop(background_music_index, true);//set the background music looping until the gameworld need to be destoried
     am.PlaySound(background_music_index);//play music
+
+    Setup_HUD_Value();
+    
+}
+void Game::Setup_HUD_Bar(GameObject* h) {
+    int width, height;
+    glfwGetWindowSize(window_, &width, &height);
+    GameObject* BarObj = h;
+
+    
+    GameObject* hp_ui_bar = new Bar(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
+    GameObject* Exp_ui_bar = new Bar(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
+    GameObject* text_bar = new Bar(glm::vec3(0.0f, 0.4f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
+    GameObject* number_bar = new Bar(glm::vec3(-1.9f, 0.25f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
+
+    GameObject* collaction_bar = new Bar(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
+
+    GameObject* minimap_bar = new Bar(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[28], game_objects_[0]);
+
+    GameObject* hp_sp = new Value_Object(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &bar_shader_, tex_[8], 1, 1, hp_ui_bar);
+    GameObject* energy_sp = new Value_Object(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &bar_shader_, tex_[11], 1, 1, hp_ui_bar);
+    GameObject* exp_text_s = new GameObject(glm::vec3(2.2f, 0.25f, 0.0f), sprite_, &sprite_shader_, tex_[13]);
+    GameObject* lv_text_s = new GameObject(glm::vec3(-2.2f, 0.25f, 0.0f), sprite_, &sprite_shader_, tex_[12]);
+    GameObject* level_number = new Value_Object(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[9], 2, 0, number_bar);
+    GameObject* exp_sp = new Value_Object(glm::vec3(0.0f, -0.2f, 0.0f), sprite_, &bar_shader_, tex_[10], 1, 1, Exp_ui_bar);
+
+    GameObject* small_player = new GameObject(glm::vec3(0,0,0), sprite_, &sprite_shader_, tex_[28]);
+
+    GameObject* in_p = new GameObject(glm::vec3(-1.7f, -0.195f, 0.0f), sprite_, &number_shader_, tex_[15]);
+    in_p->SetScale(glm::vec2(0.5, 0.5));
+    in_p->SetNumFrame(glm::vec2(4, 1));
+    in_p->SetCurrentFrame(0);
+    GameObject* in_i = new GameObject(glm::vec3(-1.7f, -0.595f, 0.0f), sprite_, &number_shader_, tex_[15]);
+    in_i->SetScale(glm::vec2(0.5, 0.5));
+    in_i->SetNumFrame(glm::vec2(4, 1));
+    in_i->SetCurrentFrame(2);
+    GameObject* in_c = new GameObject(glm::vec3(-1.7f, -0.995f, 0.0f), sprite_, &number_shader_, tex_[15]);
+    in_c->SetScale(glm::vec2(0.5, 0.5));
+    in_c->SetNumFrame(glm::vec2(4, 1));
+    in_c->SetCurrentFrame(3);
+    GameObject* in_number_bar = new Bar(glm::vec3(-1.3f, -0.195f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
+    GameObject* iron_number_bar = new Bar(glm::vec3(-1.3f, -0.595f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
+    GameObject* coin_number_bar = new Bar(glm::vec3(-1.3f, -0.995f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
+
+
+    GameObject* in_number = new Value_Object(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[9], 2, 0, in_number_bar);
+    GameObject* iron_number = new Value_Object(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[9], 2, 0, iron_number_bar);
+    GameObject* coin_number = new Value_Object(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[9], 2, 0, coin_number_bar);
+
+
+    hud_objects_.push_back(hp_ui_bar);
+    hud_objects_.push_back(Exp_ui_bar);
+    hud_objects_.push_back(text_bar);
+    hud_objects_.push_back(number_bar);
+    hud_objects_.push_back(collaction_bar);
+    hud_objects_.push_back(hp_sp);
+    hud_objects_.push_back(energy_sp);
+    hud_objects_.push_back(exp_text_s);
+    hud_objects_.push_back(lv_text_s);
+    hud_objects_.push_back(level_number);
+    hud_objects_.push_back(exp_sp);
+    hud_objects_.push_back(in_p);
+    hud_objects_.push_back(in_i);
+    hud_objects_.push_back(in_c);
+    hud_objects_.push_back(in_number_bar);
+    hud_objects_.push_back(iron_number_bar);
+    hud_objects_.push_back(coin_number_bar);
+    hud_objects_.push_back(in_number);
+    hud_objects_.push_back(iron_number);
+    hud_objects_.push_back(coin_number);
+    hud_objects_.push_back(minimap_bar);
+    
+
+    /*
+    // GameObject* text = new TextGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &text_shader_, tex_[27], text_bar);
+    //  text->SetScale(glm::vec2(2.5/1.5, 0.5/1.5));
+ // text->SetTOO(glm::vec2(0.5f, 0.5f));
+//  text->SetText("LEVEL");
+  //thequickbrownfoxjumpsoveralazydog
+  // //THEQUICKBROWNFOXJUMPSOVERALAZYDOG
+  //game_objects_.push_back(text);
+  */
+    hp_ui_bar->SetPlace_Screen(0, 0.1);
+    hp_ui_bar->SetTOO(glm::vec2(0.5, 0.5));
+
+    Exp_ui_bar->SetPlace_Screen(0.5, 1.0);
+    Exp_ui_bar->SetTOO(glm::vec2(0.0, 0.5f));
+    Exp_ui_bar->SetScale(glm::vec2(5, 1.0f));
+
+    text_bar->SetScale(glm::vec2(5.0, 0.5));
+    text_bar->SetPlace_Screen(0.0, 0.0);
+    text_bar->SetTOO(glm::vec2(0.0f, 0.5f));
+
+    collaction_bar->SetScale(glm::vec2(2.0f, 1.0f));
+    collaction_bar->SetPlace_Screen(1.0f, 0.0f);
+    collaction_bar->SetTOO(glm::vec2(-0.5f, -0.5f));
+
+    minimap_bar->SetScale(glm::vec2(1.0, 1.0));
+    minimap_bar->SetPlace_Screen(0.5, 0.5);
+    minimap_bar->SetTOO(glm::vec2(-0.5, -0.5));
+
+    hp_sp->SetTOO(glm::vec2(0.5, 0.4));
+    hp_sp->SetScale(glm::vec2(2, 1));
+    hp_sp->SetNumFrame(glm::vec2(2, 1));
+
+    energy_sp->SetTOO(glm::vec2(0.5, 0.4));
+    energy_sp->SetScale(glm::vec2(2, 1));
+    energy_sp->SetNumFrame(glm::vec2(2, 1));
+
+    exp_sp->SetScale(glm::vec2(5, 1));
+    exp_sp->SetNumFrame(glm::vec2(2, 1));
+    exp_sp->SetTOO(glm::vec2(0.0, 0.5));
+    lv_text_s->SetScale(glm::vec2(0.5, 0.5));
+    exp_text_s->SetScale(glm::vec2(0.75, 0.5));
+
+    level_number->SetScale(glm::vec2(0.5, 0.5));
+    level_number->SetNumFrame(glm::vec2(5, 2));
+
+    in_number->SetScale(glm::vec2(0.4, 0.4));
+    in_number->SetNumFrame(glm::vec2(5, 2));
+
+    iron_number->SetScale(glm::vec2(0.4, 0.4));
+    iron_number->SetNumFrame(glm::vec2(5, 2));
+
+    coin_number->SetScale(glm::vec2(0.4, 0.4));
+    coin_number->SetNumFrame(glm::vec2(5, 2));
+
+    BarObj->SetPlace_Screen(0.5, 0.5);
+    BarObj->SetTOO(glm::vec2(0, 0));
+
+    hp_ui_bar->AddChild(hp_sp);
+    hp_ui_bar->AddChild(energy_sp);
+    Exp_ui_bar->AddChild(exp_sp);
+    Exp_ui_bar->AddChild(text_bar);
+    text_bar->AddChild(number_bar);
+    text_bar->AddChild(lv_text_s);
+    text_bar->AddChild(exp_text_s);
+
+
+    number_bar->AddChild(level_number);
+    number_bar->SetTOO(glm::vec2(0.5, 0.0));
+    number_bar->SetScale(glm::vec2(1.0f, 0.5));
+
+    in_number_bar->AddChild(in_number);
+    in_number_bar->SetTOO(glm::vec2(0.5, 0.0));
+    in_number_bar->SetScale(glm::vec2(1.2f, 0.4));
+
+    iron_number_bar->AddChild(iron_number);
+    iron_number_bar->SetTOO(glm::vec2(0.5, 0.0));
+    iron_number_bar->SetScale(glm::vec2(1.2f, 0.4));
+
+    coin_number_bar->AddChild(coin_number);
+    coin_number_bar->SetTOO(glm::vec2(0.5, 0.0));
+    coin_number_bar->SetScale(glm::vec2(1.2f, 0.4));
+
+    collaction_bar->AddChild(in_p);
+    collaction_bar->AddChild(in_i);
+    collaction_bar->AddChild(in_c);
+    collaction_bar->AddChild(in_number_bar);
+    collaction_bar->AddChild(iron_number_bar);
+    collaction_bar->AddChild(coin_number_bar);
+
+
+
+    BarObj->AddChild(hp_ui_bar);
+    BarObj->AddChild(Exp_ui_bar);
+    BarObj->AddChild(collaction_bar);
+   // BarObj->AddChild(minimap_bar);
+    minimap_bar->AddChild(small_player);
+
+
+
+    BarObj->SetWindowHeight(height);
+    BarObj->SetWindowWidth(width);
+
+    minimap_ = minimap_bar;
+  //  minimap_bar->SetZoom(0.1f);
+    minimap_bar->SetWindowHeight(300);
+    minimap_bar->SetWindowWidth(400);
+}
+void Game::Setup_HUD_Value() {
+    GameObject* player = game_objects_[0];
+    HUDValue_.hp = player->GetHP();
+    HUDValue_.max_hp = player->Get_Max_Hp();
+    HUDValue_.energy = player->Get_Energy();
+    HUDValue_.max_energy = player->Get_Max_Energy();
+    HUDValue_.exp = player->Get_Exper();
+    HUDValue_.max_exp = player->Get_Max_Exp();
+    HUDValue_.level = player->Get_Level();
+    HUDValue_.money = player->Get_Coin();
+    HUDValue_.ip = player->Get_INPoint();
+    HUDValue_.iron = player->Get_Iron();
+    
 }
 
+void Game::Update_HUD_Value() {
+    Setup_HUD_Value();
+    float p = (float)HUDValue_.hp / HUDValue_.max_hp;
+    int barO = game_objects_.size() - 2;
+    game_objects_[barO]->UpdateValue(0,0,0, p);
+    p = (float)HUDValue_.energy / HUDValue_.max_energy;
+    p = (17.0f * p + 9.0f) / 32.0f;
+    game_objects_[barO]->UpdateValue(0,1,0, p);
 
+    p = (float)HUDValue_.exp / HUDValue_.max_exp;
+    game_objects_[barO]->UpdateValue(1, 0, 0, p);
+
+    int lev = HUDValue_.level;
+    game_objects_[barO]->UpdateValue(1, 1, 0, lev);
+
+    game_objects_[barO]->UpdateValue(2, 3, 0, HUDValue_.ip);
+    game_objects_[barO]->UpdateValue(2, 4, 0, HUDValue_.iron);
+    game_objects_[barO]->UpdateValue(2, 5, 0, HUDValue_.money);
+   // collaction_bar->AddChild(in_number_bar);
+  //  collaction_bar->AddChild(iron_number_bar);
+
+
+
+}
 void Game::DestroyGameWorld(void)
 {
     //shutdown audio
@@ -253,7 +486,9 @@ void Game::DestroyGameWorld(void)
     for (int i = 0; i < game_objects_.size(); i++){
         delete game_objects_[i];
     }
-
+    for (int i = 0; i < hud_objects_.size(); i++) {
+        delete hud_objects_[i];
+    }
 }
 
 
@@ -344,7 +579,7 @@ void Game::Update(double delta_time)
     current_time_ += delta_time;
     GameObject* player = game_objects_[0];
     // Update all game objects
-    for (int i = 0; i < game_objects_.size(); i++) {
+    for (int i = 0; i < game_objects_.size()-2; i++) {
         // Get the current game object
         GameObject* current_game_object = game_objects_[i];
 
@@ -354,7 +589,7 @@ void Game::Update(double delta_time)
         // Check for collision with other game objects
         // Note the loop bounds: we avoid testing the last object since
         // it's the background covering the whole game world
-        for (int j = i + 1; j < (game_objects_.size()); j++) {
+        for (int j = i + 1; j < (game_objects_.size()-2); j++) {
             GameObject* other_game_object = game_objects_[j];
 
             // Compute distance between object i and object j
@@ -529,7 +764,7 @@ void Game::Update(double delta_time)
 
 
     //delete all die object
-    for (int i = 0;i < (game_objects_.size()-1);i++) {
+    for (int i = 0;i < (game_objects_.size()-2);i++) {
         GameObject* current_game_object = game_objects_[i];
         if ( (!current_game_object->GetAlive()) ) {// (!current_game_object->GetAlive()) && (!current_game_object->GetCollectible())
             //we now cannot delete the collection
@@ -607,7 +842,7 @@ void Game::Update(double delta_time)
         timer.Start(10.0);//start the timer again
     }
     //enemy shoot
-    for (int i = 0;i < (game_objects_.size() - 1);i++) {
+    for (int i = 0;i < (game_objects_.size() - 2);i++) {
         GameObject* current_game_object = game_objects_[i];
         if (current_game_object->GetType() > 90) {
             switch (current_game_object->GetType())
@@ -636,7 +871,7 @@ void Game::Update(double delta_time)
         }
     }
 
-    for (int i = 0;i < (game_objects_.size() - 1);i++) {
+    for (int i = 0;i < (game_objects_.size() - 2);i++) {
         GameObject* current_game_object = game_objects_[i];
         if (current_game_object->GetType() == 93) {
             if (current_game_object->GetState() == 6) {
@@ -644,7 +879,16 @@ void Game::Update(double delta_time)
             }
         }
     }
-    hud_->Update(delta_time);
+    
+
+    int width, height;
+    int barO = game_objects_.size() - 2;
+    glfwGetWindowSize(window_, &width, &height);
+    game_objects_[barO]->SetWindowHeight(height);
+    game_objects_[barO]->SetWindowWidth(width);
+
+    game_objects_[barO]->Update(delta_time);
+    Update_HUD_Value();
 }
 void Game::generateDifferentEnemy() {
     if (game_objects_.size() > 100) { return; }
@@ -836,9 +1080,12 @@ void Game::Render(void){
     glm::mat4 camera_zoom_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(camera_zoom, camera_zoom, camera_zoom));
     glm::mat4  view_matrix = window_scale_matrix * camera_zoom_matrix * camera_trans;//add the new transformatrion
     
-
-    glm::mat4 HUD_matrix = window_scale_matrix * camera_zoom_matrix;
-    hud_->Render(HUD_matrix, current_time_);
+    float mini_zoom= minimap_->getZoom();
+    glm::mat4 mini_zoom_matrix= glm::scale(glm::mat4(1.0f), glm::vec3(mini_zoom, mini_zoom, mini_zoom));
+    glm::mat4 mini_matrix= window_scale_matrix * mini_zoom_matrix ;//add the new transformatrion
+    minimap_->Render(mini_matrix, current_time_);
+   // glm::mat4 HUD_matrix = window_scale_matrix * camera_zoom_matrix;
+  //  hud_->Render(HUD_matrix, current_time_);
     // Render all game objects
     for (int i = 0; i < game_objects_.size(); i++) {
         game_objects_[i]->Render(view_matrix, current_time_);
@@ -924,6 +1171,8 @@ void Game::Init(void)
     number_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/number_fragement_shader.glsl")).c_str());
     bar_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/bar_fragement_shader.glsl")).c_str());
     animate_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/animate_fragment_shader.glsl")).c_str());
+    text_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/text_fragment_shader.glsl")).c_str());
+    
     // Initialize time
     current_time_ = 0.0;
 
@@ -949,7 +1198,7 @@ Game::~Game()
 
     // Free rendering resources
     delete sprite_;
-    delete hud_;
+//    delete hud_;
     // Close window
     glfwDestroyWindow(window_);
     glfwTerminate();

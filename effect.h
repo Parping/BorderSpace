@@ -13,9 +13,17 @@ namespace game {
         Effect(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, GameObject* parent_,int type_effect);
 
         Circle* GetCircle()override { return parent_->GetCircle(); };
+        void SetAlive(bool a)override { alive_ = a; }
+        bool GetAlive()override {
+
+            return alive_;
+        };
+        bool GetColliable() override {
+            if (alive_) { return parent_->GetColliable(); }
+            return false;
+        };
         //getters
-        bool GetAlive()override { return parent_->GetAlive(); };
-        bool GetColliable() override { return false; };
+
         int GetHP() override { return parent_->GetHP(); };
         int GetState()override { return parent_->GetState(); }
         float GetSpeed()override { return parent_->GetSpeed(); };
@@ -28,6 +36,7 @@ namespace game {
 
         GameObject* parent_;
         int type_effect_;
+        bool alive_;
 
 
 

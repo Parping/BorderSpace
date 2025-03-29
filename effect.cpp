@@ -11,6 +11,7 @@ namespace game {
 
     }
     void Effect::Update(double delta_time) {
+        if (!alive_) { return; }
         switch (type_effect_)
         {
         case 31:
@@ -28,6 +29,7 @@ namespace game {
     }
 
     void Effect::Render(glm::mat4 view_matrix, double current_time) {
+        if (!alive_) { return; }
         // Set up the shader
         shader_->Enable();
 
