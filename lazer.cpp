@@ -76,8 +76,8 @@ namespace game {
         */
         if (distance <= r) {
            // std::cout << "succ!" << std::endl;
-            ract_.Print();
-            std::cout << "Target: " << position.x << " " << position.y << std::endl;
+         //   ract_.Print();
+         //   std::cout << "Target: " << position.x << " " << position.y << std::endl;
             return true;
         }
         else {

@@ -187,7 +187,7 @@ void Game::SetupGameWorld(void)
 
     // Setup enemy objects
     game_objects_.push_back(new MonsterObject(glm::vec3(2.0f, -2.0f, 0.0f), sprite_, &number_shader_, tex_[tex_monster],Circle(),current_time_,0,95));//change texture,add hitpoint, circle, random number for different moving mode
-    game_objects_.push_back(new BlueGameObject(glm::vec3(1.0f, 2.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_bbb],Circle(),current_time_, 0,93));//change texture£¬add hitpoint, circle
+    //game_objects_.push_back(new BlueGameObject(glm::vec3(1.0f, 2.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_bbb],Circle(),current_time_, 0,93));//change texture£¬add hitpoint, circle
     
     fortress_exist_ = true;
     fortress_ = new FortressObject(glm::vec3(6.0f, 10.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_for], Circle(), current_time_, 0, 94);
@@ -707,7 +707,7 @@ void Game::Update(double delta_time)
                     if (other_game_object->GetType() != current_game_object->getFrom()) {
                         if (current_game_object->Ract_Circle_Collition(other_game_object->GetPosition(), other_game_object->GetCircle()->get_r(), delta_time)) {
                             //get enemy position, enemy circle radius, and the delta_time
-                            std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
+                          //  std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
                             other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
                             // Play the sound when collision
                             if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
@@ -751,6 +751,14 @@ void Game::Update(double delta_time)
                 case 91:
                 case 92:
                 case 93:
+                    if ((other_game_object->GetType() == 94)&&(current_game_object->GetType()==93)) {
+                        if (current_game_object->getBack()) {
+                            if (distance <  (current_game_object->GetCircle()->get_r() + other_game_object->GetCircle()->get_r())) {
+                                current_game_object->SetAlive(false);
+                            }
+
+                        }
+                    }
                 case 94:
                 case 95:
                 case 100:
@@ -808,7 +816,7 @@ void Game::Update(double delta_time)
                 if (!current_game_object->GetCollectible()) {
                     delete game_objects_[i];//delete the obj
                     game_objects_.erase(game_objects_.begin() + i);//shrink vector
-                    std::cout << "item delete!" << std::endl;//print delete
+                  //  std::cout << "item delete!" << std::endl;//print delete
                     continue;
                 }
             }
@@ -822,7 +830,10 @@ void Game::Update(double delta_time)
                     player->Add_Exp(EX_Minion.exp_);
                     break;
                 case 93:
-                    player->Add_Exp(BBB.exp_);
+                    if (current_game_object->getBack() == false) {
+                        player->Add_Exp(BBB.exp_);
+                    }
+                    
                     break;
                 case 94:
                     player->Add_Exp(Fortress.exp_);
@@ -838,20 +849,30 @@ void Game::Update(double delta_time)
                 GameObject* expo = new Expo_obj(posi, sprite_, &animate_shader_, tex_[3]);
                 expo->SetNumFrame(glm::vec2(8, 1));
                 
-                delete game_objects_[i];
-                game_objects_.erase(game_objects_.begin() + i);//shrink vector
-                game_objects_.insert(game_objects_.begin() + 1, expo);
-                generateEnemyDrops(posi, type_enemy);
+                if (!current_game_object->getBack()) { 
+                    delete game_objects_[i];
+                    game_objects_.erase(game_objects_.begin() + i);//shrink vector
+                    game_objects_.insert(game_objects_.begin() + 1, expo);
+
+                    generateEnemyDrops(posi, type_enemy);
+                }
+                else {
+                    delete game_objects_[i];
+                    game_objects_.erase(game_objects_.begin() + i);//shrink vector
+                    game_objects_.insert(game_objects_.begin() + 1, expo);
+                }
+
 
             }
             else {//otherthing die
 
                 delete game_objects_[i];//delete the obj
                 game_objects_.erase(game_objects_.begin() + i);//shrink vector
-                std::cout << "delete!" << std::endl;//print delete
+                //std::cout << "delete!" << std::endl;//print delete
                 continue;
             }
         }
+        /*
         else if (current_game_object->getBack()) {
             current_game_object->getFortress()->become_angry();
             delete game_objects_[i];//delete the obj
@@ -860,6 +881,7 @@ void Game::Update(double delta_time)
 
             continue;
         }
+*/
 
     }
 
@@ -902,9 +924,11 @@ void Game::Update(double delta_time)
 
     for (int i = 0;i < (game_objects_.size() - 3);i++) {
         GameObject* current_game_object = game_objects_[i];
-        if (current_game_object->GetType() == 93) {
-            if (current_game_object->GetState() == 6) {
-                current_game_object->back();
+        if (current_game_object->GetAlive()) {
+            if (current_game_object->GetType() == 93) {
+                if (current_game_object->GetState() == 6) {
+                    current_game_object->back();
+                }
             }
         }
     }

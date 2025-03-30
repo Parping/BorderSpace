@@ -266,7 +266,7 @@ namespace game {
         glm::vec2 Myposition, Target;
         glm::vec2 direction, velocity;
         Myposition = glm::vec2(GetPosition().x, GetPosition().y);
-        Target = glm::vec2(fortress_->GetPosition().x, fortress_->GetPosition().y);
+        Target = glm::vec2(target.x, target.y);
         velocity = glm::vec2(GetVelocity().x, GetVelocity().y);
         velocity = speed * (Target - Myposition) / glm::length(Target - Myposition);
         SetVelocity(glm::vec3(velocity, 0));//set new velocity
@@ -274,6 +274,7 @@ namespace game {
     }
     void BlueGameObject::setFortress(GameObject* f) {
         fortress_ = f;
+        target = f->GetPosition();
     }
 
     // Update function for moving the player object around
@@ -344,9 +345,9 @@ namespace game {
             case 6:
                 back();
                 Myposition = glm::vec2(GetPosition().x, GetPosition().y);
-                if (glm::length(Myposition - glm::vec2(fortress_->GetPosition().x, fortress_->GetPosition().y)) <= 1.2) {
+                if (glm::length(Myposition - glm::vec2(target.x, target.y)) <= 1.2) {
                     back_ = true;
-                    colliable = false;
+                //    colliable = false;
                 }
             default:
                 break;
