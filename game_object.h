@@ -243,6 +243,7 @@ namespace game {
 
             virtual glm::mat4 GetTransformation() { return glm::mat4(1.0f); };
             virtual void SetTOO(glm::vec2 to) { toOrigin_ = to; };
+            glm::vec2 GetTOO() { return toOrigin_; };
             virtual void SetMyTarget(glm::vec3 t) {};
 
             virtual void SetArm(GameObject* a) {};
@@ -278,6 +279,7 @@ namespace game {
                 rgba_ = glm::vec4(r, g, b, a);
             }
             virtual void SetAllChild(std::vector<GameObject*> a) {};
+            virtual void SetSizeZoom(float f) {};
         protected:
             // Object's Transform Variables
             glm::vec3 position_;

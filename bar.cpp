@@ -65,8 +65,10 @@ namespace game {
 	void Bar::Update(double delta_time) {
 		// Use aspect ratio to properly scale the window
 		UpdatePosition(this, window_width, window_height, camera_zoom_);
+		glm::vec3 new_pos;
 		for (int i = 0; i < chile_game_objects_.size(); i++) {
 		//	std::cout << chile_game_objects_[i]->getZoom()<<std::endl;
+
 			UpdatePosition(chile_game_objects_[i],window_width, window_height, chile_game_objects_[i]->getZoom());
 		}
 	}
@@ -87,9 +89,7 @@ namespace game {
 		x = N->GetPlace_Screen().x* window_width;
 		y = N->GetPlace_Screen().y* window_height;
 		z = N->GetPosition().z;
-		if (camera_zoom == 0.5) {
-			1;
-		}
+
 		if (GetPlace_Screen().x == GetPlace_Screen().y == 0) { return; }
 		float w = window_width;
 		float h = window_height;
@@ -131,7 +131,7 @@ namespace game {
         // Set up the shader
         if (ghost) { return; }
 
-	    //glm::mat4 parent_transformation_matrix = parent_->GetTransformation();
+	    glm::mat4 parent_transformation_matrix = parent_->GetTransformation();
         // Setup the transformation matrix for the shader
         glm::mat4 transformation_matrix = view_matrix* GetTransformation();
 		GameObject::Render(view_matrix, current_time);

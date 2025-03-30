@@ -158,7 +158,7 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/arm3.png");
     textures.push_back("/textures/font8x8.png");
     textures.push_back("/textures/test.png");
-    textures.push_back("/textures/lidar.png");
+    textures.push_back("/textures/ridar.png");
     
 
 
@@ -192,11 +192,10 @@ void Game::SetupGameWorld(void)
     fortress_exist_ = true;
     fortress_ = new FortressObject(glm::vec3(6.0f, 10.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_for], Circle(), current_time_, 0, 94);
 
-    GameObject* fortress_shooter_ = new FortressShooter(glm::vec3(-0.9f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_for_s], fortress_);
-    game_objects_.push_back(fortress_shooter_);
-    game_objects_.push_back(fortress_);//change texture£¬add hitpoint, circle
-    game_objects_[2]->setFortress(game_objects_[4]);
-    game_objects_[4]->SetShooter(game_objects_[3]);
+   // GameObject* fortress_shooter_ = new FortressShooter(glm::vec3(-0.9f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_for_s], fortress_);
+
+    
+    Generate_Fortress(fortress_);
 
     
     //setup item object
@@ -218,18 +217,7 @@ void Game::SetupGameWorld(void)
     shield->SetNumFrame(glm::vec2(5, 1));
     game_objects_.push_back(shield);
     game_objects_[4]->GetCircle()->SetRadius(game_objects_[4]->GetScale().x*0.6);
-    GameObject* arm1 = new Arm1(glm::vec3(1.0f, 1.0f, -1.0f), sprite_, &sprite_shader_, tex_[tex_arm1], game_objects_[4]);
-    arm1->SetScale(glm::vec2(1, 0.375));
-    GameObject* arm2 = new Arm1(glm::vec3(1.0f, 0.0f, -1.0f), sprite_, &sprite_shader_, tex_[tex_arm2], arm1);
-    GameObject* arm3 = new Arm1(glm::vec3(1.0f, 0.0f, -1.0f), sprite_, &sprite_shader_, tex_[tex_arm3], arm2);
-    arm2->SetScale(glm::vec2(1, 0.375));
-    arm3->SetScale(glm::vec2(0.5, 0.5));
-    game_objects_[4]->SetArm(arm3);
-    game_objects_[4]->SetChild1(arm1);
-    game_objects_[4]->SetChild2(arm2);
-    game_objects_.push_back(arm1);
-    game_objects_.push_back(arm2);
-    game_objects_.push_back(arm3);
+
     game_objects_[0]->AddChild(lazer_);
     game_objects_[0]->AddChild(shield);
 
@@ -238,33 +226,10 @@ void Game::SetupGameWorld(void)
     Setup_HUD_Bar(BarObj);
     game_objects_[0]->AddChild(BarObj);
 
-    int width, height;
-    glfwGetWindowSize(window_, &width, &height);
+    
     GameObject* minimap_bar = new Bar(glm::vec3(0.0f, 0.0f, -0.0f), sprite_, &sprite_shader_, tex_[28],game_objects_[0]);
-    GameObject* minimap = new Mini_map_Object(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[29], minimap_bar);
 
-    DrawingGameObject* circle = new DrawingGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &drawing_shader_, tex_[5]);
-    minimap->SetPlayerSp(circle);
-
-   // game_objects_[0]->AddChild(minimap_bar);
-    minimap_bar->AddChild(minimap);
-    minimap->SetPlayer(game_objects_[0]);
-  //  minimap->AddChild(game_objects_[1]);
-    minimap_ = minimap;
-
-    minimap_bar->SetScale(glm::vec2(1.0, 1.0));
-    minimap_bar->SetPlace_Screen(0.5, 0.5);
-    minimap_bar->SetTOO(glm::vec2(0, 0));
-
-    minimap->SetTOO(glm::vec2(0.5, 0.5));
-    //minimap_ = minimap_bar;
-    minimap->SetScale(glm::vec2(2.35, 2.35));
-    minimap->SetPlace_Screen(0.0, 1.0);
- //   minimap_bar->SetZoom(0.25f);
-    minimap_bar->SetWindowHeight(600);
-    minimap_bar->SetWindowWidth(800);
-    minimap->SetWindowHeight(200);
-    minimap->SetWindowWidth(150);
+    Setup_Mini_Map(minimap_bar);
     game_objects_.push_back(minimap_bar);
     // Setup background
     // In this specific implementation, the background is always the
@@ -287,6 +252,36 @@ void Game::SetupGameWorld(void)
     am.PlaySound(background_music_index);//play music
 
     Setup_HUD_Value();
+    
+}
+
+
+
+void Game::Setup_Mini_Map(GameObject* m) {
+    GameObject* minimap_bar = m;
+    int width, height;
+    glfwGetWindowSize(window_, &width, &height);
+
+    GameObject* minimap = new Mini_map_Object(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[29], minimap_bar);
+    DrawingGameObject* circle = new DrawingGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &drawing_shader_, tex_[5]);
+
+    hud_objects_.push_back(minimap);
+    hud_objects_.push_back(circle);
+
+    minimap->SetPlayerSp(circle);
+    minimap_bar->AddChild(minimap);
+    minimap->SetPlayer(game_objects_[0]);
+    minimap_ = minimap;
+    minimap_bar->SetScale(glm::vec2(1.0, 1.0));
+    minimap_bar->SetPlace_Screen(0.5, 0.5);
+    minimap_bar->SetTOO(glm::vec2(0, 0));
+    minimap->SetTOO(glm::vec2(0.5, 0.5));
+    minimap->SetScale(glm::vec2(2.35, 1.875));
+    minimap->SetPlace_Screen(0.0, 1.0);
+    minimap_bar->SetWindowHeight(600);
+    minimap_bar->SetWindowWidth(800);
+   // minimap->SetWindowHeight(200);
+  //  minimap->SetWindowWidth(150);
     
 }
 void Game::Setup_HUD_Bar(GameObject* h) {
@@ -594,6 +589,17 @@ void Game::HandleControls(double delta_time)
     if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_RELEASE) {
         player->Set_Shield_On(false);
     }
+    if (glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS) {
+        if (map_zoom_ <= 0.25) {
+            map_zoom_ += 0.0005f;
+        }
+    }
+    if (glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        if (map_zoom_ >= 0.01f) {
+            map_zoom_ -= 0.0005f;
+        }
+    }
+
 }
 
 
@@ -903,6 +909,13 @@ void Game::Update(double delta_time)
         }
     }
     
+
+    Update_HUD(delta_time);
+
+
+}
+
+void Game::Update_HUD(double delta_time) {
     enemy_objects_.clear();
     for (int i = 1;i < (game_objects_.size() - 3);i++) {
         GameObject* current_game_object = game_objects_[i];
@@ -912,26 +925,23 @@ void Game::Update(double delta_time)
         if (enemy_objects_.size() >= 10) {
             break;
         }
-    
+
     }
-
-
     int width, height;
     int barO = game_objects_.size() - 3;
     glfwGetWindowSize(window_, &width, &height);
     game_objects_[barO]->SetWindowHeight(height);
     game_objects_[barO]->SetWindowWidth(width);
-
     game_objects_[barO + 1]->SetWindowHeight(height);
     game_objects_[barO + 1]->SetWindowWidth(width);
 
     minimap_->SetAllChild(enemy_objects_);
-
-
     game_objects_[barO]->Update(delta_time);
     game_objects_[barO + 1]->Update(delta_time);
     Update_HUD_Value();
 }
+
+
 void Game::generateDifferentEnemy() {
     if (game_objects_.size() > 100) { return; }
     glm::vec3 random_position = generateRandomPosition();//random position in the window
@@ -956,41 +966,10 @@ void Game::generateDifferentEnemy() {
         new_enemy->GetCircle()->SetRadius(new_enemy->GetScale().x *0.6);//set the circle radius
         new_enemy->SetPlayer(game_objects_[0]); // set player pointer
         new_enemy->SetRotation(pi_over_two);
-        GameObject* fortress_shooter_ = new FortressShooter(glm::vec3(-0.9f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[19], new_enemy);
        
-  
-        new_enemy->SetShooter(fortress_shooter_);
-        game_objects_.insert(game_objects_.begin() + 1, new_enemy);//new enemy
-        game_objects_.insert(game_objects_.begin() + 1, fortress_shooter_);
-        GameObject* arm1 = new Arm1(glm::vec3(1.0f, 1.0f, -1.0f), sprite_, &sprite_shader_, tex_[24], new_enemy);
-        arm1->SetScale(glm::vec2(1, 0.375));
-        GameObject* arm2 = new Arm1(glm::vec3(1.0f, 0.0f, -1.0f), sprite_, &sprite_shader_, tex_[25], arm1);
-        GameObject* arm3 = new Arm1(glm::vec3(1.0f, 0.0f, -1.0f), sprite_, &sprite_shader_, tex_[26], arm2);
-        arm2->SetScale(glm::vec2(1, 0.375));
-        arm3->SetScale(glm::vec2(0.5, 0.5));
-        new_enemy->SetArm(arm3);
-        new_enemy->SetChild1(arm1);
-        new_enemy->SetChild2(arm2);
-        game_objects_.insert(game_objects_.begin() + 1, arm3);
-        game_objects_.insert(game_objects_.begin() + 1, arm2);
-        game_objects_.insert(game_objects_.begin() + 1, arm1);
 
+        Generate_Fortress(new_enemy);
 
-        GameObject* new_small_enemy;
-      //    std::cout << "Create new Fortress at position ("//print function
-      //<< random_position.x << ", "
-      //<< random_position.y << ")" << std::endl;
-        for (int i = 0;i < 4; i++) {
-            random_position = generateRandomPosition();
-            new_small_enemy = new BlueGameObject(random_position, sprite_, &sprite_shader_, tex_[17], Circle(), current_time_, 0, 93);
-            new_small_enemy->GetCircle()->SetRadius(new_small_enemy->GetScale().x / 2);//set the circle radius
-            new_small_enemy->SetPlayer(game_objects_[0]); // set player pointer
-            new_small_enemy->setFortress(new_enemy);
-            game_objects_.insert(game_objects_.begin() + 1, new_small_enemy);
-           // std::cout << "Create new BBB at position ("//print function
-             //   << random_position.x << ", "
-               // << random_position.y << ")" << std::endl;
-        }
     }
     else {
         new_enemy = new MonsterObject(random_position, sprite_, &number_shader_, tex_[18], Circle(), current_time_, 0, 95);
@@ -1094,11 +1073,52 @@ glm::vec3 Game::generateRandomPosition() {
     return glm::vec3(x, y, 0.0f);//return the position
 }
 
+void Game::Generate_Fortress(GameObject* f) {
+    GameObject* new_enemy = f;
 
+    GameObject* fortress_shooter_ = new FortressShooter(glm::vec3(-0.9f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[19], new_enemy);
+    new_enemy->SetShooter(fortress_shooter_);
+    game_objects_.insert(game_objects_.begin() + 1, new_enemy);//new enemy
+    game_objects_.insert(game_objects_.begin() + 1, fortress_shooter_);
+
+    GameObject* arm1 = new Arm1(glm::vec3(1.0f, 1.0f, -0.0f), sprite_, &sprite_shader_, tex_[24], new_enemy);
+    arm1->SetScale(glm::vec2(1, 0.375));
+    GameObject* arm2 = new Arm1(glm::vec3(1.0f, 0.0f, -0.0f), sprite_, &sprite_shader_, tex_[25], arm1);
+    GameObject* arm3 = new Arm1(glm::vec3(1.0f, 0.0f, -0.0f), sprite_, &sprite_shader_, tex_[26], arm2);
+    arm2->SetScale(glm::vec2(1, 0.375));
+    arm3->SetScale(glm::vec2(0.5, 0.5));
+    new_enemy->SetArm(arm3);
+    new_enemy->SetChild1(arm1);
+    new_enemy->SetChild2(arm2);
+    game_objects_.insert(game_objects_.begin() + 1, arm3);
+    game_objects_.insert(game_objects_.begin() + 1, arm2);
+    game_objects_.insert(game_objects_.begin() + 1, arm1);
+   
+    
+    GameObject* new_small_enemy;
+    //    std::cout << "Create new Fortress at position ("//print function
+    //<< random_position.x << ", "
+    //<< random_position.y << ")" << std::endl;
+    glm::vec3 random_position;
+    for (int i = 0;i < 4; i++) {
+        random_position = generateRandomPosition();
+        new_small_enemy = new BlueGameObject(random_position, sprite_, &sprite_shader_, tex_[17], Circle(), current_time_, 0, 93);
+        new_small_enemy->GetCircle()->SetRadius(new_small_enemy->GetScale().x / 2);//set the circle radius
+        new_small_enemy->SetPlayer(game_objects_[0]); // set player pointer
+        new_small_enemy->setFortress(new_enemy);
+        game_objects_.insert(game_objects_.begin() + 1, new_small_enemy);
+        // std::cout << "Create new BBB at position ("//print function
+          //   << random_position.x << ", "
+            // << random_position.y << ")" << std::endl;
+    }
+
+}
 void Game::RenderMiniMap() {
     int width, height;
-    width = 200;
-    height = 150;
+    float zoom_scale = 0.25f / map_zoom_;
+    glfwGetWindowSize(window_, &width, &height);
+    width /= zoom_scale;
+    height /= zoom_scale;
     glm::mat4 window_scale_matrix;
     if (width > height) {
         float aspect_ratio = ((float)width) / ((float)height);
@@ -1112,17 +1132,21 @@ void Game::RenderMiniMap() {
     glm::vec3 player_position = game_objects_[0]->GetPosition();//get player position
    
     glm::mat4 camera_trans = glm::translate(glm::mat4(1.0f), -game_objects_[0]->GetPosition());//calculate the matrix
-    glm::vec3 scale = glm::vec3 ((game_objects_[game_objects_.size() - 2]->GetChild(0)->GetPosition().x+1.0)*5, 
-        (game_objects_[game_objects_.size() - 2]->GetChild(0)->GetPosition().y+1.0) * 5, game_objects_[game_objects_.size() - 2]->GetChild(0)->GetPosition().z);
+    float center_x = (game_objects_[game_objects_.size() - 2]->GetChild(0)->GetPosition().x + game_objects_[game_objects_.size() - 2]->GetChild(0)->GetScale().x / 2);
+    float center_y = (game_objects_[game_objects_.size() - 2]->GetChild(0)->GetPosition().y + game_objects_[game_objects_.size() - 2]->GetChild(0)->GetScale().y / 2);
+    
+    glm::vec3 scale = glm::vec3 (center_x* zoom_scale,
+        center_y * zoom_scale, game_objects_[game_objects_.size() - 2]->GetChild(0)->GetPosition().z);
      camera_trans = glm::translate(camera_trans, scale);
    // camera_trans = glm::rotate(glm::mat4(1.0f),game_objects_[0]->GetRotation(), glm::vec3(0,0,1))* camera_trans;
     // Set view to zoom out, centered by default at 0,0
-    float camera_zoom = 0.05f;
-    glm::mat4 camera_zoom_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(camera_zoom, camera_zoom, camera_zoom));
+    //float camera_zoom = 0.05f;
+    glm::mat4 camera_zoom_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(map_zoom_, map_zoom_, map_zoom_));
     glm::mat4  view_matrix = window_scale_matrix * camera_zoom_matrix * camera_trans;//add the new transformatrion
 
    // game_objects_[game_objects_.size()-2]->GetChild(0)->RenderMap(view_matrix, current_time_);
-
+  //  minimap_->SetZoom(map_zoom_);
+    minimap_->SetSizeZoom(zoom_scale);
     minimap_->RenderMap(view_matrix, current_time_);
 
     for (int i = 0; i < game_objects_.size()-2; i++) {
@@ -1254,7 +1278,7 @@ void Game::Init(void)
     drawing_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/drawing_fragment_shader.glsl")).c_str());
     // Initialize time
     current_time_ = 0.0;
-
+    map_zoom_ = 0.04;
     //Initialize Timer
     timer = Timer();
     shooter_timer = Timer();

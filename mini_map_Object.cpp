@@ -127,10 +127,13 @@ namespace game {
 		player_spirt->SetRGB(0.0, 1.0, 0.0, 1.0);
 		player_spirt->Render(view_matrix, current_time);
 
+		float x_max, y_max;
+		x_max = size_zoom_ * scale_.x / 2 - 2 * GetTOO().x;
+		y_max = size_zoom_ * scale_.y / 2 - 2 * GetTOO().y;
 		for (int i = 0; i < chile_game_objects_.size(); i++) {
 			position = chile_game_objects_[i]->GetPosition();
 
-			if (glm::distance(player_->GetPosition(), position) <= 8) {
+			if ((abs(player_->GetPosition().y - position.y) <= y_max) &&(abs(player_->GetPosition().x-position.x) <= x_max)) {
 
 				player_spirt->SetPosition(position);
 				player_spirt->SetRGB(1.0, 0.0, 0.0, 1.0);

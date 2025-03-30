@@ -119,7 +119,7 @@ namespace game {
             bool fortress_exist_;
 
             GameObject* minimap_;
-
+            float map_zoom_;
             //hp,energy,exp,level
             //money.score, max_hp,max_energy,max_exp
             //buff, collect
@@ -128,7 +128,12 @@ namespace game {
             void Setup_HUD_Value();
             void Update_HUD_Value();
 
+            void Update_HUD(double delta_time);
+
+            void Setup_Mini_Map(GameObject* m);
             void Setup_HUD_Bar(GameObject* h);
+
+            void Generate_Fortress(GameObject* f);
 
             // Keep track of time
             double current_time_;

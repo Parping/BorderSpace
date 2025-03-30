@@ -49,6 +49,9 @@ namespace game {
 
 		void SetPlayer(GameObject* a) override { player_ = a; };
 		void SetAllChild(std::vector<GameObject*> a) override { chile_game_objects_ = a; };
+
+		void SetSizeZoom(float f)override { size_zoom_ = f; };
+
 	private:
 		std::vector<GameObject*> chile_game_objects_;//内部的所有小东西
 		GameObject* player_;
@@ -56,6 +59,7 @@ namespace game {
 		int window_width;
 		int window_height;
 		float camera_zoom_ = 0.25f;
+		float size_zoom_;
 		GameObject* player_spirt;
 		GameObject* enemy_spirt;
 	};//class bar
