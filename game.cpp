@@ -126,7 +126,8 @@ void Game::SetupGameWorld(void)
         tex_font = 27,
         tex_test = 28,
         tex_lidar = 29,
-        tex_node = 30
+        tex_node = 30,
+        tex_level2=31
     };
     textures.push_back("/textures/tiny_ship1.png"); //change file
     //textures.push_back("/textures/destroyer_green.png"); 
@@ -161,6 +162,7 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/test.png");
     textures.push_back("/textures/ridar.png");
     textures.push_back("/textures/node.png");
+    textures.push_back("/textures/level2.png");
     
 
 
@@ -250,7 +252,7 @@ void Game::SetupGameWorld(void)
     // Setup background
     // In this specific implementation, the background is always the
     // last object
-    GameObject *background = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), bg, &sprite_shader_, tex_[tex_stars]);
+    GameObject *background = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), bg, &sprite_shader_, tex_[2]);
     background->SetScale(glm::vec2(12.0,12.0));
     game_objects_.push_back(background);
 
@@ -628,338 +630,362 @@ void Game::HandleControls(double delta_time)
 void Game::setMap(bool b) {
     map_ = b;
 }
+void Game::BossRoom() {
+    GameObject* background = game_objects_[game_objects_.size() - 1];
+    background->SetTexture(tex_[31]);
 
+}
 void Game::Update(double delta_time)
 {
-    if (getStop()) { return; }
-    current_time_ += delta_time;
-    GameObject* player = game_objects_[0];
-    // Update all game objects
-    for (int i = 0; i < game_objects_.size()-3; i++) {
-        // Get the current game object
-        GameObject* current_game_object = game_objects_[i];
 
-        // Update the current game object
-        current_game_object->Update(delta_time);
+    level_ = 2;
+    if (level_ == 2) {
+        BossRoom();
+        GameObject* player = game_objects_[0];
+        // Update all game objects
+        for (int i = 0; i < game_objects_.size() - 3; i++) {
+            // Get the current game object
+            GameObject* current_game_object = game_objects_[i];
 
-        // Check for collision with other game objects
-        // Note the loop bounds: we avoid testing the last object since
-        // it's the background covering the whole game world
-        for (int j = i + 1; j < (game_objects_.size()-3); j++) {
-            GameObject* other_game_object = game_objects_[j];
-
-            // Compute distance between object i and object j
-            float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
-            // If distance is below a threshold, we have a collision
-            if (other_game_object->GetColliable() && current_game_object->GetColliable()) {//if the two obj is colliable, then continue.
-                switch (current_game_object->GetType())//change if else to switch, make it more clear
-                {//player=1; colliable=2, enemy=3; projectile=4,defult=0
-                case 1://current type is player. player can colliable with collectible, enemy
-                    if (distance < 0.8f * (current_game_object->GetCircle()->get_r() + other_game_object->GetCircle()->get_r())) {
-                        if (other_game_object->GetType() >90 && other_game_object->GetType() != 94)//if it is enemy
-                        {
-                            //if the two obj has a distance smaller than 0.8 *(sum of the radius), then it there is a collisoin
-                            // This is where you would perform collision response between objects
-                            other_game_object->Get_Collision(delta_time);//current and other obj get collision.
-                            current_game_object->Get_Collision(delta_time);
-                            // Play the sound when collision
-                            if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
-                                am.PlaySound(explosion_music_index);
-                            }else {//stop it first then replay it
-                                am.StopSound(explosion_music_index);
-                                am.PlaySound(explosion_music_index);
-                            }
-                        }
-                        else if (other_game_object->GetType() == 94&& other_game_object->GetState() == 9) {
-
-                            other_game_object->Get_Collision(delta_time);//current and other obj get collision.
-                            current_game_object->Get_Collision(delta_time);
-                            // Play the sound when collision
-                            if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
-                                am.PlaySound(explosion_music_index);
-                            }
-                            else {//stop it first then replay it
-                                am.StopSound(explosion_music_index);
-                                am.PlaySound(explosion_music_index);
-                            }
-                            
-
-                            
-                        }
-                        else if ((other_game_object->GetType() >10 ) && (other_game_object->GetType() < 20) ){//if it is collect
-                            other_game_object->Get_Collision(delta_time);//item change color
-                            current_game_object->CollectItem(other_game_object->GetType());//player item++
-                        }
-                        else if ((other_game_object->GetType() > 50) && (other_game_object->GetType() < 60)) {//(other_game_object->GetType() > 50) && (other_game_object->GetType() < 60)
-                            if (other_game_object->getFrom() != 1) {
-                                other_game_object->Get_Collision(delta_time);//current and other obj get collision.
-                                current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
-                                // Play the sound when collision
-                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
-                                    am.PlaySound(explosion_music_index);
-                                }
-                                else {//stop it first then replay it
-                                    am.StopSound(explosion_music_index);
-                                    am.PlaySound(explosion_music_index);
-                                }
-                            }
-                        }
-                    }
-
-                    break;
-                case 51://current type is projectile
-                    if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
-
-                    }
-                    else if ((other_game_object->GetType() > 80)&&(other_game_object->GetType()<90) ){
-                        break;
-                    }
-                    else if (other_game_object->GetType() != current_game_object->getFrom()) {
-                        if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
-                            //get enemy position, enemy circle radius, and the delta_time
-                            current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
-                            other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
-                            // Play the sound when collision
-                            if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
-                                am.PlaySound(explosion_music_index);
-                            }
-                            else {//stop it first then replay it
-                                am.StopSound(explosion_music_index);
-                                am.PlaySound(explosion_music_index);
-                            }
-                        }
-                    }
-                    break;
-                case 52:
-                    if (other_game_object->GetType() != current_game_object->getFrom()) {
-                        if (current_game_object->Ract_Circle_Collition(other_game_object->GetPosition(), other_game_object->GetCircle()->get_r(), delta_time)) {
-                            //get enemy position, enemy circle radius, and the delta_time
-                          //  std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
-                            other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
-                            // Play the sound when collision
-                            if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
-                                am.PlaySound(explosion_music_index);
-                            }
-                            else {//stop it first then replay it
-                                am.StopSound(explosion_music_index);
-                                am.PlaySound(explosion_music_index);
-                            }
-                        }
-                    }
-                    else if ((other_game_object->GetType() > 80) && (other_game_object->GetType() < 90)) {
-                        break;
-                    }
-                    break;
-                case 53:
-                    if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
-                    
-                    }
-                    else if (other_game_object->GetType() !=current_game_object->getFrom()) {
-                        if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
-                            //get enemy position, enemy circle radius, and the delta_time
-                            current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
-                            other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
-                            // Play the sound when collision
-                            if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
-                                am.PlaySound(explosion_music_index);
-                            }
-                            else {//stop it first then replay it
-                                am.StopSound(explosion_music_index);
-                                am.PlaySound(explosion_music_index);
-                            }
-                        }
-                    }
-                    else if ((other_game_object->GetType() > 80) && (other_game_object->GetType() < 90)) {
-                        break;
-                    }
-                    break;
-                case 80:
-                    break;
-                case 91:
-                case 92:
-                case 93:
-                    if ((other_game_object->GetType() == 94)&&(current_game_object->GetType()==93)) {
-                        if (current_game_object->getBack()) {
-                            if (distance <  (current_game_object->GetCircle()->get_r() + other_game_object->GetCircle()->get_r())) {
-                                current_game_object->SetAlive(false);
-                            }
-
-                        }
-                    }
-                case 94:
-                case 95:
-                case 100:
-                    if (other_game_object->GetType() == 52) {
-                        if (current_game_object->GetType() != other_game_object->getFrom()) {
-                            if (other_game_object->Ract_Circle_Collition(current_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {
-                                //get enemy position, enemy circle radius, and the delta_time
-                                std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
-                                current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
-                                // Play the sound when collision
-                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
-                                    am.PlaySound(explosion_music_index);
-                                }
-                                else {//stop it first then replay it
-                                    am.StopSound(explosion_music_index);
-                                    am.PlaySound(explosion_music_index);
-                                }
-                            }
-                        }
-                    }
-                    break;
-
-                default:
-                    break;
-                }
-
-
-            }
-
+            // Update the current game object
+            current_game_object->Update(delta_time);
         }
     }
-
-    //check all object texture
-    if (game_objects_[0]->GetState()==1) {//if it is in invincible state
-        game_objects_[0]->SetTexture(tex_[6]);//change texture
-    }
     else {
-        game_objects_[0]->SetTexture(tex_[1]);//set it normal
-    }
+        if (getStop()) { return; }
+        current_time_ += delta_time;
+        GameObject* player = game_objects_[0];
+        // Update all game objects
+        for (int i = 0; i < game_objects_.size() - 3; i++) {
+            // Get the current game object
+            GameObject* current_game_object = game_objects_[i];
+
+            // Update the current game object
+            current_game_object->Update(delta_time);
+
+            // Check for collision with other game objects
+            // Note the loop bounds: we avoid testing the last object since
+            // it's the background covering the whole game world
+            for (int j = i + 1; j < (game_objects_.size() - 3); j++) {
+                GameObject* other_game_object = game_objects_[j];
+
+                // Compute distance between object i and object j
+                float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
+                // If distance is below a threshold, we have a collision
+                if (other_game_object->GetColliable() && current_game_object->GetColliable()) {//if the two obj is colliable, then continue.
+                    switch (current_game_object->GetType())//change if else to switch, make it more clear
+                    {//player=1; colliable=2, enemy=3; projectile=4,defult=0
+                    case 1://current type is player. player can colliable with collectible, enemy
+                        if (distance < 0.8f * (current_game_object->GetCircle()->get_r() + other_game_object->GetCircle()->get_r())) {
+                            if (other_game_object->GetType() > 90 && other_game_object->GetType() != 94)//if it is enemy
+                            {
+                                //if the two obj has a distance smaller than 0.8 *(sum of the radius), then it there is a collisoin
+                                // This is where you would perform collision response between objects
+                                other_game_object->Get_Collision(delta_time);//current and other obj get collision.
+                                current_game_object->Get_Collision(delta_time);
+                                // Play the sound when collision
+                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                    am.PlaySound(explosion_music_index);
+                                }
+                                else {//stop it first then replay it
+                                    am.StopSound(explosion_music_index);
+                                    am.PlaySound(explosion_music_index);
+                                }
+                            }
+                            else if (other_game_object->GetType() == 94 && other_game_object->GetState() == 9) {
+
+                                other_game_object->Get_Collision(delta_time);//current and other obj get collision.
+                                current_game_object->Get_Collision(delta_time);
+                                // Play the sound when collision
+                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                    am.PlaySound(explosion_music_index);
+                                }
+                                else {//stop it first then replay it
+                                    am.StopSound(explosion_music_index);
+                                    am.PlaySound(explosion_music_index);
+                                }
 
 
-    //delete all die object
-    for (int i = 0;i < (game_objects_.size()-3);i++) {
-        GameObject* current_game_object = game_objects_[i];
-        if ( (!current_game_object->GetAlive()) ) {// (!current_game_object->GetAlive()) && (!current_game_object->GetCollectible())
-            //we now cannot delete the collection
-            if (i == 0) {//player die
-                delete game_objects_[i];//delete player
-                game_objects_.erase(game_objects_.begin());//shrink the vector
-                std::cout << "Game Over!" << std::endl;//print gameover
-                glfwSetWindowShouldClose(window_, GLFW_TRUE);//set the window, it need to be shutdown
-                return;//jump out of the function
+
+                            }
+                            else if ((other_game_object->GetType() > 10) && (other_game_object->GetType() < 20)) {//if it is collect
+                                other_game_object->Get_Collision(delta_time);//item change color
+                                current_game_object->CollectItem(other_game_object->GetType());//player item++
+                            }
+                            else if ((other_game_object->GetType() > 50) && (other_game_object->GetType() < 60)) {//(other_game_object->GetType() > 50) && (other_game_object->GetType() < 60)
+                                if (other_game_object->getFrom() != 1) {
+                                    other_game_object->Get_Collision(delta_time);//current and other obj get collision.
+                                    current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                                    // Play the sound when collision
+                                    if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                        am.PlaySound(explosion_music_index);
+                                    }
+                                    else {//stop it first then replay it
+                                        am.StopSound(explosion_music_index);
+                                        am.PlaySound(explosion_music_index);
+                                    }
+                                }
+                            }
+                        }
+
+                        break;
+                    case 51://current type is projectile
+                        if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
+
+                        }
+                        else if ((other_game_object->GetType() > 80) && (other_game_object->GetType() < 90)) {
+                            break;
+                        }
+                        else if (other_game_object->GetType() != current_game_object->getFrom()) {
+                            if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
+                                //get enemy position, enemy circle radius, and the delta_time
+                                current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                                other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
+                                // Play the sound when collision
+                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                    am.PlaySound(explosion_music_index);
+                                }
+                                else {//stop it first then replay it
+                                    am.StopSound(explosion_music_index);
+                                    am.PlaySound(explosion_music_index);
+                                }
+                            }
+                        }
+                        break;
+                    case 52:
+                        if (other_game_object->GetType() != current_game_object->getFrom()) {
+                            if (current_game_object->Ract_Circle_Collition(other_game_object->GetPosition(), other_game_object->GetCircle()->get_r(), delta_time)) {
+                                //get enemy position, enemy circle radius, and the delta_time
+                              //  std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
+                                other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
+                                // Play the sound when collision
+                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                    am.PlaySound(explosion_music_index);
+                                }
+                                else {//stop it first then replay it
+                                    am.StopSound(explosion_music_index);
+                                    am.PlaySound(explosion_music_index);
+                                }
+                            }
+                        }
+                        else if ((other_game_object->GetType() > 80) && (other_game_object->GetType() < 90)) {
+                            break;
+                        }
+                        break;
+                    case 53:
+                        if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
+
+                        }
+                        else if (other_game_object->GetType() != current_game_object->getFrom()) {
+                            if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
+                                //get enemy position, enemy circle radius, and the delta_time
+                                current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                                other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
+                                // Play the sound when collision
+                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                    am.PlaySound(explosion_music_index);
+                                }
+                                else {//stop it first then replay it
+                                    am.StopSound(explosion_music_index);
+                                    am.PlaySound(explosion_music_index);
+                                }
+                            }
+                        }
+                        else if ((other_game_object->GetType() > 80) && (other_game_object->GetType() < 90)) {
+                            break;
+                        }
+                        break;
+                    case 80:
+                        break;
+                    case 91:
+                    case 92:
+                    case 93:
+                        if ((other_game_object->GetType() == 94) && (current_game_object->GetType() == 93)) {
+                            if (current_game_object->getBack()) {
+                                if (distance < (current_game_object->GetCircle()->get_r() + other_game_object->GetCircle()->get_r())) {
+                                    current_game_object->SetAlive(false);
+                                }
+
+                            }
+                        }
+                    case 94:
+                    case 95:
+                    case 100:
+                        if (other_game_object->GetType() == 52) {
+                            if (current_game_object->GetType() != other_game_object->getFrom()) {
+                                if (other_game_object->Ract_Circle_Collition(current_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {
+                                    //get enemy position, enemy circle radius, and the delta_time
+                                    std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
+                                    current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                                    // Play the sound when collision
+                                    if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                        am.PlaySound(explosion_music_index);
+                                    }
+                                    else {//stop it first then replay it
+                                        am.StopSound(explosion_music_index);
+                                        am.PlaySound(explosion_music_index);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+
+                    default:
+                        break;
+                    }
+
+
+                }
+
             }
-            else if ( (current_game_object->GetType() > 10) && (current_game_object->GetType() < 20)) {
-                if (!current_game_object->GetCollectible()) {
+        }
+
+        //check all object texture
+        if (game_objects_[0]->GetState() == 1) {//if it is in invincible state
+            game_objects_[0]->SetTexture(tex_[6]);//change texture
+        }
+        else {
+            game_objects_[0]->SetTexture(tex_[1]);//set it normal
+        }
+
+
+        //delete all die object
+        for (int i = 0;i < (game_objects_.size() - 3);i++) {
+            GameObject* current_game_object = game_objects_[i];
+            if ((!current_game_object->GetAlive())) {// (!current_game_object->GetAlive()) && (!current_game_object->GetCollectible())
+                //we now cannot delete the collection
+                if (i == 0) {//player die
+                    delete game_objects_[i];//delete player
+                    game_objects_.erase(game_objects_.begin());//shrink the vector
+                    std::cout << "Game Over!" << std::endl;//print gameover
+                    glfwSetWindowShouldClose(window_, GLFW_TRUE);//set the window, it need to be shutdown
+                    return;//jump out of the function
+                }
+                else if ((current_game_object->GetType() > 10) && (current_game_object->GetType() < 20)) {
+                    if (!current_game_object->GetCollectible()) {
+                        delete game_objects_[i];//delete the obj
+                        game_objects_.erase(game_objects_.begin() + i);//shrink vector
+                        //  std::cout << "item delete!" << std::endl;//print delete
+                        continue;
+                    }
+                }
+                else if ((current_game_object->GetType() > 90) && (current_game_object->GetType() < 100)) {
+                    switch (current_game_object->GetType())
+                    {
+                    case 91:
+                        player->Add_Exp(Minion.exp_);
+                        break;
+                    case 92:
+                        player->Add_Exp(EX_Minion.exp_);
+                        break;
+                    case 93:
+                        if (current_game_object->getBack() == false) {
+                            player->Add_Exp(BBB.exp_);
+                        }
+
+                        break;
+                    case 94:
+                        player->Add_Exp(Fortress.exp_);
+                        break;
+                    case 95:
+                        player->Add_Exp(Monster.exp_);
+                        break;
+                    default:
+                        break;
+                    }
+                    int type_enemy = current_game_object->GetType();
+                    glm::vec3 posi = current_game_object->GetPosition();
+                    GameObject* expo = new Expo_obj(posi, sprite_, &animate_shader_, tex_[3]);
+                    expo->SetNumFrame(glm::vec2(8, 1));
+
+                    if (!current_game_object->getBack()) {
+                        delete game_objects_[i];
+                        game_objects_.erase(game_objects_.begin() + i);//shrink vector
+                        game_objects_.insert(game_objects_.begin() + 1, expo);
+
+                        generateEnemyDrops(posi, type_enemy);
+                    }
+                    else {
+                        delete game_objects_[i];
+                        game_objects_.erase(game_objects_.begin() + i);//shrink vector
+                        game_objects_.insert(game_objects_.begin() + 1, expo);
+                    }
+
+
+                }
+                else {//otherthing die
+
                     delete game_objects_[i];//delete the obj
                     game_objects_.erase(game_objects_.begin() + i);//shrink vector
-                  //  std::cout << "item delete!" << std::endl;//print delete
+                    //std::cout << "delete!" << std::endl;//print delete
                     continue;
                 }
             }
-            else if ((current_game_object->GetType()>90) && (current_game_object->GetType()<100)) {
+            /*
+            else if (current_game_object->getBack()) {
+                current_game_object->getFortress()->become_angry();
+                delete game_objects_[i];//delete the obj
+                game_objects_.erase(game_objects_.begin() + i);//shrink vector
+                std::cout << "delete!" << std::endl;//print delete
+
+                continue;
+            }
+    */
+
+        }
+
+        //new enemy
+        if (timer.Finished()) {//if the timer is finished, then span new enemy  
+            //std::cout <<"Create new !" << std::endl;
+
+            generateDifferentEnemy();
+            timer.Start(10.0);//start the timer again
+        }
+        //enemy shoot
+        for (int i = 0;i < (game_objects_.size() - 3);i++) {
+            GameObject* current_game_object = game_objects_[i];
+            if (current_game_object->GetType() > 90) {
                 switch (current_game_object->GetType())
                 {
                 case 91:
-                    player->Add_Exp(Minion.exp_);
-                    break;
                 case 92:
-                    player->Add_Exp(EX_Minion.exp_);
-                    break;
-                case 93:
-                    if (current_game_object->getBack() == false) {
-                        player->Add_Exp(BBB.exp_);
+                    if (current_game_object->getShoot()) {
+                        game_objects_.insert(game_objects_.begin() + 1, new Projectile(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[7], Circle(), current_game_object->GetRotation(), current_game_object->GetType(), 51));
+                        game_objects_[1]->SetScale(glm::vec2(0.5, 0.2));
+                        game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
+                        current_game_object->setWant(false);
                     }
-                    
                     break;
                 case 94:
-                    player->Add_Exp(Fortress.exp_);
-                    break;
-                case 95:
-                    player->Add_Exp(Monster.exp_);
-                    break;
+                    if (current_game_object->getShoot() && current_game_object->GetState() == 9) {
+                        glm::vec3 po = glm::vec3(current_game_object->getShooter().x, current_game_object->getShooter().y, current_game_object->getShooter().z);
+                        float an = current_game_object->getShooter().w;
+                        game_objects_.insert(game_objects_.begin() + 1, new Projectile(po, sprite_, &sprite_shader_, tex_[7], Circle(), an, current_game_object->GetType(), 51));
+                        game_objects_[1]->SetScale(glm::vec2(1, 0.2));
+                        game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
+                        current_game_object->setWant(false);
+                    }
                 default:
                     break;
                 }
-                int type_enemy = current_game_object->GetType();
-                glm::vec3 posi = current_game_object->GetPosition();
-                GameObject* expo = new Expo_obj(posi, sprite_, &animate_shader_, tex_[3]);
-                expo->SetNumFrame(glm::vec2(8, 1));
-                
-                if (!current_game_object->getBack()) { 
-                    delete game_objects_[i];
-                    game_objects_.erase(game_objects_.begin() + i);//shrink vector
-                    game_objects_.insert(game_objects_.begin() + 1, expo);
-
-                    generateEnemyDrops(posi, type_enemy);
-                }
-                else {
-                    delete game_objects_[i];
-                    game_objects_.erase(game_objects_.begin() + i);//shrink vector
-                    game_objects_.insert(game_objects_.begin() + 1, expo);
-                }
-
-
-            }
-            else {//otherthing die
-
-                delete game_objects_[i];//delete the obj
-                game_objects_.erase(game_objects_.begin() + i);//shrink vector
-                //std::cout << "delete!" << std::endl;//print delete
-                continue;
             }
         }
-        /*
-        else if (current_game_object->getBack()) {
-            current_game_object->getFortress()->become_angry();
-            delete game_objects_[i];//delete the obj
-            game_objects_.erase(game_objects_.begin() + i);//shrink vector
-            std::cout << "delete!" << std::endl;//print delete
 
-            continue;
-        }
-*/
-
-    }
-
-    //new enemy
-    if (timer.Finished()) {//if the timer is finished, then span new enemy  
-        //std::cout <<"Create new !" << std::endl;
-
-        generateDifferentEnemy();
-        timer.Start(10.0);//start the timer again
-    }
-    //enemy shoot
-    for (int i = 0;i < (game_objects_.size() - 3);i++) {
-        GameObject* current_game_object = game_objects_[i];
-        if (current_game_object->GetType() > 90) {
-            switch (current_game_object->GetType())
-            {
-            case 91:
-            case 92:
-                if (current_game_object->getShoot()) {
-                    game_objects_.insert(game_objects_.begin() + 1, new Projectile(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[7], Circle(), current_game_object->GetRotation(), current_game_object->GetType(),51));
-                    game_objects_[1]->SetScale(glm::vec2(0.5, 0.2));
-                    game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
-                    current_game_object->setWant(false);
-                }
-                break;
-            case 94:
-                if (current_game_object->getShoot() && current_game_object->GetState() == 9) {
-                    glm::vec3 po = glm::vec3(current_game_object->getShooter().x, current_game_object->getShooter().y, current_game_object->getShooter().z);
-                    float an = current_game_object->getShooter().w;
-                    game_objects_.insert(game_objects_.begin() + 1, new Projectile(po, sprite_, &sprite_shader_, tex_[7], Circle(), an, current_game_object->GetType(),51));
-                    game_objects_[1]->SetScale(glm::vec2(1, 0.2));
-                    game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
-                    current_game_object->setWant(false);
-                }
-                default:
-                    break;
-            }
-        }
-    }
-
-    for (int i = 0;i < (game_objects_.size() - 3);i++) {
-        GameObject* current_game_object = game_objects_[i];
-        if (current_game_object->GetAlive()) {
-            if (current_game_object->GetType() == 93) {
-                if (current_game_object->GetState() == 6) {
-                    current_game_object->back();
+        for (int i = 0;i < (game_objects_.size() - 3);i++) {
+            GameObject* current_game_object = game_objects_[i];
+            if (current_game_object->GetAlive()) {
+                if (current_game_object->GetType() == 93) {
+                    if (current_game_object->GetState() == 6) {
+                        current_game_object->back();
+                    }
                 }
             }
         }
-    }
+
     
+    
+    }
+  
 
     Update_HUD(delta_time);
     shop_.Update(window_, 0.25f);
@@ -1338,6 +1364,7 @@ void Game::Init(void)
     shooter_timer = Timer();
     stop_ = false;
     map_ = true;
+    level_ = 1;
     //Initialize audio manager
     am.Init(NULL);
     
@@ -1388,7 +1415,7 @@ void Game::SetTexture(GLuint w, const char *fname,int type)
     SOIL_free_image_data(image);
 
     // Texture Wrapping
-    if(type==2){//if it is background
+    if(type==2||type==31){//if it is background
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//change it to repeat for background
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     }

@@ -28,7 +28,7 @@ namespace game {
 
         void Get_Collision(double delta_time)override;
         void Update(double delta_time) override;
-
+        void become_angry()override;
         bool Ract_Circle_Collition(glm::vec3 position, float r, double deltatime) override;
 
         void Render(glm::mat4 view_matrix, double current_time);

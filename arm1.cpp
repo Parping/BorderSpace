@@ -66,6 +66,9 @@ namespace game {
     void Arm1::Get_Collision(double delta_time) {
         parent_->become_angry();
     }
+    void Arm1::become_angry() {
+        parent_->become_angry();
+    }
 
     void Arm1::Update(double delta_time) {
         if (!alive_) { return; }

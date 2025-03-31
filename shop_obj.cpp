@@ -13,7 +13,7 @@ namespace game {
         item_sptite_ = NULL;
         node_sprite_ = NULL;
         number_sprite_ = NULL;
-        ghost_ = false;
+        ghost_ = true;
     }
 
     void Shop::BuildShop(GameObject* node_sprite, GameObject* item_sptite, GameObject* number_sprite,GameObject* text_sprite) {

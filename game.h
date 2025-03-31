@@ -126,6 +126,7 @@ namespace game {
             Shop shop_;
             float X_Ax_;
             float Y_Ax_;
+            int level_;
 
             GameObject* minimap_;
             float map_zoom_;
@@ -140,6 +141,7 @@ namespace game {
             void setMap(bool b);
             bool getMap() { return map_; }
 
+            void BossRoom();
 
             void Setup_HUD_Value();
             void Update_HUD_Value();
