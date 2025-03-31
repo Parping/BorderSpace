@@ -120,7 +120,8 @@ namespace game {
 		enemy_spirt = p;
 	}
 	void Mini_map_Object::RenderMap(glm::mat4 view_matrix, double current_time) {
-		if (ghost) { return; }
+		if (ghost) {
+			return; }
 		glm::vec3 position;
 		position = player_->GetPosition();
 		player_spirt->SetPosition(position);

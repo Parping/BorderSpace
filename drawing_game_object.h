@@ -14,7 +14,17 @@ namespace game {
             DrawingGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture);
 
             // Render function for the text
+
+
             void Render(glm::mat4 view_matrix, double current_time) override;
+
+            void SetShape_(int s) override { shape_ = s; };
+
+            
+        private:
+            int shape_;//1 circle 2 ract
+            bool hover_;
+            bool click_;
 
     }; // class DrawingGameObject
 

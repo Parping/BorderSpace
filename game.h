@@ -11,6 +11,8 @@
 #include "HUD.h"
 #include "audio_manager.h"
 
+#include "shop_obj.h"
+
 namespace game {
 
     // A class for holding the main game objects
@@ -110,6 +112,9 @@ namespace game {
             //the music index, used fo audio manager
             int background_music_index, explosion_music_index;
 
+            bool stop_;
+            bool map_;
+
             // List of game objects
             std::vector<GameObject*> game_objects_;
             std::vector<GameObject*> hud_objects_;
@@ -118,12 +123,23 @@ namespace game {
             GameObject* fortress_;
             bool fortress_exist_;
 
+            Shop shop_;
+            float X_Ax_;
+            float Y_Ax_;
+
             GameObject* minimap_;
             float map_zoom_;
             //hp,energy,exp,level
             //money.score, max_hp,max_energy,max_exp
             //buff, collect
             HUDValue HUDValue_;
+
+            void setStop(bool b) { stop_ = b; }
+            bool getStop() { return stop_; }
+
+            void setMap(bool b);
+            bool getMap() { return map_; }
+
 
             void Setup_HUD_Value();
             void Update_HUD_Value();

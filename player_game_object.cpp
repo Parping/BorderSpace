@@ -24,8 +24,8 @@ PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Sh
 
 	invisible_point_=0;
 	energy_=100;
-	iron_=0;
-	coin_=0;
+	iron_=10;
+	coin_=10;
 	experience_=0;
 	level_=1;
 	max_exp=100;
@@ -34,6 +34,9 @@ PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Sh
 	lazer_act_ = false;
 	shield_act_ = false;
 	rest_ = false;
+	bomb_ = 0;
+	can_lazer_ = false;
+	can_shield_ = false;
 }
 
 //gettters and setters
@@ -163,10 +166,11 @@ void PlayerGameObject::Set_Lazer_On(bool a)  {
 	if (energy_ <= 0 && a == true) {
 		return;
 	}
+	if (!can_lazer_) { return; }
 	lazer_act_ = a;
 }
 void PlayerGameObject::Set_Shield_On(bool a)  { 
-
+	if (!can_shield_) { return; }
 	shield_act_ = a; 
 }
 

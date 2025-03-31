@@ -125,7 +125,8 @@ void Game::SetupGameWorld(void)
         tex_arm3 = 26,
         tex_font = 27,
         tex_test = 28,
-        tex_lidar = 29
+        tex_lidar = 29,
+        tex_node = 30
     };
     textures.push_back("/textures/tiny_ship1.png"); //change file
     //textures.push_back("/textures/destroyer_green.png"); 
@@ -159,6 +160,7 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/font8x8.png");
     textures.push_back("/textures/test.png");
     textures.push_back("/textures/ridar.png");
+    textures.push_back("/textures/node.png");
     
 
 
@@ -201,7 +203,21 @@ void Game::SetupGameWorld(void)
     //setup item object
     game_objects_.push_back(new CollectibleGameObject(glm::vec3(5.2f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[tex_items], Circle(), 14));
     
+    GameObject* shop_number_bar_= new Bar(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[28], game_objects_[0]);
+    shop_number_bar_->SetScale(glm::vec2(0.5, 0.5));
+    GameObject* node_sprite = new DrawingGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &drawing_shader_, tex_[tex_node]);
 
+    GameObject* in_number = new Value_Object(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[9], 2, 0, shop_number_bar_);
+    GameObject* in_p = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[15]);
+    GameObject* text = new TextGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &text_shader_, tex_[27]);
+    shop_.BuildShop(node_sprite, in_p, in_number, text);
+    shop_.SetPlayer(game_objects_[0]);
+    //GameObject*  shop= new DrawingGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &drawing_shader_, tex_[5]);
+    //shop->SetScale(glm::vec2(5.0f, 4.0f));
+    //shop->SetRGB(1.0, 1.0, 1.0, 1.0);
+    //shop->SetShape_(2);
+    //shop_bar_->AddChild(shop);
+   // shop_bar_->SetGhost(true);
 
     //set circle radius for each
     for (int i = 0;i < game_objects_.size();i++) {
@@ -354,7 +370,7 @@ void Game::Setup_HUD_Bar(GameObject* h) {
     
 
     /*
-    // GameObject* text = new TextGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &text_shader_, tex_[27], text_bar);
+    // 
     //  text->SetScale(glm::vec2(2.5/1.5, 0.5/1.5));
  // text->SetTOO(glm::vec2(0.5f, 0.5f));
 //  text->SetText("LEVEL");
@@ -599,12 +615,23 @@ void Game::HandleControls(double delta_time)
             map_zoom_ -= 0.0005f;
         }
     }
-
+    if (glfwGetKey(window_, GLFW_KEY_ENTER) == GLFW_PRESS) {
+        setStop(!getStop());
+    }
+    if (glfwGetKey(window_, GLFW_KEY_M) == GLFW_PRESS) {
+        setMap(!getMap());
+    }
+    if (glfwGetKey(window_, GLFW_KEY_P) == GLFW_PRESS) {
+        shop_.OpenShop();
+    }
 }
-
+void Game::setMap(bool b) {
+    map_ = b;
+}
 
 void Game::Update(double delta_time)
 {
+    if (getStop()) { return; }
     current_time_ += delta_time;
     GameObject* player = game_objects_[0];
     // Update all game objects
@@ -935,7 +962,7 @@ void Game::Update(double delta_time)
     
 
     Update_HUD(delta_time);
-
+    shop_.Update(window_, 0.25f);
 
 }
 
@@ -1207,10 +1234,13 @@ void Game::Render(void){
     float camera_zoom = 0.25f;
     glm::mat4 camera_zoom_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(camera_zoom, camera_zoom, camera_zoom));
     glm::mat4  view_matrix = window_scale_matrix * camera_zoom_matrix * camera_trans;//add the new transformatrion
-    
 
-    RenderMiniMap();
-    game_objects_[game_objects_.size() - 2]->Render(view_matrix, current_time_);
+
+    shop_.Render(window_scale_matrix * camera_zoom_matrix, current_time_);
+    if (map_) {
+        RenderMiniMap();
+        game_objects_[game_objects_.size() - 2]->Render(view_matrix, current_time_);
+    }
     // Render all game objects
     for (int i = 0; i < game_objects_.size(); i++) {
         if (i == game_objects_.size() - 2) { continue; }
@@ -1306,6 +1336,8 @@ void Game::Init(void)
     //Initialize Timer
     timer = Timer();
     shooter_timer = Timer();
+    stop_ = false;
+    map_ = true;
     //Initialize audio manager
     am.Init(NULL);
     

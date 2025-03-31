@@ -46,12 +46,12 @@ namespace game {
             int Get_Exper()override { return experience_; }
             int Get_Level() override { return level_; }
 
-            void Set_INPoint(int i) { invisible_point_ = i; }
-            void Set_Energy(int e) { energy_ = e; }
-            void Set_Iron(int i) { iron_ = i; }
-            void Set_Coin(int c) { coin_ = c; }
-            void Set_Exper(int e) { experience_ = e; }
-            void Set_Level(int l) { level_ = l; }
+            void Set_INPoint(int i) override { invisible_point_ = i; }
+            void Set_Energy(int e)override { energy_ = e; }
+            void Set_Iron(int i) override { iron_ = i; }
+            void Set_Coin(int c) override { coin_ = c; }
+            void Set_Exper(int e) override { experience_ = e; }
+            void Set_Level(int l)override { level_ = l; }
             
             void Add_Exp(int a) override;
             void Level_up() override;
@@ -70,6 +70,14 @@ namespace game {
             glm::mat4 GetLocalTransformation();
             void getHeal() override;
             void AddChild(GameObject* child) override;
+
+            void AddBomb() override { bomb_++; };
+            void SetCan_Lazer(bool a) override { can_lazer_ = a; }
+            void SetCan_Shield(bool a) override { can_shield_ = a; }
+
+            int GetBomb() override { return bomb_; }
+            bool Get_Can_lazer() override { return can_lazer_; }
+            bool Get_Can_shield() override { return can_shield_; }
 
     private:
         int hitpoint;
@@ -92,6 +100,11 @@ namespace game {
         int max_exp;
         int max_hp;
         int max_energy;
+
+        int bomb_;
+        bool can_lazer_;
+        bool can_shield_;
+
         Timer collision_timer;
         Timer rest_timer;
         Timer act_timer;

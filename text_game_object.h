@@ -11,7 +11,7 @@ namespace game {
     class TextGameObject : public GameObject {
 
         public:
-            TextGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture, GameObject* parent);
+            TextGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture);
 
             // Text to be displayed
             std::string GetText(void) const;
@@ -23,7 +23,7 @@ namespace game {
             glm::mat4 GetLocalTransformation();
         private:
             std::string text_;
-            GameObject* parent_;
+
 
     }; // class TextGameObject
 

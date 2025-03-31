@@ -215,6 +215,13 @@ namespace game {
             virtual int Get_Exper() { return -1; }
             virtual int Get_Level() { return -1; }
 
+            virtual void Set_INPoint(int i) {};
+            virtual void Set_Energy(int e) {};
+            virtual void Set_Iron(int i) {};
+            virtual void Set_Coin(int c) {};
+            virtual void Set_Exper(int e) {};
+            virtual void Set_Level(int l) {};
+
             virtual void Add_Exp(int a) {};
             virtual void Level_up() {};
             virtual int Get_Max_Exp() { return -1; }
@@ -280,6 +287,15 @@ namespace game {
             }
             virtual void SetAllChild(std::vector<GameObject*> a) {};
             virtual void SetSizeZoom(float f) {};
+            virtual void SetShape_(int s) {};
+
+            virtual void AddBomb()  {  };
+            virtual void SetCan_Lazer(bool a) {};
+            virtual void SetCan_Shield(bool a) {};
+
+            virtual int GetBomb() { return 0; };
+            virtual bool Get_Can_lazer()  { return false; }
+            virtual bool Get_Can_shield() { return false; }
         protected:
             // Object's Transform Variables
             glm::vec3 position_;

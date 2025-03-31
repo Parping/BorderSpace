@@ -9,6 +9,7 @@ in vec2 uv_interp;
 uniform sampler2D onetex;
 
 uniform vec4 rgb_color;
+uniform int shape_;
 
 void main()
 {
@@ -18,9 +19,11 @@ void main()
 
     // If the fragment is not on the shape, make it transparent
     vec2 coord = uv_interp - vec2(0.5, 0.5);
-    float r = 0.3;
-    if (length(coord) > r){
-        color.a = 0.0;
+    if(shape_==1){
+        float r = 0.3;
+        if (length(coord) > r){
+            color.a = 0.0;
+        }
     }
 
     // Check for transparency

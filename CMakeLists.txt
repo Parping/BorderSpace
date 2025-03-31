@@ -35,6 +35,8 @@ Value_Object.h
 text_game_object.h
 mini_map_Object.h
 drawing_game_object.h
+shop_obj.h
+node.h
 )
  
 set(SRCS
@@ -66,6 +68,8 @@ Value_Object.cpp
 text_game_object.cpp
 mini_map_Object.cpp
 drawing_game_object.cpp
+shop_obj.cpp
+node.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     number_fragement_shader.glsl

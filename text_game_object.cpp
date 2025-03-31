@@ -4,10 +4,10 @@
 
 namespace game {
 
-TextGameObject::TextGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture, GameObject* parent) : GameObject(position, geom, shader, texture) {
+TextGameObject::TextGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture) : GameObject(position, geom, shader, texture) {
 
     text_ = "";
-    parent_ = parent;
+
 }
 
 
@@ -19,7 +19,6 @@ void TextGameObject::Render(glm::mat4 view_matrix, double current_time) {
     // Set up the view matrix
     shader_->SetUniformMat4("view_matrix", view_matrix);
 
-    glm::mat4 parent_transformation_matrix = parent_->GetTransformation();
     // Setup the transformation matrix for the shader
     glm::mat4 scaling_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale_.x, scale_.y, 1.0));//change to .x and .y
 
@@ -74,9 +73,9 @@ glm::mat4 TextGameObject::GetTransformation() {
     glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle_, glm::vec3(0.0, 0.0, 1.0));
     // Set up the translation matrix for the shader
     glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), position_);
-    glm::mat4 parent_translation_matrix = glm::translate(glm::mat4(1.0f), parent_->GetPosition());
+
     //glm::mat4 parent_transformation_matrix = parent_->GetTransformation();
-    glm::mat4 transformation_matrix = parent_translation_matrix * translation_matrix * rotation_matrix;
+    glm::mat4 transformation_matrix =  translation_matrix * rotation_matrix;
     return transformation_matrix;
 }
 glm::mat4 TextGameObject::GetLocalTransformation() {
