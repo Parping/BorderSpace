@@ -587,10 +587,14 @@ void Game::HandleControls(double delta_time)
     }
     if (glfwGetKey(window_, GLFW_KEY_K) == GLFW_PRESS) {//press K to shoot bomb
         if (shooter_timer.Finished()) {//cooldown 
-            game_objects_.insert(game_objects_.begin() + 1, new Projectile(player->GetPosition(), sprite_, &animate_shader_, tex_[21], Circle(), angle, 1,53));
-            //the projectile is start at the player current position, and faster velocity with same direction as player
-            game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
-            shooter_timer.Start(0.5f);//cooldown
+            if (player->GetBomb() > 0) {
+                game_objects_.insert(game_objects_.begin() + 1, new Projectile(player->GetPosition(), sprite_, &animate_shader_, tex_[21], Circle(), angle, 1, 53));
+                //the projectile is start at the player current position, and faster velocity with same direction as player
+                game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
+                player->deleteBomb();
+                shooter_timer.Start(0.5f);//cooldown
+               
+            }
         }
     }
     if (glfwGetKey(window_, GLFW_KEY_L) == GLFW_PRESS) {//press J to shoot
@@ -638,7 +642,7 @@ void Game::BossRoom() {
 void Game::Update(double delta_time)
 {
 
-    level_ = 2;
+    //level_ = 2;
     if (level_ == 2) {
         BossRoom();
         GameObject* player = game_objects_[0];

@@ -7,6 +7,7 @@
 
 #include "node.h"
 #include "shader.h"
+#include "timer.h"
 
 
 
@@ -43,6 +44,7 @@ namespace game {
         GameObject* number_sprite_;
         GameObject* text_sprite_;
         bool ghost_;
+        Timer click_timer_;
     };
 
 }

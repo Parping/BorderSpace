@@ -72,12 +72,16 @@ namespace game {
             void AddChild(GameObject* child) override;
 
             void AddBomb() override { bomb_++; };
+            void deleteBomb()override { if (bomb_ > 0) { bomb_--; } };
             void SetCan_Lazer(bool a) override { can_lazer_ = a; }
             void SetCan_Shield(bool a) override { can_shield_ = a; }
 
             int GetBomb() override { return bomb_; }
             bool Get_Can_lazer() override { return can_lazer_; }
             bool Get_Can_shield() override { return can_shield_; }
+
+           
+            
 
     private:
         int hitpoint;

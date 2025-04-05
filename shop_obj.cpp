@@ -127,7 +127,7 @@ namespace game {
 
     }
     void Shop::ClickNode(Node* node) {
-        std::cout << "click:  "<<node->GetId() << std::endl;
+
         int c1, c2, c3, c4;
         c1 = player_->Get_Iron();
         c2 = player_->Get_Coin();
@@ -153,6 +153,13 @@ namespace game {
                 }
             }
         case 2:
+            if (click_timer_.Finished()) {
+                player_->Set_Iron(c1 - 5);
+                player_->Set_Coin(c2 - 5);
+                player_->AddBomb();
+                click_timer_.Start(0.5f);
+                std::cout << "click:  " << node->GetId() << std::endl;
+            }
             break;
         case 3:
             CloseShop();
