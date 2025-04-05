@@ -47,14 +47,14 @@ namespace game {
         void intercepting(double delta_time);//another mode for moving
         bool findPlayer();//see if player is closer to this obj
 
-
+        void wakeup()override;
 
         void setWant(bool s) override;
         bool getShoot() override;//attack
         int Get_Shoot_Desire() { return shoot_desire; };
 
 
-        void Run(double delta_time);
+        void back()override;
         bool getBack() override { return back_; }
     private:
         int hitpoint;
@@ -78,6 +78,7 @@ namespace game {
         glm::vec3 target;
 
         Timer sleep_timer;
+        Timer attacking_timer;
 
         int max_hp;
         bool back_;

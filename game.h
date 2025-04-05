@@ -52,6 +52,8 @@ namespace game {
                 int max_exp;
                 int ip;
                 int iron;
+
+                int bomb;
                 
                 bool buff;
                 bool collect;

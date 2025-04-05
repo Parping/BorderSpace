@@ -152,6 +152,7 @@ namespace game {
                     player_->Set_Coin(c2 - 10);
                 }
             }
+            break;
         case 2:
             if (click_timer_.Finished()) {
                 player_->Set_Iron(c1 - 5);
@@ -371,8 +372,10 @@ namespace game {
                  number_sprite_->SetPosition(pos);
                  number_sprite_->SetValue(5);
                  number_sprite_->Render(view_matrix, current_time);
+                 break;
              case 3:
                  node_sprite_->Render(view_matrix, current_time);
+                 break;
 
              default:
                  break;

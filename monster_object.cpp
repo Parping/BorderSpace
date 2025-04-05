@@ -12,6 +12,10 @@ namespace game {
         colliable = true;
         t_ = t;
         timer_react = Timer();
+        collision_timer = Timer();
+        reload_timer = Timer();
+        attacking_timer = Timer();
+
         want_shoot = false;
         target = glm::vec3(0, 0, 0);
         back_ = false;
@@ -134,7 +138,11 @@ namespace game {
         }
         return false;
     }
-
+    void MonsterObject::wakeup() {
+        current_frame = 1;
+        statue = 4;
+    
+    }
     void MonsterObject::InitType(int t) {
         int random = rand() % 100;
         switch (t)
@@ -153,7 +161,7 @@ namespace game {
             num_frame = glm::vec2(2, 1);
             current_frame = 0;
             max_hp = hitpoint;
-            sleep_timer.Start(1.0f + (rand() / (float)RAND_MAX) * 9.0f);
+            sleep_timer.Start(20.0f + (rand() / (float)RAND_MAX) * 9.0f);
             //
             center_ = position_;//the center is the given position
             width = 1;
@@ -169,17 +177,30 @@ namespace game {
     void MonsterObject::intercepting(double delta_time) {
         glm::vec2 Myposition, Target, Player_position;
         glm::vec2 direction, velocity;
+        float current_speed=speed;
         if (timer_react.Finished()) {//adjust velocity every 
             Myposition = glm::vec2(GetPosition().x, GetPosition().y);
             Player_position = glm::vec2(player_->GetPosition().x, player_->GetPosition().y);
             velocity = glm::vec2(GetVelocity().x, GetVelocity().y);
             //calculate the velocity and adjust it with unit of speed
-            velocity = speed * (Player_position - Myposition) / glm::length(Player_position - Myposition);
+            if (want_shoot) {
+                attacking_timer.Start(5);
+                want_shoot = false;
+            }
+
+            if(attacking_timer.Finished()){
+                current_speed = speed ;
+            }
+            else {
+                current_speed = speed*4.0;
+                
+            }
+            velocity = current_speed * (Player_position - Myposition) / glm::length(Player_position - Myposition);
             glm::vec2 a;
             a = Player_position - Myposition - velocity;
             velocity = velocity + a * (float)delta_time;
-            if (glm::length(velocity) > speed) {
-                velocity = speed * velocity / glm::length(velocity);
+            if (glm::length(velocity) > current_speed) {
+                velocity = current_speed * velocity / glm::length(velocity);
             }
             SetVelocity(glm::vec3(velocity, 0));//set new velocity
             if (glm::dot(Player_position, velocity) == 0) {
@@ -212,27 +233,16 @@ namespace game {
         return want_shoot;
     }
 
-    void MonsterObject::Run(double delta_time) {
-        glm::vec2 Myposition, Target, Player_position;
-        glm::vec2 direction, velocity;
-        if (timer_react.Finished()) {//adjust velocity every 
-            Myposition = glm::vec2(GetPosition().x, GetPosition().y);
-            Player_position = glm::vec2(player_->GetPosition().x, player_->GetPosition().y);
-            velocity = glm::vec2(GetVelocity().x, GetVelocity().y);
-            //calculate the velocity and adjust it with unit of speed
-            velocity = speed * (Player_position - Myposition) / glm::length(Player_position - Myposition);
-            glm::vec2 a;
-            a = Player_position - Myposition - velocity;
-            velocity = -(velocity + a * (float)delta_time);
-            if (glm::length(velocity) > speed) {
-                velocity = speed * velocity / glm::length(velocity);
-            }
+    void MonsterObject::back() {
 
-            SetVelocity(glm::vec3(velocity, 0));//set new velocity
-            if (glm::dot(Player_position, -velocity) == 0) {
-                timer_react.Start(react);//restart the timer
-            }
-        }
+        glm::vec2 Myposition, Target;
+        glm::vec2 direction, velocity;
+        Myposition = glm::vec2(GetPosition().x, GetPosition().y);
+        Target = glm::vec2(0,0);
+        velocity = glm::vec2(GetVelocity().x, GetVelocity().y);
+        velocity = speed * (Target - Myposition) / glm::length(Target - Myposition);
+        SetVelocity(glm::vec3(velocity, 0));//set new velocity
+        target = glm::vec3(Target, 0);
     }
 
 
@@ -292,10 +302,10 @@ namespace game {
                 break;
             case 3:
                 intercepting(delta_time);//change velocity by intercepting
-                if (reload_timer.Finished()) {
+                if (reload_timer.Finished()&& attacking_timer.Finished()) {
                     if (!getShoot()) {
                         int random = rand() % 100;
-                        if (random > shoot_desire) {
+                        if (random < shoot_desire) {//
                             setWant(true);
                         }
                         reload_timer.Start(reload);
@@ -303,9 +313,14 @@ namespace game {
 
                 }
                 break;
+            case 4:
+                speed = 2.0;
+                back();
             default:
                 break;
             }
+
+
 
             velocity = glm::vec2(GetVelocity().x, GetVelocity().y);
             Myposition = glm::vec2(position_.x, position_.y);

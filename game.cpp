@@ -228,7 +228,7 @@ void Game::SetupGameWorld(void)
         game_objects_[i]->SetPlayer(game_objects_[0]);//set player pointer for each enemy
     }
 
-    GameObject* lazer_ = new Lazer(glm::vec3(1.0f, 0.0f, -1.0f), sprite_, &animate_shader_, tex_[tex_beam], game_objects_[0]);
+    GameObject* lazer_ = new Lazer(glm::vec3(1.0f, 0.0f, 0.0f), sprite_, &animate_shader_, tex_[tex_beam], game_objects_[0]);
     lazer_->SetNumFrame(glm::vec2(2, 1));
     game_objects_.push_back(lazer_);
     GameObject* shield = new Effect(glm::vec3(0.0f, 0.0f, -1.0f), sprite_, &animate_shader_, tex_[tex_shield], game_objects_[0], 31);
@@ -321,8 +321,9 @@ void Game::Setup_HUD_Bar(GameObject* h) {
     GameObject* energy_sp = new Value_Object(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &bar_shader_, tex_[11], 1, 1, hp_ui_bar);
     GameObject* exp_text_s = new GameObject(glm::vec3(2.2f, 0.25f, 0.0f), sprite_, &sprite_shader_, tex_[13]);
     GameObject* lv_text_s = new GameObject(glm::vec3(-2.2f, 0.25f, 0.0f), sprite_, &sprite_shader_, tex_[12]);
-    GameObject* level_number = new Value_Object(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[9], 2, 0, number_bar);
+    GameObject* level_number = new Value_Object(glm::vec3(0.2f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[9], 2, 0, number_bar);
     GameObject* exp_sp = new Value_Object(glm::vec3(0.0f, -0.2f, 0.0f), sprite_, &bar_shader_, tex_[10], 1, 1, Exp_ui_bar);
+
 
     
 
@@ -338,6 +339,14 @@ void Game::Setup_HUD_Bar(GameObject* h) {
     in_c->SetScale(glm::vec2(0.5, 0.5));
     in_c->SetNumFrame(glm::vec2(4, 1));
     in_c->SetCurrentFrame(3);
+
+    GameObject* in_b = new GameObject(glm::vec3(0.0, -0.5f, 0.0f), sprite_, &number_shader_, tex_[21]);
+    in_b->SetScale(glm::vec2(0.5, 0.5));
+    in_b->SetNumFrame(glm::vec2(2, 1));
+    in_b->SetCurrentFrame(0);
+    in_b->SetTOO(glm::vec2(0.5, 0.5));
+    GameObject* bomb_number = new Value_Object(glm::vec3(0.5f, -0.5f, 0.0f), sprite_, &number_shader_, tex_[9], 2, 0, hp_ui_bar);
+    bomb_number->SetTOO(glm::vec2(0.5, 0.5));
     GameObject* in_number_bar = new Bar(glm::vec3(-1.3f, -0.195f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
     GameObject* iron_number_bar = new Bar(glm::vec3(-1.3f, -0.595f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
     GameObject* coin_number_bar = new Bar(glm::vec3(-1.3f, -0.995f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
@@ -368,6 +377,8 @@ void Game::Setup_HUD_Bar(GameObject* h) {
     hud_objects_.push_back(in_number);
     hud_objects_.push_back(iron_number);
     hud_objects_.push_back(coin_number);
+    hud_objects_.push_back(in_b);
+    hud_objects_.push_back(bomb_number);
 
     
 
@@ -423,11 +434,16 @@ void Game::Setup_HUD_Bar(GameObject* h) {
     coin_number->SetScale(glm::vec2(0.4, 0.4));
     coin_number->SetNumFrame(glm::vec2(5, 2));
 
+    bomb_number->SetScale(glm::vec2(0.4, 0.4));
+    bomb_number->SetNumFrame(glm::vec2(5, 2));
+
     BarObj->SetPlace_Screen(0.5, 0.5);
     BarObj->SetTOO(glm::vec2(0, 0));
 
     hp_ui_bar->AddChild(hp_sp);
     hp_ui_bar->AddChild(energy_sp);
+    hp_ui_bar->AddChild(in_b);
+    hp_ui_bar->AddChild(bomb_number);
     Exp_ui_bar->AddChild(exp_sp);
     Exp_ui_bar->AddChild(text_bar);
     text_bar->AddChild(number_bar);
@@ -486,6 +502,8 @@ void Game::Setup_HUD_Value() {
     HUDValue_.money = player->Get_Coin();
     HUDValue_.ip = player->Get_INPoint();
     HUDValue_.iron = player->Get_Iron();
+
+    HUDValue_.bomb = player->GetBomb();
     
 }
 
@@ -507,6 +525,8 @@ void Game::Update_HUD_Value() {
     game_objects_[barO]->UpdateValue(2, 3, 0, HUDValue_.ip);
     game_objects_[barO]->UpdateValue(2, 4, 0, HUDValue_.iron);
     game_objects_[barO]->UpdateValue(2, 5, 0, HUDValue_.money);
+
+    game_objects_[barO]->UpdateValue(0, 3, 0, HUDValue_.bomb);
    // collaction_bar->AddChild(in_number_bar);
   //  collaction_bar->AddChild(iron_number_bar);
 
@@ -525,6 +545,7 @@ void Game::DestroyGameWorld(void)
     for (int i = 0; i < hud_objects_.size(); i++) {
         delete hud_objects_[i];
     }
+    
 }
 
 
@@ -859,6 +880,7 @@ void Game::Update(double delta_time)
             if ((!current_game_object->GetAlive())) {// (!current_game_object->GetAlive()) && (!current_game_object->GetCollectible())
                 //we now cannot delete the collection
                 if (i == 0) {//player die
+                    map_ = false;
                     delete game_objects_[i];//delete player
                     game_objects_.erase(game_objects_.begin());//shrink the vector
                     std::cout << "Game Over!" << std::endl;//print gameover

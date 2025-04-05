@@ -106,7 +106,7 @@ namespace game {
                 0.5f,
                 2.0,
                 0.5,
-                30,
+                80,
                 10
             };
             E boss = {
@@ -297,6 +297,8 @@ namespace game {
             virtual int GetBomb() { return 0; };
             virtual bool Get_Can_lazer()  { return false; }
             virtual bool Get_Can_shield() { return false; }
+
+            virtual void wakeup() {};
         protected:
             // Object's Transform Variables
             glm::vec3 position_;

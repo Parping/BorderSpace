@@ -9,8 +9,15 @@ in vec2 uv_interp;
 uniform sampler2D onetex;
 uniform int ghost;
 uniform vec2 frame;
+
+uniform int from;
+
 vec3 rgb2gray(vec3 color) {//create gray vec3
     float luminance = dot(color, vec3(0.299, 0.587, 0.114));//Gray = R*0.299 + G*0.587 + B*0.114_rgb
+    return vec3(luminance);
+}
+vec3 rgb2Red(vec3 color) {//create red vec3
+    float luminance = dot(color, vec3(0.5, 0.1, 0.1));//Gray 
     return vec3(luminance);
 }
 void main()
@@ -25,6 +32,18 @@ void main()
     if(ghost==1){
         vec3 gray = rgb2gray(vec3(color.r,color.g,color.b));
         gl_FragColor = vec4(gray, color.a * 0.5);//transformation
+    }
+    else if(from==-2){
+        gl_FragColor = vec4(color.r, color.g, color.b, color.a);
+    }
+    else if(from==91){
+        gl_FragColor = vec4(0.0, 1.0, 0.0, color.a);
+    }
+    else if(from ==92){
+        gl_FragColor = vec4(1.0, 1.0, 0.0, color.a);
+    }
+    else if(from == 94){
+        gl_FragColor = vec4(1.0, 0.1, 0.1, color.a);
     }
     else{
         gl_FragColor = vec4(color.r, color.g, color.b, color.a);

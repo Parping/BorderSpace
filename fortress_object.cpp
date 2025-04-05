@@ -238,7 +238,7 @@ namespace game {
        
        // temp = glm::vec4(shooter->GetPosition(), 1);
         //temp = GetTransformation() * temp;
-        P = shooter->GetPosition();
+        P =  shooter->GetPosition();
         //F = position_ + glm::vec3(0,P.x,0);
         return glm::vec4(P, A);
     }

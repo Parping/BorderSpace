@@ -96,6 +96,10 @@ void GameObject::Render(glm::mat4 view_matrix, double current_time){
     shader_->SetUniform1f("percent", bar_percent);
     shader_->SetUniform1i("offset", offset);
 
+
+    shader_->SetUniform1i("from", getFrom());
+
+
     shader_->SetUniform1f("time", (float)current_time);
 
     // Set up the view matrix
