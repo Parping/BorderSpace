@@ -171,7 +171,7 @@ void Game::SetupGameWorld(void)
 
     //setup timer for new enemy
     timer.Start(10.0);
-
+    level_1_timer.Start(5.0);
     // **** Setup all the game objects in the world
 
     // Setup the player object (position, texture, vertex count,hp,circle)
@@ -545,7 +545,7 @@ void Game::DestroyGameWorld(void)
     for (int i = 0; i < hud_objects_.size(); i++) {
         delete hud_objects_[i];
     }
-    
+
 }
 
 
@@ -660,26 +660,83 @@ void Game::BossRoom() {
     background->SetTexture(tex_[31]);
 
 }
-void Game::Update(double delta_time)
-{
 
-    //level_ = 2;
-    if (level_ == 2) {
-        BossRoom();
-        GameObject* player = game_objects_[0];
-        // Update all game objects
-        for (int i = 0; i < game_objects_.size() - 3; i++) {
-            // Get the current game object
-            GameObject* current_game_object = game_objects_[i];
-
-            // Update the current game object
-            current_game_object->Update(delta_time);
+void Game::wakeup_monster() {
+    for (int i = 0; i < game_objects_.size() - 3; i++) {
+        GameObject* current_game_object = game_objects_[i];
+        if (current_game_object->GetType() == 95) {
+            current_game_object->wakeup();
         }
     }
-    else {
+}
+void Game::destory_level_1() {
+
+    for (int i = 1; i < game_objects_.size()-3; i++) {
+        game_objects_[i]->SetAlive(false);
+    }
+}
+void Game::set_up_level_2() {
+    GameObject* lazer_ = new Lazer(glm::vec3(1.0f, 0.0f, 0.0f), sprite_, &animate_shader_, tex_[22], game_objects_[0]);
+    lazer_->SetNumFrame(glm::vec2(2, 1));
+    game_objects_.insert(game_objects_.begin() + 1, lazer_);
+    GameObject* shield = new Effect(glm::vec3(0.0f, 0.0f, -1.0f), sprite_, &animate_shader_, tex_[23], game_objects_[0], 31);
+    shield->SetNumFrame(glm::vec2(5, 1));
+    game_objects_.insert(game_objects_.begin() + 1, shield);
+    game_objects_[0]->AddChild(lazer_);
+    game_objects_[0]->AddChild(shield);
+    game_objects_[0]->SetPosition(glm::vec3(0, 0, 0));
+
+}
+
+bool Game::check_level_2() {
+    int count=0;
+    for (int i = 0; i < game_objects_.size() - 3; i++) {
+        GameObject* current_game_object = game_objects_[i];
+        if (current_game_object->GetType() == 95) {
+            if ( (abs(current_game_object->GetPosition().x) < 0.5) && (abs(current_game_object->GetPosition().y) < 0.5) ){
+                count++;
+            }
+        }
+    }
+    
+    if ( count > 0) {
+        return true;
+    }
+
+
+    return false;
+
+}
+void Game::Update(double delta_time)
+{
+    if (level_1_timer.Finished()) {
+        if (!changing_level_) {
+            changing_level_ = true;
+            generateDifferentEnemy();
+        }
+        wakeup_monster();
+    }
+    //level_ = 2;
+    if (changing_level_) {
+        if (check_level_2()) {
+            changing_timer.Start(5);
+            destory_level_1();
+            
+            BossRoom();
+            set_up_level_2();
+            
+        }
+    }
+    if (changing_level_ && changing_timer.Finished()) {
+        level_ = 2;
+        changing_level_ = false;
+    }
+
+
         if (getStop()) { return; }
         current_time_ += delta_time;
         GameObject* player = game_objects_[0];
+
         // Update all game objects
         for (int i = 0; i < game_objects_.size() - 3; i++) {
             // Get the current game object
@@ -687,6 +744,11 @@ void Game::Update(double delta_time)
 
             // Update the current game object
             current_game_object->Update(delta_time);
+
+
+            if (changing_level_) {
+                continue;
+            }
 
             // Check for collision with other game objects
             // Note the loop bounds: we avoid testing the last object since
@@ -887,6 +949,11 @@ void Game::Update(double delta_time)
                     glfwSetWindowShouldClose(window_, GLFW_TRUE);//set the window, it need to be shutdown
                     return;//jump out of the function
                 }
+                else if(changing_level_){
+                    delete game_objects_[i];//delete the obj
+                    game_objects_.erase(game_objects_.begin() + i);//shrink vector
+                    continue;
+                }
                 else if ((current_game_object->GetType() > 10) && (current_game_object->GetType() < 20)) {
                     if (!current_game_object->GetCollectible()) {
                         delete game_objects_[i];//delete the obj
@@ -923,6 +990,8 @@ void Game::Update(double delta_time)
                     glm::vec3 posi = current_game_object->GetPosition();
                     GameObject* expo = new Expo_obj(posi, sprite_, &animate_shader_, tex_[3]);
                     expo->SetNumFrame(glm::vec2(8, 1));
+
+                    
 
                     if (!current_game_object->getBack()) {
                         delete game_objects_[i];
@@ -963,9 +1032,10 @@ void Game::Update(double delta_time)
         //new enemy
         if (timer.Finished()) {//if the timer is finished, then span new enemy  
             //std::cout <<"Create new !" << std::endl;
-
-            generateDifferentEnemy();
-            timer.Start(10.0);//start the timer again
+            if (!changing_level_) {
+                generateDifferentEnemy();
+                timer.Start(10.0);//start the timer again
+            }
         }
         //enemy shoot
         for (int i = 0;i < (game_objects_.size() - 3);i++) {
@@ -997,6 +1067,7 @@ void Game::Update(double delta_time)
             }
         }
 
+        //blue back
         for (int i = 0;i < (game_objects_.size() - 3);i++) {
             GameObject* current_game_object = game_objects_[i];
             if (current_game_object->GetAlive()) {
@@ -1010,7 +1081,7 @@ void Game::Update(double delta_time)
 
     
     
-    }
+    
   
 
     Update_HUD(delta_time);
@@ -1046,6 +1117,19 @@ void Game::Update_HUD(double delta_time) {
 
 
 void Game::generateDifferentEnemy() {
+    if (level_ == 2) { return; }
+    if (changing_level_) { 
+        
+        GameObject* new_enemy;
+        glm::vec3 random_position = generateRandomPosition();//random position in the window
+        float pi_over_two = glm::pi<float>() / 2.0f;
+        new_enemy = new MonsterObject(random_position, sprite_, &number_shader_, tex_[18], Circle(), current_time_, 0, 95);
+        new_enemy->GetCircle()->SetRadius(new_enemy->GetScale().x / 2);//set the circle radius
+        new_enemy->SetPlayer(game_objects_[0]); // set player pointer
+        new_enemy->SetRotation(pi_over_two);
+        game_objects_.insert(game_objects_.begin() + 1, new_enemy);
+        return; 
+    }
     if (game_objects_.size() > 100) { return; }
     glm::vec3 random_position = generateRandomPosition();//random position in the window
     int r1 = rand() % 100;//
@@ -1388,9 +1472,12 @@ void Game::Init(void)
     //Initialize Timer
     timer = Timer();
     shooter_timer = Timer();
+    level_1_timer = Timer();
     stop_ = false;
     map_ = true;
+    changing_level_ = false;
     level_ = 1;
+    changing_timer = Timer();
     //Initialize audio manager
     am.Init(NULL);
     

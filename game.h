@@ -86,6 +86,14 @@ namespace game {
             void generateEnemyDrops(glm::vec3 position,EnemyDrop s);
             float  randRange(float min, float max);
             void RenderMiniMap();
+
+            void wakeup_monster();
+            void destory_level_1();
+            void set_up_level_2();
+
+            bool check_level_2();
+
+            void set_up_maze();
         private:
             // Main window: pointer to the GLFW window structure
             GLFWwindow *window_;
@@ -110,6 +118,8 @@ namespace game {
             //add timer and audio
             Timer timer;
             Timer shooter_timer;
+            Timer level_1_timer;
+            Timer changing_timer;
             audio_manager::AudioManager am;
             //the music index, used fo audio manager
             int background_music_index, explosion_music_index;
@@ -125,10 +135,14 @@ namespace game {
             GameObject* fortress_;
             bool fortress_exist_;
 
+            GameObject* the_player_;
+
             Shop shop_;
             float X_Ax_;
             float Y_Ax_;
             int level_;
+
+            bool changing_level_;
 
             GameObject* minimap_;
             float map_zoom_;
