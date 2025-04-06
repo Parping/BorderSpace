@@ -44,7 +44,7 @@ class Node {
         inline bool IsOnPath(void) const { return on_path_; }
         inline Node* GetPrev(void) { return prev_; }
         inline bool IsSearched(void) const { return search_; }//add for part3
-
+        inline bool IsWall(void) const { return is_wall_; }
 
         // Setters for node properties
         inline void SetX(float x) { x_ = x; }
@@ -55,6 +55,8 @@ class Node {
         inline void SetOnPath(bool path_status) { on_path_ = path_status; }
         inline void SetPrev(Node* node) { prev_ = node; }
         inline void SetSearch(bool searched) { search_ = searched; }//add for part3
+
+        inline void SetWall(bool wall) { is_wall_ = wall; }
     protected:
         // Vector containing all edges the node connects to
         // This can be used to create a graph where nodes have any
@@ -83,6 +85,7 @@ class Node {
 
         // Link to previous node on path
         Node* prev_;
+        bool is_wall_;
 }; 
 
 } // namespace game

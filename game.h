@@ -13,6 +13,8 @@
 
 #include "shop_obj.h"
 
+#include "maze.h"
+
 namespace game {
 
     // A class for holding the main game objects
@@ -137,6 +139,7 @@ namespace game {
 
             GameObject* the_player_;
 
+            Maze maze_;
             Shop shop_;
             float X_Ax_;
             float Y_Ax_;

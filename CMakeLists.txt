@@ -37,6 +37,7 @@ mini_map_Object.h
 drawing_game_object.h
 shop_obj.h
 node.h
+maze.h
 )
  
 set(SRCS
@@ -70,6 +71,7 @@ mini_map_Object.cpp
 drawing_game_object.cpp
 shop_obj.cpp
 node.cpp
+maze.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     number_fragement_shader.glsl

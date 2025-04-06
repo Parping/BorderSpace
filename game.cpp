@@ -127,7 +127,9 @@ void Game::SetupGameWorld(void)
         tex_test = 28,
         tex_lidar = 29,
         tex_node = 30,
-        tex_level2=31
+        tex_level2=31,
+        tex_wall=32,
+        tex_path=33
     };
     textures.push_back("/textures/tiny_ship1.png"); //change file
     //textures.push_back("/textures/destroyer_green.png"); 
@@ -163,6 +165,9 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/ridar.png");
     textures.push_back("/textures/node.png");
     textures.push_back("/textures/level2.png");
+    textures.push_back("/textures/bricks.png");
+    textures.push_back("/textures/road.png");
+
     
 
 
@@ -183,7 +188,7 @@ void Game::SetupGameWorld(void)
 
     
     game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tiny_ship17],100,Circle()));//change texture, add hitpoint, circle
-
+    set_up_maze();
     
    // hud_ = new HUD(hp_spirt, num_spirt, energy_spirt, exp_spirt, exp_text_s, lv_text_s, game_objects_[0]);
     
@@ -655,6 +660,19 @@ void Game::HandleControls(double delta_time)
 void Game::setMap(bool b) {
     map_ = b;
 }
+void Game::set_up_maze() {
+    GameObject* wall_sp = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[32]);
+
+    wall_sp->SetScale(glm::vec2(1.5, 1.5));
+    // Setup sprite used as graph edge
+    GameObject* path_sp = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[33]);
+    path_sp->SetScale(glm::vec2(1.5, 1.5));
+    Maze temp;
+    temp.BuildGrid(17, 13, 3.0,3.0, 0, 0, 4, wall_sp, path_sp);
+    maze_.BuildEmptyMaze(wall_sp, path_sp);
+    temp.BuildMaze(maze_);
+    maze_.BuildWall();
+}
 void Game::BossRoom() {
     GameObject* background = game_objects_[game_objects_.size() - 1];
     background->SetTexture(tex_[31]);
@@ -685,7 +703,7 @@ void Game::set_up_level_2() {
     game_objects_[0]->AddChild(lazer_);
     game_objects_[0]->AddChild(shield);
     game_objects_[0]->SetPosition(glm::vec3(0, 0, 0));
-
+    
 }
 
 bool Game::check_level_2() {
@@ -1378,8 +1396,12 @@ void Game::Render(void){
         game_objects_[game_objects_.size() - 2]->Render(view_matrix, current_time_);
     }
     // Render all game objects
+    
     for (int i = 0; i < game_objects_.size(); i++) {
         if (i == game_objects_.size() - 2) { continue; }
+        if (i == game_objects_.size() - 1) {
+            maze_.Render(view_matrix, current_time_);
+        }
         game_objects_[i]->Render(view_matrix, current_time_);
     }
 
