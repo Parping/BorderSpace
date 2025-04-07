@@ -188,7 +188,7 @@ void Game::SetupGameWorld(void)
 
     
     game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tiny_ship17],100,Circle()));//change texture, add hitpoint, circle
-    set_up_maze();
+
     
    // hud_ = new HUD(hp_spirt, num_spirt, energy_spirt, exp_spirt, exp_text_s, lv_text_s, game_objects_[0]);
     
@@ -672,6 +672,20 @@ void Game::set_up_maze() {
     maze_.BuildEmptyMaze(wall_sp, path_sp);
     temp.BuildMaze(maze_);
     maze_.BuildWall();
+    std::vector<Node*> temp_wall = maze_.GetAllWall();
+    Node* current_node;
+    glm::vec3 wall_position;
+    GameObject* brick;
+    for (int i = 0;i < temp_wall.size();i++) {
+        current_node = temp_wall[i];
+        wall_position = glm::vec3(current_node->GetX(), current_node->GetY(), 0.0);
+        if (current_node->IsWall()) {
+            brick = new Wall(wall_position, sprite_, &sprite_shader_, tex_[32]);
+            brick->SetScale(glm::vec2(1.5, 1.5));
+            game_objects_.insert(game_objects_.begin() + 1, brick);
+        }
+    }
+    
 }
 void Game::BossRoom() {
     GameObject* background = game_objects_[game_objects_.size() - 1];
@@ -703,7 +717,7 @@ void Game::set_up_level_2() {
     game_objects_[0]->AddChild(lazer_);
     game_objects_[0]->AddChild(shield);
     game_objects_[0]->SetPosition(glm::vec3(0, 0, 0));
-    
+    set_up_maze();
 }
 
 bool Game::check_level_2() {
@@ -880,6 +894,20 @@ void Game::Update(double delta_time)
                     case 53:
                         if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
 
+                        }
+                        else if (other_game_object->GetType() == 41) {
+                            if (other_game_object->Ract_Circle_Collition(current_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {
+                                std::cout << " attack wall!! " << std::endl;;
+                                current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                                other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
+                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                    am.PlaySound(explosion_music_index);
+                                }
+                                else {//stop it first then replay it
+                                    am.StopSound(explosion_music_index);
+                                    am.PlaySound(explosion_music_index);
+                                }
+                            }
                         }
                         else if (other_game_object->GetType() != current_game_object->getFrom()) {
                             if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
@@ -1399,9 +1427,9 @@ void Game::Render(void){
     
     for (int i = 0; i < game_objects_.size(); i++) {
         if (i == game_objects_.size() - 2) { continue; }
-        if (i == game_objects_.size() - 1) {
-            maze_.Render(view_matrix, current_time_);
-        }
+       // if (i == game_objects_.size() - 1) {
+            //maze_.Render(view_matrix, current_time_);
+      //  }
         game_objects_[i]->Render(view_matrix, current_time_);
     }
 

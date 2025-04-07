@@ -15,6 +15,8 @@
 
 #include "maze.h"
 
+#include "wall.h"
+
 namespace game {
 
     // A class for holding the main game objects
@@ -134,12 +136,15 @@ namespace game {
             std::vector<GameObject*> hud_objects_;
             std::vector<GameObject*> enemy_objects_;
 
+            std::vector<GameObject*> wall_objects_;
+
             GameObject* fortress_;
             bool fortress_exist_;
 
             GameObject* the_player_;
 
             Maze maze_;
+            
             Shop shop_;
             float X_Ax_;
             float Y_Ax_;

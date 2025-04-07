@@ -24,6 +24,9 @@ namespace game{
             // Add a node to the graph
             Node* AddNode(int id, float x, float y);
             Node* AddWall(int id, float x, float y);
+
+            std::vector<Node*> GetAllWall() { return wall_; }
+
             // Build a graph with a grid layout
             // Parameters: columns and rows of the grid, displacement of
             // each node along x and y, starting x and y position, viewport

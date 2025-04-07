@@ -161,7 +161,7 @@ namespace game {
 
             // Setters
             inline void SetPosition(const glm::vec3& position) { position_ = position; }
-            inline void SetScale(glm::vec2 scale) { scale_=scale; }//change it to vec2
+            virtual void SetScale(glm::vec2 scale) { scale_=scale; }//change it to vec2
             void SetRotation(float angle);
             virtual void SetVelocity(const glm::vec3& velocity) {};
 
