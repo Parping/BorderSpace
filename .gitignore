@@ -417,3 +417,11 @@ bin/.vs/Borderspace/v17/ipch/AutoPCH/86d25f99dce842dc/WALL.ipch
 bin/Borderspace.dir/Debug/CircleCollider.obj
 bin/Borderspace.dir/Debug/wall.obj
 bin/.vs/Borderspace/FileContentIndex/fdb08db4-8e83-4b82-ada9-ba7902cf24eb.vsidx
+bin/.vs/Borderspace/FileContentIndex/2f89f5f7-8f44-4046-808c-08db76725d36.vsidx
+bin/.vs/Borderspace/FileContentIndex/400ff0f1-93f9-4dba-b1b7-bb30f702461a.vsidx
+bin/.vs/Borderspace/FileContentIndex/b088aa16-6606-40ca-baab-9f771ad3b101.vsidx
+bin/.vs/Borderspace/v17/ipch/AutoPCH/711ae4b0ea5c48ac/CIRCLECOLLIDER.ipch
+bin/.vs/Borderspace/v17/ipch/AutoPCH/7d8021e39315c054/COLLIDER.ipch
+bin/.vs/Borderspace/v17/ipch/AutoPCH/93a102774a3f71e6/RACTCOLLIDER.ipch
+bin/Borderspace.dir/Debug/Collider.obj
+bin/Borderspace.dir/Debug/RactCollider.obj

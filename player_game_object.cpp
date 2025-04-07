@@ -8,7 +8,8 @@ namespace game {
 */
 
 PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture,int hp,Circle circle)
-	: GameObject(position, geom, shader, texture) {
+	: GameObject(position, geom, shader, texture)
+	 {//,collider_(scale_.x, this)
 	hitpoint = hp;
 	circle = circle;
 	alive = true;
@@ -37,6 +38,7 @@ PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Sh
 	bomb_ = 0;
 	can_lazer_ = false;
 	can_shield_ = false;
+
 }
 
 //gettters and setters

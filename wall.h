@@ -39,12 +39,15 @@ namespace game {
 
         glm::mat4 GetLocalTransformation();
 
+       // RactCollider* GetRactCollider() override{ return &collider_; }
+       // RactCollider collider_;
+
     private:
         Ract ract_;
         bool alive_;
         bool colliable_;
         int hp_;
-
+        
 
 
 

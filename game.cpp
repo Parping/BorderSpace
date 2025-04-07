@@ -739,6 +739,39 @@ bool Game::check_level_2() {
     return false;
 
 }
+
+
+void Game::collision_Check(GameObject* a, GameObject* b) {
+    GameObject* current = a;
+    GameObject* other = b;
+    CircleCollider circle_collider=CircleCollider();
+    RactCollider ract_collider = RactCollider();
+    if (current->GetType() == 1&&other->GetType()==41) {
+        circle_collider.SetRadius(current->GetCircle()->get_r());
+        circle_collider.SetObject(current);
+        ract_collider.SetWidth(other->GetRact()->get_W());
+        ract_collider.SetHeight(other->GetRact()->get_H());
+        ract_collider.SetObject(other);
+        if (circle_collider.TestCollision(ract_collider)) {
+            circle_collider.CollisionEvent(current, other);
+        }
+    }
+    else if(current->GetType()==41&& other->GetType() == 1){
+        circle_collider.SetRadius(other->GetCircle()->get_r());
+        circle_collider.SetObject(other);
+        ract_collider.SetWidth(current->GetRact()->get_W());
+        ract_collider.SetHeight(current->GetRact()->get_H());
+        ract_collider.SetObject(current);
+
+        if (circle_collider.TestCollision(ract_collider)) {
+            circle_collider.CollisionEvent(current, other);
+        }
+    }
+
+}
+
+
+
 void Game::Update(double delta_time)
 {
     if (level_1_timer.Finished()) {
@@ -787,8 +820,10 @@ void Game::Update(double delta_time)
             // it's the background covering the whole game world
             for (int j = i + 1; j < (game_objects_.size() - 3); j++) {
                 GameObject* other_game_object = game_objects_[j];
-
-                // Compute distance between object i and object j
+                
+                collision_Check(current_game_object, other_game_object);
+                
+                    // Compute distance between object i and object j
                 float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
                 // If distance is below a threshold, we have a collision
                 if (other_game_object->GetColliable() && current_game_object->GetColliable()) {//if the two obj is colliable, then continue.
@@ -971,7 +1006,9 @@ void Game::Update(double delta_time)
                 }
 
             }
-        }
+        
+            
+}
 
         //check all object texture
         if (game_objects_[0]->GetState() == 1) {//if it is in invincible state

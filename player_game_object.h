@@ -3,6 +3,7 @@
 
 #include "game_object.h"
 #include <vector>
+
 namespace game {
 
     // Inherits from GameObject
@@ -79,8 +80,8 @@ namespace game {
             int GetBomb() override { return bomb_; }
             bool Get_Can_lazer() override { return can_lazer_; }
             bool Get_Can_shield() override { return can_shield_; }
-
-           
+         //   CircleCollider* GetCircleCollider() override { return &collider_; }
+          //  CircleCollider collider_;
             
 
     private:

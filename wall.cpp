@@ -6,7 +6,8 @@
 namespace game {
 
 	Wall::Wall(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture) 
-		: GameObject(position, geom, shader, texture) {
+		: GameObject(position, geom, shader, texture)
+        {//,collider_(this)
 		type = 41;
 		alive_ = true;
 		colliable_ = true;
@@ -19,6 +20,8 @@ namespace game {
 		float x = scale.x;
 		float y = scale.y;
 		ract_.SetWH(glm::vec2(x, y));
+       // collider_.SetWidth(x);
+       // collider_.SetHeight(y);
 	}
 	void Wall::Update(double delta_time) {
 	

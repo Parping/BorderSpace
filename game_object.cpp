@@ -27,6 +27,8 @@ GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader
     bar_percent = 1.0;
     place_screen_ = glm::vec2(0, 0);
     toOrigin_ = glm::vec2(0, 0);
+    //c = CircleCollider(0, this);
+  //  ra = RactCollider(0, 0, this);
 }
 
 glm::vec3 GameObject::GetBearing(void) const {

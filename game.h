@@ -17,6 +17,8 @@
 
 #include "wall.h"
 
+#include "Collider.h"
+
 namespace game {
 
     // A class for holding the main game objects
@@ -98,6 +100,8 @@ namespace game {
             bool check_level_2();
 
             void set_up_maze();
+
+            void collision_Check(GameObject* a,GameObject*b);
         private:
             // Main window: pointer to the GLFW window structure
             GLFWwindow *window_;

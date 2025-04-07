@@ -10,6 +10,8 @@
 #include "timer.h"
 #include "circle.h"
 #include "ract.h"
+
+
 #include <string>
 
 #include <vector>
@@ -43,9 +45,10 @@ namespace game {
     */
 
 
-
-
-
+    
+  //  class Collider;
+  //  class CircleCollider;
+  //  class RactCollider;
 
     class GameObject {
 
@@ -295,10 +298,15 @@ namespace game {
             virtual void SetCan_Shield(bool a) {};
 
             virtual int GetBomb() { return 0; };
-            virtual bool Get_Can_lazer()  { return false; }
-            virtual bool Get_Can_shield() { return false; }
+            virtual bool Get_Can_lazer() { return false; };
+            virtual bool Get_Can_shield() { return false; };
+
 
             virtual void wakeup() {};
+            
+         //   virtual void SetCollider(Collider* c) {};
+            
+         //   virtual RactCollider* GetRactCollider() { return nullptr; }
         protected:
             // Object's Transform Variables
             glm::vec3 position_;
@@ -330,7 +338,7 @@ namespace game {
             glm::vec4 rgba_;
             glm::vec2 toOrigin_;
 
-
+            
             
 
 

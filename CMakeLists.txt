@@ -39,7 +39,9 @@ shop_obj.h
 node.h
 maze.h
 wall.h
+Collider.h
 CircleCollider.h
+RactCollider.h
 )
  
 set(SRCS
@@ -75,7 +77,9 @@ shop_obj.cpp
 node.cpp
 maze.cpp
 wall.cpp
+Collider.cpp
 CircleCollider.cpp
+RactCollider.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     number_fragement_shader.glsl
