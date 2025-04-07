@@ -22,7 +22,7 @@ PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Sh
 	t_ = 0;//time passed
 	max_velocity = 2.0f;//max velocity is 2 unit
 	velocity_ = glm::vec3(0,0,0);
-
+	collision_timer = Timer();
 	invisible_point_=0;
 	energy_=100;
 	iron_=10;
@@ -82,15 +82,30 @@ float PlayerGameObject::GetSpeed() {
 void  PlayerGameObject::Get_Collision(double delta_time) {
 	//std::cout << " Get Collision" << std::endl;
 	if (state != 1) {//normal state
-		if (hitpoint > 0) {// get collision, hitpoint - 1
-			hitpoint--;
+		if (collision_timer.Finished()) {
+			if (hitpoint > 0) {// get collision, hitpoint - 1
+				hitpoint--;
+			}
+			collision_timer.Start(delta_time);
 		}
 		//if (hitpoint <= 0) {//if it is <= 0, then it is dying and get explosion
 		//	Explosion();
 		//}
 	}
 }
+void PlayerGameObject::CollideWall(double delta_time, glm::vec3 new_velocity) {
+	if (!collision_timer.Finished()) { return; }
+	collision_timer.Start(delta_time);
+	if (glm::length(new_velocity) > max_velocity) {//if > max, then normalize it to save the direction
+		velocity_ = glm::normalize(new_velocity) * max_velocity;
+	}
+	else {
+		velocity_ = new_velocity;
+	}
 
+	//std::cout << "Update angle" << angle << std::endl;
+
+}
 void PlayerGameObject::Get_Collision_Pro(double delta_time, int pro_type,int attacker) {
 	if (attacker == 1) { return; }
 	if (state == 1) { return; }
@@ -253,7 +268,15 @@ void PlayerGameObject::Update(double delta_time) {
 
 
 void PlayerGameObject::SetVelocity(const glm::vec3& velocity) {
-	velocity_ = velocity;
+
+	if (glm::length(velocity) > max_velocity) {//if > max, then normalize it to save the direction
+		velocity_ = glm::normalize(velocity) * max_velocity;
+	}
+	else {
+		velocity_ = velocity;
+	}
+
+
 	float dp = glm::dot(velocity_, glm::vec3(1, 0, 0));//dot product with velocity and x axis
 	float dp2 = glm::dot(velocity_, glm::vec3(0, 1, 0));//dot product with velocity and y axis
 	dp /= glm::length(velocity_);//normalized

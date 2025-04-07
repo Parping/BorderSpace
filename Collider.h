@@ -19,7 +19,7 @@ namespace game {
         virtual float GetHeight() { return 0; }
         virtual bool TestCollision(Collider& other) { return false; };
         //	virtual bool TestCollision(RactCollider& other) { return false; };
-        virtual void CollisionEvent(GameObject* object1, GameObject* object2) {};
+
 
   //  protected:
        GameObject* object;
@@ -36,7 +36,7 @@ namespace game {
         void SetRadius(float r) override { radius_ = r; };
         float GetRadius() override { return radius_; };
 
-        void CollisionEvent(GameObject* object1, GameObject* object2)override;
+
     };
 
     class RactCollider : public

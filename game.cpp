@@ -686,6 +686,7 @@ void Game::set_up_maze() {
         }
     }
     
+    
 }
 void Game::BossRoom() {
     GameObject* background = game_objects_[game_objects_.size() - 1];
@@ -740,8 +741,48 @@ bool Game::check_level_2() {
 
 }
 
+void Game::CollisionEvent(GameObject* object1, GameObject* object2,double delta_time) {
+    std::cout << "hit!!!!" << std::endl;
+    glm::vec3 player, wall;
+    glm::vec2 circleCenter, ractCenter, delta;
+    float halfWidth, halfHeight;
+    float bounceFactor = 0.2f;
+    if ((object1->GetType() == 1) && object2->GetType() == 41) {
+        player = object1->GetPosition();
+        wall = object2->GetPosition();
+        circleCenter = glm::vec2(player.x, player.y);
+        ractCenter = glm::vec2(wall.x, wall.y);
+        glm::vec3 w, v_0, v_p, v_out, v;
+        glm::vec2 delta = circleCenter - ractCenter;
 
-void Game::collision_Check(GameObject* a, GameObject* b) {
+        v = object1->GetVelocity();
+
+        halfWidth = object2->GetRact()->get_W() / 2;
+        halfHeight = object2->GetRact()->get_H() / 2;
+
+        float dx = delta.x;
+        float dy = delta.y;
+
+        float overlapX = halfWidth - std::abs(dx);
+        float overlapY = halfHeight - std::abs(dy);
+        if (overlapX < overlapY) {
+            // 撞在左右边
+            w = glm::vec3((dx > 0) ? 1.0f : -1.0f, 0.0f, 0);
+        }
+        else {
+            // 撞在上下边
+            w = glm::vec3(0.0f, (dy > 0) ? 1.0f : -1.0f, 0);
+        }
+
+        v_0 = glm::dot(v, w) * w;
+        v_out = v - 2.0f * v_0;
+        v = v_out * bounceFactor;
+        object1->CollideWall(0.1, v_out);
+    }
+
+}
+
+bool Game::collision_Check(GameObject* a, GameObject* b) {
     GameObject* current = a;
     GameObject* other = b;
     CircleCollider circle_collider=CircleCollider();
@@ -752,9 +793,7 @@ void Game::collision_Check(GameObject* a, GameObject* b) {
         ract_collider.SetWidth(other->GetRact()->get_W());
         ract_collider.SetHeight(other->GetRact()->get_H());
         ract_collider.SetObject(other);
-        if (circle_collider.TestCollision(ract_collider)) {
-            circle_collider.CollisionEvent(current, other);
-        }
+        return circle_collider.TestCollision(ract_collider);
     }
     else if(current->GetType()==41&& other->GetType() == 1){
         circle_collider.SetRadius(other->GetCircle()->get_r());
@@ -763,9 +802,8 @@ void Game::collision_Check(GameObject* a, GameObject* b) {
         ract_collider.SetHeight(current->GetRact()->get_H());
         ract_collider.SetObject(current);
 
-        if (circle_collider.TestCollision(ract_collider)) {
-            circle_collider.CollisionEvent(current, other);
-        }
+        return circle_collider.TestCollision(ract_collider);
+
     }
 
 }
@@ -784,7 +822,8 @@ void Game::Update(double delta_time)
     //level_ = 2;
     if (changing_level_) {
         if (check_level_2()) {
-            changing_timer.Start(5);
+            changing_timer.Start(10);
+            
             destory_level_1();
             
             BossRoom();
@@ -795,81 +834,55 @@ void Game::Update(double delta_time)
     if (changing_level_ && changing_timer.Finished()) {
         level_ = 2;
         changing_level_ = false;
+
     }
+
 
 
         if (getStop()) { return; }
         current_time_ += delta_time;
         GameObject* player = game_objects_[0];
 
-        // Update all game objects
-        for (int i = 0; i < game_objects_.size() - 3; i++) {
-            // Get the current game object
-            GameObject* current_game_object = game_objects_[i];
-
-            // Update the current game object
-            current_game_object->Update(delta_time);
-
-
-            if (changing_level_) {
-                continue;
+        if (changing_level_) {
+            for (int i = 1; i < game_objects_.size() - 3; i++) {
+                GameObject* current_game_object = game_objects_[i];
+                // Update the current game object
+                current_game_object->Update(delta_time);
             }
+        }
 
-            // Check for collision with other game objects
-            // Note the loop bounds: we avoid testing the last object since
-            // it's the background covering the whole game world
-            for (int j = i + 1; j < (game_objects_.size() - 3); j++) {
-                GameObject* other_game_object = game_objects_[j];
-                
-                collision_Check(current_game_object, other_game_object);
-                
+        else {
+            // Update all game objects
+            for (int i = 0; i < game_objects_.size() - 3; i++) {
+                // Get the current game object
+                GameObject* current_game_object = game_objects_[i];
+
+                // Update the current game object
+                current_game_object->Update(delta_time);
+
+
+                // Check for collision with other game objects
+                // Note the loop bounds: we avoid testing the last object since
+                // it's the background covering the whole game world
+                for (int j = i + 1; j < (game_objects_.size() - 3); j++) {
+                    GameObject* other_game_object = game_objects_[j];
+
+                    
+
                     // Compute distance between object i and object j
-                float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
-                // If distance is below a threshold, we have a collision
-                if (other_game_object->GetColliable() && current_game_object->GetColliable()) {//if the two obj is colliable, then continue.
-                    switch (current_game_object->GetType())//change if else to switch, make it more clear
-                    {//player=1; colliable=2, enemy=3; projectile=4,defult=0
-                    case 1://current type is player. player can colliable with collectible, enemy
-                        if (distance < 0.8f * (current_game_object->GetCircle()->get_r() + other_game_object->GetCircle()->get_r())) {
-                            if (other_game_object->GetType() > 90 && other_game_object->GetType() != 94)//if it is enemy
-                            {
-                                //if the two obj has a distance smaller than 0.8 *(sum of the radius), then it there is a collisoin
-                                // This is where you would perform collision response between objects
-                                other_game_object->Get_Collision(delta_time);//current and other obj get collision.
-                                current_game_object->Get_Collision(delta_time);
-                                // Play the sound when collision
-                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
-                                    am.PlaySound(explosion_music_index);
-                                }
-                                else {//stop it first then replay it
-                                    am.StopSound(explosion_music_index);
-                                    am.PlaySound(explosion_music_index);
-                                }
-                            }
-                            else if (other_game_object->GetType() == 94 && other_game_object->GetState() == 9) {
-
-                                other_game_object->Get_Collision(delta_time);//current and other obj get collision.
-                                current_game_object->Get_Collision(delta_time);
-                                // Play the sound when collision
-                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
-                                    am.PlaySound(explosion_music_index);
-                                }
-                                else {//stop it first then replay it
-                                    am.StopSound(explosion_music_index);
-                                    am.PlaySound(explosion_music_index);
-                                }
-
-
-
-                            }
-                            else if ((other_game_object->GetType() > 10) && (other_game_object->GetType() < 20)) {//if it is collect
-                                other_game_object->Get_Collision(delta_time);//item change color
-                                current_game_object->CollectItem(other_game_object->GetType());//player item++
-                            }
-                            else if ((other_game_object->GetType() > 50) && (other_game_object->GetType() < 60)) {//(other_game_object->GetType() > 50) && (other_game_object->GetType() < 60)
-                                if (other_game_object->getFrom() != 1) {
+                    float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
+                    // If distance is below a threshold, we have a collision
+                    if (other_game_object->GetColliable() && current_game_object->GetColliable()) {//if the two obj is colliable, then continue.
+                        switch (current_game_object->GetType())//change if else to switch, make it more clear
+                        {//player=1; colliable=2, enemy=3; projectile=4,defult=0
+                        case 1://current type is player. player can colliable with collectible, enemy
+                            if (distance < 0.8f * (current_game_object->GetCircle()->get_r() + other_game_object->GetCircle()->get_r())) {
+                                if (other_game_object->GetType() > 90 && other_game_object->GetType() != 94)//if it is enemy
+                                {
+                                    //if the two obj has a distance smaller than 0.8 *(sum of the radius), then it there is a collisoin
+                                    // This is where you would perform collision response between objects
                                     other_game_object->Get_Collision(delta_time);//current and other obj get collision.
-                                    current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                                    current_game_object->Get_Collision(delta_time);
                                     // Play the sound when collision
                                     if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
                                         am.PlaySound(explosion_music_index);
@@ -879,112 +892,60 @@ void Game::Update(double delta_time)
                                         am.PlaySound(explosion_music_index);
                                     }
                                 }
+                                else if (other_game_object->GetType() == 94 && other_game_object->GetState() == 9) {
+
+                                    other_game_object->Get_Collision(delta_time);//current and other obj get collision.
+                                    current_game_object->Get_Collision(delta_time);
+                                    // Play the sound when collision
+                                    if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                        am.PlaySound(explosion_music_index);
+                                    }
+                                    else {//stop it first then replay it
+                                        am.StopSound(explosion_music_index);
+                                        am.PlaySound(explosion_music_index);
+                                    }
+
+
+
+                                }
+                                else if ((other_game_object->GetType() > 10) && (other_game_object->GetType() < 20)) {//if it is collect
+                                    other_game_object->Get_Collision(delta_time);//item change color
+                                    current_game_object->CollectItem(other_game_object->GetType());//player item++
+                                }
+                               
+                                else if ((other_game_object->GetType() > 50) && (other_game_object->GetType() < 60)) {//(other_game_object->GetType() > 50) && (other_game_object->GetType() < 60)
+                                    if (other_game_object->getFrom() != 1) {
+                                        other_game_object->Get_Collision(delta_time);//current and other obj get collision.
+                                        current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                                        // Play the sound when collision
+                                        if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                            am.PlaySound(explosion_music_index);
+                                        }
+                                        else {//stop it first then replay it
+                                            am.StopSound(explosion_music_index);
+                                            am.PlaySound(explosion_music_index);
+                                        }
+                                    }
+                                }
                             }
-                        }
-
-                        break;
-                    case 51://current type is projectile
-                        if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
-
-                        }
-                        else if ((other_game_object->GetType() > 80) && (other_game_object->GetType() < 90)) {
+                            if (other_game_object->GetType() == 41) {
+                                if (collision_Check(current_game_object, other_game_object)) {
+                                    CollisionEvent(current_game_object, other_game_object,delta_time);
+                                }
+                            }
                             break;
-                        }
-                        else if (other_game_object->GetType() != current_game_object->getFrom()) {
-                            if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
-                                //get enemy position, enemy circle radius, and the delta_time
-                                current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
-                                other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
-                                // Play the sound when collision
-                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
-                                    am.PlaySound(explosion_music_index);
-                                }
-                                else {//stop it first then replay it
-                                    am.StopSound(explosion_music_index);
-                                    am.PlaySound(explosion_music_index);
-                                }
-                            }
-                        }
-                        break;
-                    case 52:
-                        if (other_game_object->GetType() != current_game_object->getFrom()) {
-                            if (current_game_object->Ract_Circle_Collition(other_game_object->GetPosition(), other_game_object->GetCircle()->get_r(), delta_time)) {
-                                //get enemy position, enemy circle radius, and the delta_time
-                              //  std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
-                                other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
-                                // Play the sound when collision
-                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
-                                    am.PlaySound(explosion_music_index);
-                                }
-                                else {//stop it first then replay it
-                                    am.StopSound(explosion_music_index);
-                                    am.PlaySound(explosion_music_index);
-                                }
-                            }
-                        }
-                        else if ((other_game_object->GetType() > 80) && (other_game_object->GetType() < 90)) {
-                            break;
-                        }
-                        break;
-                    case 53:
-                        if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
-
-                        }
-                        else if (other_game_object->GetType() == 41) {
-                            if (other_game_object->Ract_Circle_Collition(current_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {
-                                std::cout << " attack wall!! " << std::endl;;
-                                current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
-                                other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
-                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
-                                    am.PlaySound(explosion_music_index);
-                                }
-                                else {//stop it first then replay it
-                                    am.StopSound(explosion_music_index);
-                                    am.PlaySound(explosion_music_index);
-                                }
-                            }
-                        }
-                        else if (other_game_object->GetType() != current_game_object->getFrom()) {
-                            if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
-                                //get enemy position, enemy circle radius, and the delta_time
-                                current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
-                                other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
-                                // Play the sound when collision
-                                if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
-                                    am.PlaySound(explosion_music_index);
-                                }
-                                else {//stop it first then replay it
-                                    am.StopSound(explosion_music_index);
-                                    am.PlaySound(explosion_music_index);
-                                }
-                            }
-                        }
-                        else if ((other_game_object->GetType() > 80) && (other_game_object->GetType() < 90)) {
-                            break;
-                        }
-                        break;
-                    case 80:
-                        break;
-                    case 91:
-                    case 92:
-                    case 93:
-                        if ((other_game_object->GetType() == 94) && (current_game_object->GetType() == 93)) {
-                            if (current_game_object->getBack()) {
-                                if (distance < (current_game_object->GetCircle()->get_r() + other_game_object->GetCircle()->get_r())) {
-                                    current_game_object->SetAlive(false);
-                                }
+                        case 51://current type is projectile
+                            if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
 
                             }
-                        }
-                    case 94:
-                    case 95:
-                    case 100:
-                        if (other_game_object->GetType() == 52) {
-                            if (current_game_object->GetType() != other_game_object->getFrom()) {
-                                if (other_game_object->Ract_Circle_Collition(current_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {
+                            else if ((other_game_object->GetType() > 80) && (other_game_object->GetType() < 90)) {
+                                break;
+                            }
+                            else if (other_game_object->GetType() != current_game_object->getFrom()) {
+                                if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
                                     //get enemy position, enemy circle radius, and the delta_time
-                                    std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
                                     current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                                    other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
                                     // Play the sound when collision
                                     if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
                                         am.PlaySound(explosion_music_index);
@@ -995,21 +956,111 @@ void Game::Update(double delta_time)
                                     }
                                 }
                             }
+                            break;
+                        case 52:
+                            if (other_game_object->GetType() != current_game_object->getFrom()) {
+                                if (current_game_object->Ract_Circle_Collition(other_game_object->GetPosition(), other_game_object->GetCircle()->get_r(), delta_time)) {
+                                    //get enemy position, enemy circle radius, and the delta_time
+                                  //  std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
+                                    other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
+                                    // Play the sound when collision
+                                    if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                        am.PlaySound(explosion_music_index);
+                                    }
+                                    else {//stop it first then replay it
+                                        am.StopSound(explosion_music_index);
+                                        am.PlaySound(explosion_music_index);
+                                    }
+                                }
+                            }
+                            else if ((other_game_object->GetType() > 80) && (other_game_object->GetType() < 90)) {
+                                break;
+                            }
+                            break;
+                        case 53:
+                            if ((other_game_object->GetType() < 20) && (other_game_object->GetType() > 10)) {
+
+                            }
+                            else if (other_game_object->GetType() == 41) {
+                                if (other_game_object->Ract_Circle_Collition(current_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {
+                                    std::cout << " attack wall!! " << std::endl;;
+                                    current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                                    other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
+                                    if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                        am.PlaySound(explosion_music_index);
+                                    }
+                                    else {//stop it first then replay it
+                                        am.StopSound(explosion_music_index);
+                                        am.PlaySound(explosion_music_index);
+                                    }
+                                }
+                            }
+                            else if (other_game_object->GetType() != current_game_object->getFrom()) {
+                                if (current_game_object->RayToCircleCheck(other_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {//ray to circle
+                                    //get enemy position, enemy circle radius, and the delta_time
+                                    current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                                    other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
+                                    // Play the sound when collision
+                                    if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                        am.PlaySound(explosion_music_index);
+                                    }
+                                    else {//stop it first then replay it
+                                        am.StopSound(explosion_music_index);
+                                        am.PlaySound(explosion_music_index);
+                                    }
+                                }
+                            }
+                            else if ((other_game_object->GetType() > 80) && (other_game_object->GetType() < 90)) {
+                                break;
+                            }
+                            break;
+                        case 80:
+                            break;
+                        case 91:
+                        case 92:
+                        case 93:
+                            if ((other_game_object->GetType() == 94) && (current_game_object->GetType() == 93)) {
+                                if (current_game_object->getBack()) {
+                                    if (distance < (current_game_object->GetCircle()->get_r() + other_game_object->GetCircle()->get_r())) {
+                                        current_game_object->SetAlive(false);
+                                    }
+
+                                }
+                            }
+                        case 94:
+                        case 95:
+                        case 100:
+                            if (other_game_object->GetType() == 52) {
+                                if (current_game_object->GetType() != other_game_object->getFrom()) {
+                                    if (other_game_object->Ract_Circle_Collition(current_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {
+                                        //get enemy position, enemy circle radius, and the delta_time
+                                        std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
+                                        current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
+                                        // Play the sound when collision
+                                        if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
+                                            am.PlaySound(explosion_music_index);
+                                        }
+                                        else {//stop it first then replay it
+                                            am.StopSound(explosion_music_index);
+                                            am.PlaySound(explosion_music_index);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+                        default:
+                            break;
                         }
-                        break;
 
-                    default:
-                        break;
+
                     }
-
 
                 }
 
-            }
-        
-            
-}
 
+            }
+        }
         //check all object texture
         if (game_objects_[0]->GetState() == 1) {//if it is in invincible state
             game_objects_[0]->SetTexture(tex_[6]);//change texture
@@ -1455,6 +1506,7 @@ void Game::Render(void){
     glm::mat4  view_matrix = window_scale_matrix * camera_zoom_matrix * camera_trans;//add the new transformatrion
 
 
+
     shop_.Render(window_scale_matrix * camera_zoom_matrix, current_time_);
     if (map_) {
         RenderMiniMap();
@@ -1565,6 +1617,7 @@ void Game::Init(void)
     changing_level_ = false;
     level_ = 1;
     changing_timer = Timer();
+    load_timer = Timer();
     //Initialize audio manager
     am.Init(NULL);
     

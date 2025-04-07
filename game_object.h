@@ -147,7 +147,7 @@ namespace game {
             inline glm::vec2 GetScale(void) const { return scale_; }//change it to vec2
             virtual float GetRotation(void) { return angle_; }
             int GetType() { return type; }
-            virtual glm::vec3 GetVelocity(void) { return glm::vec3(0, 0, 0); };
+            virtual glm::vec3 GetVelocity(void) { return velocity_; };
 
             virtual void back() {};
             virtual void SetStatue(int a) {};
@@ -166,7 +166,7 @@ namespace game {
             inline void SetPosition(const glm::vec3& position) { position_ = position; }
             virtual void SetScale(glm::vec2 scale) { scale_=scale; }//change it to vec2
             void SetRotation(float angle);
-            virtual void SetVelocity(const glm::vec3& velocity) {};
+            virtual void SetVelocity(const glm::vec3& velocity) { velocity_ = velocity; };
 
             //change the texture
             void SetTexture(GLuint new_texture);
@@ -188,6 +188,8 @@ namespace game {
             
             //vitrual function, won't implimentation in this class
             virtual void Get_Collision(double delta_time) {};
+            virtual void CollideWall(double delta_time,glm::vec3 new_velocity) {};
+
             virtual void Explosion() {};
             virtual void SetColliable(bool a) {};
             virtual void SetAlive(bool a) {};

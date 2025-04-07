@@ -101,7 +101,8 @@ namespace game {
 
             void set_up_maze();
 
-            void collision_Check(GameObject* a,GameObject*b);
+            bool collision_Check(GameObject* a,GameObject*b);
+            void CollisionEvent(GameObject* object1, GameObject* object2,double delta_time);
         private:
             // Main window: pointer to the GLFW window structure
             GLFWwindow *window_;
@@ -128,6 +129,7 @@ namespace game {
             Timer shooter_timer;
             Timer level_1_timer;
             Timer changing_timer;
+            Timer load_timer;
             audio_manager::AudioManager am;
             //the music index, used fo audio manager
             int background_music_index, explosion_music_index;

@@ -80,6 +80,8 @@ namespace game {
             int GetBomb() override { return bomb_; }
             bool Get_Can_lazer() override { return can_lazer_; }
             bool Get_Can_shield() override { return can_shield_; }
+
+            void CollideWall(double delta_time, glm::vec3 new_velocity);
          //   CircleCollider* GetCircleCollider() override { return &collider_; }
           //  CircleCollider collider_;
             
