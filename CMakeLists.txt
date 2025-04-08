@@ -89,7 +89,7 @@ set(SRCS
     number_fragement_shader.glsl
     bar_fragement_shader.glsl
     animate_fragment_shader.glsl
-    child_fragment_shader.glsl
+    child_vertex_shader.glsl
     text_fragment_shader.glsl
     drawing_fragment_shader.glsl
     bar.cpp

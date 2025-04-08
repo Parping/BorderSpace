@@ -112,7 +112,7 @@ namespace game {
         P2 = glm::vec2(player_->GetPosition().x, player_->GetPosition().y);
         if (glm::distance( P1,P2) <0.4f) {
             player_->getHeal();
-            std::cout << " heal" << std::endl;
+            //std::cout << " heal" << std::endl;
         }
 
     }
@@ -139,7 +139,7 @@ namespace game {
                 default:
                     break;
                 }
-                collision_timer.Start(delta_time);
+                collision_timer.Start(0.25f);
                 become_angry();
             }
         }

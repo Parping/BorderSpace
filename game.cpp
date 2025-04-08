@@ -182,7 +182,7 @@ void Game::SetupGameWorld(void)
 
     //setup timer for new enemy
     timer.Start(10.0);
-    level_1_timer.Start(60.0);
+    level_1_timer.Start(65.0);
     // **** Setup all the game objects in the world
 
     // Setup the player object (position, texture, vertex count,hp,circle)
@@ -274,22 +274,53 @@ void Game::SetupGameWorld(void)
     // Set position of listener
     am.SetListenerPosition(0.0, 0.0, 0.0);
     // Load first sound to be played
-    std::string filename = std::string(RESOURCES_DIRECTORY).append(std::string("/audio/").append(std::string("Background.wav")));
+    std::string filename = std::string(RESOURCES_DIRECTORY).append(std::string("/audio/").append(std::string("Pixel_Perfect_fixed.wav")));
     background_music_index = am.AddSound(filename.c_str());
     filename = std::string(RESOURCES_DIRECTORY).append(std::string("/audio/").append(std::string("Explosion.wav")));//set the explosion music
     explosion_music_index = am.AddSound(filename.c_str());
+    filename = std::string(RESOURCES_DIRECTORY).append(std::string("/audio/").append(std::string("CosmicHorror_Rumble2.wav")));//set the explosion music
+    monster_whisper_1 = am.AddSound(filename.c_str());
+    filename = std::string(RESOURCES_DIRECTORY).append(std::string("/audio/").append(std::string("CosmicHorror_Rumble3.wav")));//set the explosion music
+    monster_whisper_2 = am.AddSound(filename.c_str());
+    filename = std::string(RESOURCES_DIRECTORY).append(std::string("/audio/").append(std::string("CosmicHorror_RumbleLoop1.wav")));//set the explosion music
+
+    level_2_music = am.AddSound(filename.c_str());
     // Set sound properties
     am.SetSoundPosition(background_music_index, -10.0, 0.0, 0.0);
     am.SetLoop(background_music_index, true);//set the background music looping until the gameworld need to be destoried
     am.PlaySound(background_music_index);//play music
 
+    am.PlaySound(monster_whisper_1);
+    am.SetSoundGain(monster_whisper_1, 0.0f);
+    am.SetLoop(monster_whisper_1, true);
+
+    am.PlaySound(monster_whisper_2);
+    am.SetSoundGain(monster_whisper_2, 0.0f);
+    am.SetLoop(monster_whisper_2, true);
+
     Setup_HUD_Value();
 
     // Setup particle system
     GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), particles_, &particle_shader_, tex_[tex_orb], game_objects_[0]);
+
+    firework_system_ = new ParticleSystem(glm::vec3(-2.5f, 0.0f, 0.0f), firework_, &firework_shader_, tex_[tex_orb], BarObj);
+    firework_system_->SetScale(glm::vec2(0.1, 0.1));
+    firework_system_->SetGhost(true);
     particles->SetScale(glm::vec2(0.2, 0.2));
     particles->SetRotation(-pi_over_two);
     game_objects_.push_back(particles);
+
+    //game_objects_.push_back(firework);
+
+    win_text_ = new TextGameObject(glm::vec3(0, 0, -1.0), sprite_, &text_shader_, tex_[27]);
+   
+    win_text_->SetScale(glm::vec2(3.0, 1.0));
+    win_text_->SetText("YOU WIN");
+
+    over_text_ = new TextGameObject(glm::vec3(0, 0, -1.0), sprite_, &text_shader_, tex_[27]);
+    
+    over_text_->SetScale(glm::vec2(3.5, 1.0));
+    over_text_->SetText("GAME OVER");
 }
 
 
@@ -589,6 +620,7 @@ void Game::HandleControls(double delta_time)
 {
     // Get player game object
     GameObject *player = game_objects_[0];
+    if (!player->GetAlive()) { return; }
     // Get current position and angle
     glm::vec3 curpos = player->GetPosition();
     float angle = player->GetRotation();
@@ -719,7 +751,7 @@ void Game::set_up_maze() {
     GameObject* path_sp = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[33]);
     path_sp->SetScale(glm::vec2(1.5, 1.5));
     Maze temp;
-    temp.BuildGrid(17, 13, 3.0,3.0, 0, 0, 4, wall_sp, path_sp);
+    temp.BuildGrid(17, 13, 3.0,3.0, 0, 0, 0, wall_sp, path_sp);
     maze_.BuildEmptyMaze(wall_sp, path_sp);
     temp.BuildMaze(maze_);
     maze_.BuildWall();
@@ -768,6 +800,10 @@ void Game::destory_level_1() {
     game_objects_[0]->clearChild();
 }
 void Game::set_up_level_2() {
+
+    am.SetSoundGain(background_music_index, 0.0f);
+    am.PlaySound(level_2_music);
+    am.SetLoop(level_2_music,true);
     GameObject* lazer_ = new Lazer(glm::vec3(1.0f, 0.0f, 0.0f), sprite_, &animate_shader_, tex_[22], game_objects_[0]);
     lazer_->SetNumFrame(glm::vec2(2, 1));
     game_objects_.insert(game_objects_.begin() + 1, lazer_);
@@ -785,8 +821,8 @@ void Game::set_up_level_2() {
     boss->GetCircle()->SetRadius(boss->GetScale().x / 2);//set the circle radius as scale/2
     boss->SetPlayer(game_objects_[0]);//set player pointer for each enemy
     game_objects_.insert(game_objects_.begin() + 1, boss);
-
-    std::cout << "set up maze!!" << std::endl;
+    boss_exist_ = true;
+   // std::cout << "set up maze!!" << std::endl;
 }
 
 bool Game::check_level_2() {
@@ -880,7 +916,7 @@ bool Game::collision_Check(GameObject* a, GameObject* b) {
 
 void Game::Update(double delta_time)
 {
-
+    
     if (level_1_timer.Finished()&&(level_ != 2)) {
         if (!changing_level_) {
             changing_level_ = true;
@@ -893,7 +929,7 @@ void Game::Update(double delta_time)
                 
                 
             generateDifferentEnemy();
-            std::cout << "im here" << std::endl;
+           // std::cout << "im here" << std::endl;
             wakeup_monster();
 
 
@@ -915,12 +951,17 @@ void Game::Update(double delta_time)
         
     }
 
-
-
+    if (lose_ && finish_timer.Finished()) {
+        glfwSetWindowShouldClose(window_, GLFW_TRUE);//set the window, it need to be shutdown
+    }
+    else if(win_&& finish_timer.Finished()) {
+        glfwSetWindowShouldClose(window_, GLFW_TRUE);//set the window, it need to be shutdown
+    }
         if (getStop()) { return; }
         current_time_ += delta_time;
         GameObject* player = game_objects_[0];
-
+        float gain = 0;
+        float level2_gain = 0;
         if (changing_level_) {
             for (int i = 1; i < game_objects_.size() - 4; i++) {
                 GameObject* current_game_object = game_objects_[i];
@@ -931,6 +972,8 @@ void Game::Update(double delta_time)
 
         else {
             // Update all game objects
+            
+            float cloest_distance = 9999;
             for (int i = 0; i < game_objects_.size() - 4; i++) {
                 // Get the current game object
                 GameObject* current_game_object = game_objects_[i];
@@ -1018,6 +1061,13 @@ void Game::Update(double delta_time)
                                         current_game_object->collect_resource(other_game_object);
 
                                 }
+                            }
+                            else if (other_game_object->GetType() == 95) {
+                                if (distance < cloest_distance){
+                                    cloest_distance = distance;
+                                }
+
+
                             }
                             break;
                         case 51://current type is projectile
@@ -1120,7 +1170,7 @@ void Game::Update(double delta_time)
                                 if (current_game_object->GetType() != other_game_object->getFrom()) {
                                     if (other_game_object->Ract_Circle_Collition(current_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {
                                         //get enemy position, enemy circle radius, and the delta_time
-                                        std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
+                                       // std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
                                         current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
                                         // Play the sound when collision
                                         if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
@@ -1130,6 +1180,13 @@ void Game::Update(double delta_time)
                                             am.StopSound(explosion_music_index);
                                             am.PlaySound(explosion_music_index);
                                         }
+                                    }
+                                    if (current_game_object->GetType() == 100) {
+                                        level2_gain =  1.0f- ((float)current_game_object->GetHP() / (float)current_game_object->Get_Max_Hp() );
+
+                                       // std::cout<<"current hp" << current_game_object->GetHP() << std::endl;
+                                       // std::cout << "current max hp" << current_game_object->Get_Max_Hp() << std::endl;
+                                       // std::cout << "level2_gain: " << level2_gain << std::endl;
                                     }
                                 }
                             }
@@ -1146,7 +1203,11 @@ void Game::Update(double delta_time)
 
 
             }
-        }
+            if (cloest_distance <= 3.0f) {
+                gain = 1.0f - (cloest_distance - 0.01f) / (3.0f - 0.01f);
+            }
+
+}
         //check all object texture
         if (game_objects_[0]->GetState() == 1) {//if it is in invincible state
             game_objects_[0]->SetTexture(tex_[6]);//change texture
@@ -1163,13 +1224,26 @@ void Game::Update(double delta_time)
                 //we now cannot delete the collection
                 if (i == 0) {//player die
                     map_ = false;
-                    delete game_objects_[i];//delete player
-                    game_objects_.erase(game_objects_.begin());//shrink the vector
-                    std::cout << "Game Over!" << std::endl;//print gameover
-                    glfwSetWindowShouldClose(window_, GLFW_TRUE);//set the window, it need to be shutdown
+                    lose_ = true;
+                    if (finish_timer.Finished()) {
+                        finish_timer.Start(5.0);
+
+                        // delete game_objects_[i];//delete player
+                        // 
+                         //game_objects_.erase(game_objects_.begin());//shrink the vector
+                        std::cout << "Game Over!" << std::endl;//print gameover
+                    }
+
+                   // glfwSetWindowShouldClose(window_, GLFW_TRUE);//set the window, it need to be shutdown
                     return;//jump out of the function
                 }
                 else if(level_==2){
+                    if (current_game_object->GetType() == 100) {
+                        delete game_objects_[i];//delete the obj
+                        game_objects_.erase(game_objects_.begin() + i);//shrink vector
+                        boss_exist_ = false;
+                        continue;
+                    }
                     delete game_objects_[i];//delete the obj
                     game_objects_.erase(game_objects_.begin() + i);//shrink vector
                     continue;
@@ -1232,7 +1306,7 @@ void Game::Update(double delta_time)
 
                     delete game_objects_[i];//delete the obj
                     game_objects_.erase(game_objects_.begin() + i);//shrink vector
-                    std::cout << "delete!" << std::endl;//print delete
+                   // std::cout << "its not a boss delete!" << std::endl;//print delete
                     continue;
                 }
             }
@@ -1254,7 +1328,12 @@ void Game::Update(double delta_time)
             //std::cout <<"Create new !" << std::endl;
             if (!changing_level_) {
                 generateDifferentEnemy();
-                timer.Start(10.0);//start the timer again
+                if (current_time_ > 30) {
+                    timer.Start(5.0);//start the timer again
+                }
+                else {
+                    timer.Start(10.0);//start the timer again
+                }
             }
         }
         //enemy shoot
@@ -1299,10 +1378,26 @@ void Game::Update(double delta_time)
             }
         }
 
+        
     
-    
-    
-  
+        if (current_time_ > 10) {
+            am.SetSoundGain(monster_whisper_1, gain * 0.5);
+        }
+        if (level_ == 2) {
+            if (boss_exist_) {
+                am.SetSoundGain(background_music_index, level2_gain * 0.75);
+            }
+            else {
+                am.SetSoundGain(background_music_index, 1.0f);
+                if(finish_timer.Finished()){
+                    win_ = true;
+                    Win();
+                    finish_timer.Start(5.0f);
+                }
+
+
+            }
+        }
 
     Update_HUD(delta_time);
     shop_.Update(window_, 0.25f);
@@ -1572,6 +1667,9 @@ void Game::RenderMiniMap() {
 
 
 }
+void Game::Win() {
+    firework_system_->SetGhost(false);
+}
 void Game::Render(void){
 
     // Clear background
@@ -1626,7 +1724,13 @@ void Game::Render(void){
     if (game_objects_[0]->GetEngine()) {
         game_objects_[game_objects_.size() - 1]->Render(view_matrix, current_time_);
     }
-
+    if (win_) {
+        win_text_->Render(window_scale_matrix * camera_zoom_matrix, current_time_);
+    }
+    if (lose_) {
+        over_text_->Render(window_scale_matrix * camera_zoom_matrix, current_time_);
+    }
+    firework_system_->Render(window_scale_matrix * camera_zoom_matrix, current_time_);
 }
 
 
@@ -1648,7 +1752,11 @@ void Game::MainLoop(void)
         HandleControls(delta_time);
 
         // Update all the game objects
+
         Update(delta_time);
+
+
+        
 
         if (glfwWindowShouldClose(window_)) {
             break; // jump out
@@ -1706,9 +1814,15 @@ void Game::Init(void)
     bg = new Background();
     bg->CreateGeometry();
     // Initialize particle geometry
-    Particles* particles_temp = new Particles();
+    Particles* particles_temp = new Particles(0);
     particles_temp->CreateGeometry(4000); // Use 4000 particles
     particles_ = particles_temp;
+
+    Particles* particles_temp1 = new Particles(1);
+
+    particles_temp1->CreateGeometry(4000); // Use 500 particles
+    firework_ = particles_temp1;
+
     // Initialize sprite shader
     sprite_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/sprite_fragment_shader.glsl")).c_str());
     number_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/number_fragement_shader.glsl")).c_str());
@@ -1718,7 +1832,7 @@ void Game::Init(void)
     drawing_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/drawing_fragment_shader.glsl")).c_str());
     // Initialize particle shader
     particle_shader_.Init((resources_directory_g + std::string("/particle_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/particle_fragment_shader.glsl")).c_str());
-
+    firework_shader_.Init((resources_directory_g + std::string("/child_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/particle_fragment_shader.glsl")).c_str());
     // Initialize time
     current_time_ = 0.0;
     map_zoom_ = 0.04;
@@ -1730,9 +1844,13 @@ void Game::Init(void)
     map_ = true;
     changing_level_ = false;
     maze_setup = false;
+    boss_exist_ = false;
+    win_ = false;
+    lose_ = false;
     level_ = 1;
     changing_timer = Timer();
     load_timer = Timer();
+    finish_timer = Timer();
     //Initialize audio manager
     am.Init(NULL);
     
@@ -1754,6 +1872,7 @@ Game::~Game()
     delete sprite_;
     delete particles_;
     delete bg;
+    delete firework_system_;
 
 //    delete hud_;
     // Close window

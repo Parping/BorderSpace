@@ -16,6 +16,7 @@ namespace game {
         bool GetAlive()override;
         bool GetColliable() override;
         int GetHP() override;
+        int Get_Max_Hp() override { return max_hp; }
         int GetState()override;
         float GetSpeed()override;
         //setters

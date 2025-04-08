@@ -126,7 +126,7 @@ namespace game {
                 default:
                     break;
                 }
-                collision_timer.Start(delta_time);
+                collision_timer.Start(0.25f);
             }
         }
     }

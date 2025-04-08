@@ -6,12 +6,13 @@
 
 namespace game {
 
-Particles::Particles(void) : Geometry()
+Particles::Particles(int t) : Geometry()
 {
     // Initialize variables with default values
     vbo_ = 0;
     ebo_ = 0;
     size_ = 0;
+    type_ = t;
 }
 
 
@@ -52,51 +53,106 @@ void Particles::CreateGeometry(int num_particles)
     float theta, r, tmod;
     float pi = glm::pi<float>();
     float two_pi = 2.0f*pi;
+    int num_face_elements;
+    GLuint* manyfaces;
+    if (type_ == 0) {
 
-    for (int i = 0; i < num_particles; i++){
-        // Check if we are initializing a new particle
-        //
-        // A particle has four vertices, so every four vertices we need
-        // to initialize new random values
-        if (i % 4 == 0){
-            // Get three random values
-            // Se above for definition of rand_num()
+        for (int i = 0; i < num_particles; i++) {
+            // Check if we are initializing a new particle
             //
-            // Opening of the stream of particles
-            theta = (2.0*rand_num() -1.0f)*0.13f + pi;
-            //theta = two_pi*rand_num();
-            // Radius (length) of the stream
-            r = 0.0f + 0.4*rand_num();
-            // Time phase
-            tmod = rand_num();
+            // A particle has four vertices, so every four vertices we need
+            // to initialize new random values
+            if (i % 4 == 0) {
+                // Get three random values
+                // Se above for definition of rand_num()
+                //
+                // Opening of the stream of particles
+                theta = (2.0 * rand_num() - 1.0f) * 0.13f + pi;
+                //theta = two_pi*rand_num();
+                // Radius (length) of the stream
+                r = 0.0f + 0.4 * rand_num();
+                // Time phase
+                tmod = rand_num();
+            }
+
+            // Copy position from standard sprite
+            particles[i * vertex_attr + 0] = vertex[(i % 4) * 7 + 0];
+            particles[i * vertex_attr + 1] = vertex[(i % 4) * 7 + 1];
+
+            // Set direction (velocity) based on random values
+            particles[i * vertex_attr + 2] = sin(theta) * r;
+            particles[i * vertex_attr + 3] = cos(theta) * r;
+
+            // Set phase based on random values
+            particles[i * vertex_attr + 4] = tmod;
+
+            // Copy texture coordinates from standard sprite
+            particles[i * vertex_attr + 5] = vertex[(i % 4) * 7 + 5];
+            particles[i * vertex_attr + 6] = vertex[(i % 4) * 7 + 6];
         }
 
-        // Copy position from standard sprite
-        particles[i*vertex_attr + 0] = vertex[(i % 4) * 7 + 0];
-        particles[i*vertex_attr + 1] = vertex[(i % 4) * 7 + 1];
+        // Initialize all the particle faces
+        num_face_elements = num_particles * 6;
+        manyfaces = new GLuint[num_face_elements];
 
-        // Set direction (velocity) based on random values
-        particles[i*vertex_attr + 2] = sin(theta)*r;
-        particles[i*vertex_attr + 3] = cos(theta)*r;
+        for (int i = 0; i < num_particles; i++) {
+            for (int j = 0; j < 6; j++) {
+                manyfaces[i * 6 + j] = face[j] + i * 4;
+            }
+        }
 
-        // Set phase based on random values
-        particles[i*vertex_attr + 4] = tmod;
-
-        // Copy texture coordinates from standard sprite
-        particles[i*vertex_attr + 5] = vertex[(i % 4) * 7 + 5];
-        particles[i*vertex_attr + 6] = vertex[(i % 4) * 7 + 6];
     }
+    else {
+        for (int i = 0; i < num_particles; i++) {
+            // Check if we are initializing a new particle
+            //
+            // A particle has four vertices, so every four vertices we need
+            // to initialize new random values
+            if (i % 4 == 0) {
+                // Get three random values
+                // Se above for definition of rand_num()
+                //
+                // Opening of the stream of particles
+                theta = theta = two_pi * rand_num(); // 0 ~ 2¦Ð 
+                
+                //theta = two_pi*rand_num();
+                // Radius (length) of the stream
+                r = 0.02+ 0.5f * rand_num(); // 
 
-    // Initialize all the particle faces
-    int num_face_elements = num_particles * 6;
-    GLuint *manyfaces = new GLuint[num_face_elements];
+                // Time phase
 
-    for (int i = 0; i < num_particles; i++) {
-        for (int j = 0; j < 6; j++){
-            manyfaces[i * 6 + j] = face[j] + i * 4;
+                    tmod = 0.1f + 0.3f * rand_num(); // 1
+
+
+
+            }
+
+            // Copy position from standard sprite
+            particles[i * vertex_attr + 0] = vertex[(i % 4) * 7 + 0];
+            particles[i * vertex_attr + 1] = vertex[(i % 4) * 7 + 1];
+
+            // Set direction (velocity) based on random values
+            particles[i * vertex_attr + 2] = sin(theta) * r;
+            particles[i * vertex_attr + 3] = cos(theta) * r;
+
+            // Set phase based on random values
+            particles[i * vertex_attr + 4] = tmod;
+
+            // Copy texture coordinates from standard sprite
+            particles[i * vertex_attr + 5] = vertex[(i % 4) * 7 + 5];
+            particles[i * vertex_attr + 6] = vertex[(i % 4) * 7 + 6];
+        }
+
+        // Initialize all the particle faces
+        num_face_elements = num_particles * 6;
+        manyfaces = new GLuint[num_face_elements];
+
+        for (int i = 0; i < num_particles; i++) {
+            for (int j = 0; j < 6; j++) {
+                manyfaces[i * 6 + j] = face[j] + i * 4;
+            }
         }
     }
-
     // Create buffer for vertices
     glGenBuffers(1, &vbo_);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_);

@@ -155,11 +155,13 @@ namespace game {
             break;
         case 2:
             if (click_timer_.Finished()) {
-                player_->Set_Iron(c1 - 5);
-                player_->Set_Coin(c2 - 5);
-                player_->AddBomb();
-                click_timer_.Start(0.5f);
-                std::cout << "click:  " << node->GetId() << std::endl;
+                if ((c1 >= 5) && (c2 >= 5)) {
+                    player_->Set_Iron(c1 - 5);
+                    player_->Set_Coin(c2 - 5);
+                    player_->AddBomb();
+                    click_timer_.Start(0.5f);
+                 //   std::cout << "click:  " << node->GetId() << std::endl;
+                }
             }
             break;
         case 3:

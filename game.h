@@ -113,6 +113,9 @@ namespace game {
             Geometry *sprite_;
             Geometry *bg;
             Geometry *particles_;
+
+            Geometry* firework_;
+            GameObject* firework_system_;
             // Shader for rendering sprites in the scene
             Shader sprite_shader_;
             Shader number_shader_;
@@ -123,6 +126,8 @@ namespace game {
             Shader drawing_shader_;
             // Shader for rendering particles
             Shader particle_shader_;
+
+            Shader firework_shader_;
 
             // References to textures
             // This needs to be a pointer
@@ -135,13 +140,17 @@ namespace game {
             Timer level_1_timer;
             Timer changing_timer;
             Timer load_timer;
+            Timer finish_timer;
             audio_manager::AudioManager am;
             //the music index, used fo audio manager
-            int background_music_index, explosion_music_index;
+            int background_music_index,explosion_music_index,monster_whisper_1, monster_whisper_2,level_2_music;
 
             bool stop_;
             bool map_;
             bool maze_setup;
+            bool boss_exist_;
+            bool win_;
+            bool lose_;
 
             // List of game objects
             std::vector<GameObject*> game_objects_;
@@ -154,6 +163,8 @@ namespace game {
             bool fortress_exist_;
 
             GameObject* the_player_;
+            GameObject* win_text_;
+            GameObject* over_text_;
 
             Maze maze_;
             
@@ -188,6 +199,8 @@ namespace game {
             void Setup_HUD_Bar(GameObject* h);
 
             void Generate_Fortress(GameObject* f);
+
+            void Win();
 
             // Keep track of time
             double current_time_;

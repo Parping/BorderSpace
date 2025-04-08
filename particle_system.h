@@ -18,6 +18,7 @@ namespace game {
         private:
             GameObject *parent_;
 
+
     }; // class ParticleSystem
 
 } // namespace game

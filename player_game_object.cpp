@@ -89,11 +89,15 @@ float PlayerGameObject::GetSpeed() {
 void  PlayerGameObject::Get_Collision(double delta_time) {
 	//std::cout << " Get Collision" << std::endl;
 	if (state != 1) {//normal state
+		
 		if (collision_timer.Finished()) {
 			if (hitpoint > 0) {// get collision, hitpoint - 1
-				hitpoint-=5;
+				if (shield_act_) { energy_-=1; }
+				else {
+					hitpoint -= 5;
+				}
 			}
-			collision_timer.Start(delta_time);
+			collision_timer.Start(delta_time*10);
 		}
 		//if (hitpoint <= 0) {//if it is <= 0, then it is dying and get explosion
 		//	Explosion();
@@ -215,7 +219,7 @@ void PlayerGameObject::CollectItem(int type) {
 }
 void PlayerGameObject::Invincible() {
 	state = 1;//change state
-	std::cout << " Get Invincible" << std::endl;
+	//std::cout << " Get Invincible" << std::endl;
 	timer_invi.Start(10);//timer
 }
 
@@ -269,7 +273,8 @@ void PlayerGameObject::Update(double delta_time) {
 	t_ += delta_time;
 	if (this->GetHP() < 1) {//if HP<1.get explosion
 		if (this->GetAlive()&&this->GetColliable()) {
-			Explosion();
+			//Explosion();
+			this->SetAlive(false);
 		}
 		else {
 			if (timer_exp.Finished()) {

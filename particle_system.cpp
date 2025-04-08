@@ -24,7 +24,7 @@ void ParticleSystem::Render(glm::mat4 view_matrix, double current_time){
 
     // Set up the shader
     shader_->Enable();
-
+    if (ghost) { return; }
     // Set up the view matrix
     shader_->SetUniformMat4("view_matrix", view_matrix);
     if (!parent_->GetAcc()) {
