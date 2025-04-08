@@ -6,6 +6,11 @@
 
 namespace game {
 
+    const unsigned int world_scale = 100;
+    const float minX = -48.0f;
+    const float maxX = 48.0f;
+    const float minY = -48.0f;
+    const float maxY = 48.0f;
 
 GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture) 
 {
@@ -51,6 +56,31 @@ GLuint  GameObject::getTexture() {
 }
 
 //setters
+
+void GameObject::SetPosition(const glm::vec3& position) {
+    
+
+    glm::vec3 pos = position;
+    if (pos.x < minX) {
+        pos.x = maxX;
+
+    }
+    else if (pos.x > maxX) {
+        pos.x = minX;
+
+    }
+
+    if (pos.y < minY) {
+        pos.y = maxY;
+
+    }
+    else if (pos.y > maxY) {
+        pos.y = minY;
+
+    }
+    position_ = pos;
+}
+
 void GameObject::SetRotation(float angle){ 
 
     // Set rotation angle of the game object

@@ -25,6 +25,8 @@
 #include "lazer.h"
 #include "effect.h"
 #include "arm1.h"
+#include "particles.h"
+#include "particle_system.h"
 
 #include "bar.h"
 #include "Value_Object.h"
@@ -49,7 +51,11 @@ const glm::vec3 viewport_background_color_g(0.0, 0.0, 1.0);
 // Directory with game resources such as textures
 const std::string resources_directory_g = RESOURCES_DIRECTORY;
 
-;
+const unsigned int world_scale = 100;
+const float minX = -50.0f;
+const float maxX = 50.0f;    
+const float minY = -50.0f;
+const float maxY = 50.0f;   
 
 
 
@@ -219,6 +225,7 @@ void Game::SetupGameWorld(void)
     GameObject* text = new TextGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &text_shader_, tex_[27]);
     shop_.BuildShop(node_sprite, in_p, in_number, text);
     shop_.SetPlayer(game_objects_[0]);
+
     //GameObject*  shop= new DrawingGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &drawing_shader_, tex_[5]);
     //shop->SetScale(glm::vec2(5.0f, 4.0f));
     //shop->SetRGB(1.0, 1.0, 1.0, 1.0);
@@ -275,7 +282,12 @@ void Game::SetupGameWorld(void)
     am.PlaySound(background_music_index);//play music
 
     Setup_HUD_Value();
-    
+
+    // Setup particle system
+    GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), particles_, &particle_shader_, tex_[tex_orb], game_objects_[0]);
+    particles->SetScale(glm::vec2(0.2, 0.2));
+    particles->SetRotation(-pi_over_two);
+    game_objects_.push_back(particles);
 }
 
 
@@ -515,7 +527,7 @@ void Game::Setup_HUD_Value() {
 void Game::Update_HUD_Value() {
     Setup_HUD_Value();
     float p = (float)HUDValue_.hp / HUDValue_.max_hp;
-    int barO = game_objects_.size() - 3;
+    int barO = game_objects_.size() - 4;
     game_objects_[barO]->UpdateValue(0,0,0, p);
     p = (float)HUDValue_.energy / HUDValue_.max_energy;
     p = (17.0f * p + 9.0f) / 32.0f;
@@ -624,7 +636,7 @@ void Game::HandleControls(double delta_time)
         }
     }
     if (glfwGetKey(window_, GLFW_KEY_L) == GLFW_PRESS) {//press J to shoot
-
+        //std::cout << "x: "<<player->GetPosition().x <<" y:  "<<player->GetPosition().y << std::endl;;
         player->Set_Lazer_On(true);
         
     }
@@ -661,6 +673,7 @@ void Game::setMap(bool b) {
     map_ = b;
 }
 void Game::set_up_maze() {
+    maze_setup = true;
     GameObject* wall_sp = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[32]);
 
     wall_sp->SetScale(glm::vec2(1.5, 1.5));
@@ -676,7 +689,7 @@ void Game::set_up_maze() {
     Node* current_node;
     glm::vec3 wall_position;
     GameObject* brick;
-    for (int i = 0;i < temp_wall.size();i++) {
+    for (int i = 0;i < temp_wall.size()-2;i++) {
         current_node = temp_wall[i];
         wall_position = glm::vec3(current_node->GetX(), current_node->GetY(), 0.0);
         if (current_node->IsWall()) {
@@ -687,6 +700,7 @@ void Game::set_up_maze() {
     }
     
     
+    
 }
 void Game::BossRoom() {
     GameObject* background = game_objects_[game_objects_.size() - 1];
@@ -695,7 +709,7 @@ void Game::BossRoom() {
 }
 
 void Game::wakeup_monster() {
-    for (int i = 0; i < game_objects_.size() - 3; i++) {
+    for (int i = 0; i < game_objects_.size() - 4; i++) {
         GameObject* current_game_object = game_objects_[i];
         if (current_game_object->GetType() == 95) {
             current_game_object->wakeup();
@@ -704,9 +718,16 @@ void Game::wakeup_monster() {
 }
 void Game::destory_level_1() {
 
-    for (int i = 1; i < game_objects_.size()-3; i++) {
+    for (int i = 1; i < game_objects_.size()-4; i++) {
         game_objects_[i]->SetAlive(false);
     }
+    for (int i = 0;i < (game_objects_.size() - 3);i++) {
+        if (game_objects_[i]->GetAlive() == false) {
+            delete game_objects_[i];//delete the obj
+            game_objects_.erase(game_objects_.begin() + i);//shrink vector
+        }
+    }
+
 }
 void Game::set_up_level_2() {
     GameObject* lazer_ = new Lazer(glm::vec3(1.0f, 0.0f, 0.0f), sprite_, &animate_shader_, tex_[22], game_objects_[0]);
@@ -718,12 +739,21 @@ void Game::set_up_level_2() {
     game_objects_[0]->AddChild(lazer_);
     game_objects_[0]->AddChild(shield);
     game_objects_[0]->SetPosition(glm::vec3(0, 0, 0));
+
     set_up_maze();
+    GameObject* boss = new MonsterObject(glm::vec3(-20.0f, -20.0f, 0.0f), sprite_, &animate_shader_, tex_[20], Circle(), current_time_, 0, 100);
+    boss->SetNumFrame(glm::vec2(1, 1));
+    boss->SetCurrentFrame(0);
+    boss->GetCircle()->SetRadius(boss->GetScale().x / 2);//set the circle radius as scale/2
+    boss->SetPlayer(game_objects_[0]);//set player pointer for each enemy
+    game_objects_.insert(game_objects_.begin() + 1, boss);
+
+    std::cout << "set up maze!!" << std::endl;
 }
 
 bool Game::check_level_2() {
     int count=0;
-    for (int i = 0; i < game_objects_.size() - 3; i++) {
+    for (int i = 0; i < game_objects_.size() - 4; i++) {
         GameObject* current_game_object = game_objects_[i];
         if (current_game_object->GetType() == 95) {
             if ( (abs(current_game_object->GetPosition().x) < 0.5) && (abs(current_game_object->GetPosition().y) < 0.5) ){
@@ -742,7 +772,7 @@ bool Game::check_level_2() {
 }
 
 void Game::CollisionEvent(GameObject* object1, GameObject* object2,double delta_time) {
-    std::cout << "hit!!!!" << std::endl;
+    //std::cout << "hit!!!!" << std::endl;
     glm::vec3 player, wall;
     glm::vec2 circleCenter, ractCenter, delta;
     float halfWidth, halfHeight;
@@ -812,31 +842,40 @@ bool Game::collision_Check(GameObject* a, GameObject* b) {
 
 void Game::Update(double delta_time)
 {
+<<<<<<< Updated upstream
     if (level_1_timer.Finished()) {
         if (!changing_level_) {
             changing_level_ = true;
             generateDifferentEnemy();
-        }
+        } 
         wakeup_monster();
+=======
+    if (level_1_timer.Finished()&& changing_timer.Finished()) {
+        if ((!changing_level_) &&(level_==1)) {
+                changing_timer.Start(10);
+                changing_level_ = true;
+                generateDifferentEnemy();
+                std::cout << "im here" << std::endl;
+                wakeup_monster();
+            }
+>>>>>>> Stashed changes
     }
     //level_ = 2;
-    if (changing_level_) {
-        if (check_level_2()) {
-            changing_timer.Start(10);
+
+    if (changing_level_&&check_level_2()) {
+        if (!maze_setup) {
             
             destory_level_1();
-            
             BossRoom();
+
             set_up_level_2();
-            
+           // std::cout << "check 2 correct" << std::endl;
         }
     }
-    if (changing_level_ && changing_timer.Finished()) {
-        level_ = 2;
+    if (changing_level_&&changing_timer.Finished()) {
         changing_level_ = false;
-
+        level_ = 2;
     }
-
 
 
         if (getStop()) { return; }
@@ -844,7 +883,7 @@ void Game::Update(double delta_time)
         GameObject* player = game_objects_[0];
 
         if (changing_level_) {
-            for (int i = 1; i < game_objects_.size() - 3; i++) {
+            for (int i = 1; i < game_objects_.size() - 4; i++) {
                 GameObject* current_game_object = game_objects_[i];
                 // Update the current game object
                 current_game_object->Update(delta_time);
@@ -853,7 +892,7 @@ void Game::Update(double delta_time)
 
         else {
             // Update all game objects
-            for (int i = 0; i < game_objects_.size() - 3; i++) {
+            for (int i = 0; i < game_objects_.size() - 4; i++) {
                 // Get the current game object
                 GameObject* current_game_object = game_objects_[i];
 
@@ -864,7 +903,7 @@ void Game::Update(double delta_time)
                 // Check for collision with other game objects
                 // Note the loop bounds: we avoid testing the last object since
                 // it's the background covering the whole game world
-                for (int j = i + 1; j < (game_objects_.size() - 3); j++) {
+                for (int j = i + 1; j < (game_objects_.size() - 4); j++) {
                     GameObject* other_game_object = game_objects_[j];
 
                     
@@ -983,7 +1022,7 @@ void Game::Update(double delta_time)
                             }
                             else if (other_game_object->GetType() == 41) {
                                 if (other_game_object->Ract_Circle_Collition(current_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {
-                                    std::cout << " attack wall!! " << std::endl;;
+                                   // std::cout << " attack wall!! " << std::endl;;
                                     current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
                                     other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
                                     if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
@@ -1071,7 +1110,7 @@ void Game::Update(double delta_time)
 
 
         //delete all die object
-        for (int i = 0;i < (game_objects_.size() - 3);i++) {
+        for (int i = 0;i < (game_objects_.size() - 4);i++) {
             GameObject* current_game_object = game_objects_[i];
             if ((!current_game_object->GetAlive())) {// (!current_game_object->GetAlive()) && (!current_game_object->GetCollectible())
                 //we now cannot delete the collection
@@ -1146,7 +1185,7 @@ void Game::Update(double delta_time)
 
                     delete game_objects_[i];//delete the obj
                     game_objects_.erase(game_objects_.begin() + i);//shrink vector
-                    //std::cout << "delete!" << std::endl;//print delete
+                    std::cout << "delete!" << std::endl;//print delete
                     continue;
                 }
             }
@@ -1172,7 +1211,7 @@ void Game::Update(double delta_time)
             }
         }
         //enemy shoot
-        for (int i = 0;i < (game_objects_.size() - 3);i++) {
+        for (int i = 0;i < (game_objects_.size() - 4);i++) {
             GameObject* current_game_object = game_objects_[i];
             if (current_game_object->GetType() > 90) {
                 switch (current_game_object->GetType())
@@ -1202,7 +1241,7 @@ void Game::Update(double delta_time)
         }
 
         //blue back
-        for (int i = 0;i < (game_objects_.size() - 3);i++) {
+        for (int i = 0;i < (game_objects_.size() - 4);i++) {
             GameObject* current_game_object = game_objects_[i];
             if (current_game_object->GetAlive()) {
                 if (current_game_object->GetType() == 93) {
@@ -1225,7 +1264,7 @@ void Game::Update(double delta_time)
 
 void Game::Update_HUD(double delta_time) {
     enemy_objects_.clear();
-    for (int i = 1;i < (game_objects_.size() - 3);i++) {
+    for (int i = 1;i < (game_objects_.size() - 4);i++) {
         GameObject* current_game_object = game_objects_[i];
         if (current_game_object->GetType() > 90) {
             enemy_objects_.push_back(current_game_object);
@@ -1236,7 +1275,7 @@ void Game::Update_HUD(double delta_time) {
 
     }
     int width, height;
-    int barO = game_objects_.size() - 3;
+    int barO = game_objects_.size() - 4;
     glfwGetWindowSize(window_, &width, &height);
     game_objects_[barO]->SetWindowHeight(height);
     game_objects_[barO]->SetWindowWidth(width);
@@ -1251,7 +1290,8 @@ void Game::Update_HUD(double delta_time) {
 
 
 void Game::generateDifferentEnemy() {
-    if (level_ == 2) { return; }
+   
+   // if (level_ != 1) { return; }
     if (changing_level_) { 
         
         GameObject* new_enemy;
@@ -1264,6 +1304,7 @@ void Game::generateDifferentEnemy() {
         game_objects_.insert(game_objects_.begin() + 1, new_enemy);
         return; 
     }
+    if (level_ == 2) { return; }
     if (game_objects_.size() > 100) { return; }
     glm::vec3 random_position = generateRandomPosition();//random position in the window
     int r1 = rand() % 100;//
@@ -1453,11 +1494,11 @@ void Game::RenderMiniMap() {
     glm::vec3 player_position = game_objects_[0]->GetPosition();//get player position
    
     glm::mat4 camera_trans = glm::translate(glm::mat4(1.0f), -game_objects_[0]->GetPosition());//calculate the matrix
-    float center_x = (game_objects_[game_objects_.size() - 2]->GetChild(0)->GetPosition().x + game_objects_[game_objects_.size() - 2]->GetChild(0)->GetScale().x / 2);
-    float center_y = (game_objects_[game_objects_.size() - 2]->GetChild(0)->GetPosition().y + game_objects_[game_objects_.size() - 2]->GetChild(0)->GetScale().y / 2);
+    float center_x = (game_objects_[game_objects_.size() - 3]->GetChild(0)->GetPosition().x + game_objects_[game_objects_.size() - 3]->GetChild(0)->GetScale().x / 2);
+    float center_y = (game_objects_[game_objects_.size() - 3]->GetChild(0)->GetPosition().y + game_objects_[game_objects_.size() - 3]->GetChild(0)->GetScale().y / 2);
     
     glm::vec3 scale = glm::vec3 (center_x* zoom_scale,
-        center_y * zoom_scale, game_objects_[game_objects_.size() - 2]->GetChild(0)->GetPosition().z);
+        center_y * zoom_scale, game_objects_[game_objects_.size() - 3]->GetChild(0)->GetPosition().z);
      camera_trans = glm::translate(camera_trans, scale);
    // camera_trans = glm::rotate(glm::mat4(1.0f),game_objects_[0]->GetRotation(), glm::vec3(0,0,1))* camera_trans;
     // Set view to zoom out, centered by default at 0,0
@@ -1470,7 +1511,7 @@ void Game::RenderMiniMap() {
     minimap_->SetSizeZoom(zoom_scale);
     minimap_->RenderMap(view_matrix, current_time_);
 
-    for (int i = 0; i < game_objects_.size()-2; i++) {
+    for (int i = 0; i < game_objects_.size()-3; i++) {
       //  game_objects_[i]->Render(view_matrix, current_time_);
     }
 
@@ -1497,7 +1538,12 @@ void Game::Render(void){
     }
 
     glm::vec3 player_position = game_objects_[0]->GetPosition();//get player position
+    
+
     glm::vec3 camera_position = glm::vec3(player_position.x, player_position.y, 1.0f);//camera center is the player
+
+  
+
     glm::mat4 camera_trans = glm::translate(glm::mat4(1.0f),-game_objects_[0]->GetPosition());//calculate the matrix
     //camera_trans = glm::rotate(glm::mat4(1.0f),game_objects_[0]->GetRotation(), glm::vec3(0,0,1))* camera_trans;
     // Set view to zoom out, centered by default at 0,0
@@ -1510,12 +1556,12 @@ void Game::Render(void){
     shop_.Render(window_scale_matrix * camera_zoom_matrix, current_time_);
     if (map_) {
         RenderMiniMap();
-        game_objects_[game_objects_.size() - 2]->Render(view_matrix, current_time_);
+        game_objects_[game_objects_.size() - 3]->Render(view_matrix, current_time_);
     }
     // Render all game objects
     
     for (int i = 0; i < game_objects_.size(); i++) {
-        if (i == game_objects_.size() - 2) { continue; }
+        if (i == game_objects_.size() - 3) { continue; }
        // if (i == game_objects_.size() - 1) {
             //maze_.Render(view_matrix, current_time_);
       //  }
@@ -1598,6 +1644,10 @@ void Game::Init(void)
     sprite_->CreateGeometry();
     bg = new Background();
     bg->CreateGeometry();
+    // Initialize particle geometry
+    Particles* particles_temp = new Particles();
+    particles_temp->CreateGeometry(4000); // Use 4000 particles
+    particles_ = particles_temp;
     // Initialize sprite shader
     sprite_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/sprite_fragment_shader.glsl")).c_str());
     number_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/number_fragement_shader.glsl")).c_str());
@@ -1605,6 +1655,9 @@ void Game::Init(void)
     animate_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/animate_fragment_shader.glsl")).c_str());
     text_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/text_fragment_shader.glsl")).c_str());
     drawing_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/drawing_fragment_shader.glsl")).c_str());
+    // Initialize particle shader
+    particle_shader_.Init((resources_directory_g + std::string("/particle_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/particle_fragment_shader.glsl")).c_str());
+
     // Initialize time
     current_time_ = 0.0;
     map_zoom_ = 0.04;
@@ -1615,6 +1668,7 @@ void Game::Init(void)
     stop_ = false;
     map_ = true;
     changing_level_ = false;
+    maze_setup = false;
     level_ = 1;
     changing_timer = Timer();
     load_timer = Timer();
@@ -1637,6 +1691,7 @@ Game::~Game()
 
     // Free rendering resources
     delete sprite_;
+    delete particles_;
 //    delete hud_;
     // Close window
     glfwDestroyWindow(window_);

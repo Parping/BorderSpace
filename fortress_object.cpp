@@ -333,7 +333,7 @@ namespace game {
 
 
         t_ += delta_time;//update the t_
-
+        SetPosition(position_);
     }
 
     glm::mat4 FortressObject::GetTransformation() {

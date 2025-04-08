@@ -198,7 +198,8 @@ void PlayerGameObject::Update(double delta_time) {
 	d = GetBearing();
 
 	T = P + (float)delta_time * velocity_;
-	position_ = glm::vec3(T.x, T.y, 0.0);
+
+	SetPosition(glm::vec3(T.x, T.y, 0.0));
 	t_ += delta_time;
 	if (this->GetHP() < 1) {//if HP<1.get explosion
 		if (this->GetAlive()&&this->GetColliable()) {

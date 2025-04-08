@@ -15,33 +15,35 @@ set(HDRS
     sprite.h
     circle.h
     timer.h
-audio_manager.h
- collectible_game_object.h
-enemy_game_object.h
-projectile.h
-HUD.h
-expo_obj.h
-blue_game_object.h
-fortress_object.h
-monster_object.h
-lazer.h
-bomb.h
-fortress_shooter.h
-effect.h
-arm1.h
-ract.h
-bar.h
-Value_Object.h
-text_game_object.h
-mini_map_Object.h
-drawing_game_object.h
-shop_obj.h
-node.h
-maze.h
-wall.h
-Collider.h
-CircleCollider.h
-RactCollider.h
+    audio_manager.h
+    collectible_game_object.h
+    enemy_game_object.h
+    projectile.h
+    HUD.h
+    expo_obj.h
+    blue_game_object.h
+    fortress_object.h
+    monster_object.h
+    lazer.h
+    bomb.h
+    fortress_shooter.h
+    effect.h
+    arm1.h
+    ract.h
+    bar.h
+    Value_Object.h
+    text_game_object.h
+    mini_map_Object.h
+    drawing_game_object.h
+    shop_obj.h
+    node.h
+    maze.h
+    wall.h
+    Collider.h
+    CircleCollider.h
+    RactCollider.h
+    particles.h
+    particle_system.h
 )
  
 set(SRCS
@@ -54,41 +56,45 @@ set(SRCS
     sprite.cpp
     circle.cpp
     timer.cpp
-audio_manager.cpp
-collectible_game_object.cpp
-enemy_game_object.cpp
-projectile.cpp
-HUD.cpp
-expo_obj.cpp
-blue_game_object.cpp
-fortress_object.cpp
-monster_object.cpp
-lazer.cpp
-bomb.cpp
-fortress_shooter.cpp
-effect.cpp
-arm1.cpp
-ract.cpp
-Value_Object.cpp
-text_game_object.cpp
-mini_map_Object.cpp
-drawing_game_object.cpp
-shop_obj.cpp
-node.cpp
-maze.cpp
-wall.cpp
-Collider.cpp
-CircleCollider.cpp
-RactCollider.cpp
+    audio_manager.cpp
+    collectible_game_object.cpp
+    enemy_game_object.cpp
+    projectile.cpp
+    HUD.cpp
+    expo_obj.cpp
+    blue_game_object.cpp
+    fortress_object.cpp
+    monster_object.cpp
+    lazer.cpp
+    bomb.cpp
+    fortress_shooter.cpp
+    effect.cpp
+    arm1.cpp
+    ract.cpp
+    Value_Object.cpp
+    text_game_object.cpp
+    mini_map_Object.cpp
+    drawing_game_object.cpp
+    shop_obj.cpp
+    node.cpp
+    maze.cpp
+    wall.cpp
+    Collider.cpp
+    CircleCollider.cpp
+    RactCollider.cpp
+    particles.cpp
+    particle_system.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     number_fragement_shader.glsl
     bar_fragement_shader.glsl
-animate_fragment_shader.glsl
-child_fragment_shader.glsl
-text_fragment_shader.glsl
-drawing_fragment_shader.glsl
-bar.cpp
+    animate_fragment_shader.glsl
+    child_fragment_shader.glsl
+    text_fragment_shader.glsl
+    drawing_fragment_shader.glsl
+    bar.cpp
+    particle_vertex_shader.glsl
+    particle_fragment_shader.glsl
 )
 
 # Add path name to configuration file
