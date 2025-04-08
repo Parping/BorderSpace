@@ -139,6 +139,7 @@ namespace game {
 
             bool stop_;
             bool map_;
+            bool maze_setup;
 
             // List of game objects
             std::vector<GameObject*> game_objects_;

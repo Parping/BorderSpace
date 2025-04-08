@@ -163,7 +163,7 @@ namespace game {
             GLuint getTexture();
 
             // Setters
-            inline void SetPosition(const glm::vec3& position) { position_ = position; }
+            void SetPosition(const glm::vec3& position); 
             virtual void SetScale(glm::vec2 scale) { scale_=scale; }//change it to vec2
             void SetRotation(float angle);
             virtual void SetVelocity(const glm::vec3& velocity) { velocity_ = velocity; };
@@ -305,6 +305,8 @@ namespace game {
 
 
             virtual void wakeup() {};
+
+
             
          //   virtual void SetCollider(Collider* c) {};
             

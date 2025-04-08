@@ -167,7 +167,19 @@ namespace game {
             width = 1;
             height = 2;
             break;
-
+        case 100:
+            hitpoint = boss.hp_;
+            type = boss.type_;
+            speed = boss.speed_;
+            scale_ = glm::vec2(boss.size_scale_, boss.size_scale_);
+            react = boss.react_;
+            shoot_desire = boss.shoot_desire_;
+            reload = boss.reload_;
+            statue = 0;
+            num_frame = glm::vec2(1, 1);
+            current_frame = 0;
+            max_hp = hitpoint;
+            center_ = position_;//the center is the given position
         default:
             break;
         }
@@ -269,16 +281,23 @@ namespace game {
             {
             case 0:
                 if (sleep_timer.Finished()) {
+                    if (type == 95) {
 
+                        current_frame = 1;
+                        int random = rand() % 100;
 
-                    current_frame = 1;
-                    int random = rand() % 100;
-
-                    if ((random % 5) != 0) {//random choose the starting moving mode
-                        statue = 2;
+                        if ((random % 5) != 0) {//random choose the starting moving mode
+                            statue = 2;
+                        }
+                        else {
+                            statue = 3;
+                        }
                     }
-                    else {
+                }
+                if (type == 100) {
+                    if (findPlayer()) {
                         statue = 3;
+                        reload_timer.Start(reload);
                     }
                 }
                 break;

@@ -124,6 +124,7 @@ namespace game {
 			return; }
 		glm::vec3 position;
 		position = player_->GetPosition();
+		player_spirt->SetScale(glm::vec2(1.0f, 1.0f));
 		player_spirt->SetPosition(position);
 		player_spirt->SetRGB(0.0, 1.0, 0.0, 1.0);
 		player_spirt->Render(view_matrix, current_time);
@@ -135,6 +136,9 @@ namespace game {
 			position = chile_game_objects_[i]->GetPosition();
 
 			if ((abs(player_->GetPosition().y - position.y) <= y_max) &&(abs(player_->GetPosition().x-position.x) <= x_max)) {
+				if (chile_game_objects_[i]->GetType() == 100) {
+					player_spirt->SetScale(glm::vec2(15.0f, 15.0f));
+				}
 
 				player_spirt->SetPosition(position);
 				player_spirt->SetRGB(1.0, 0.0, 0.0, 1.0);

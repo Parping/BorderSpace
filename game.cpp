@@ -51,7 +51,11 @@ const glm::vec3 viewport_background_color_g(0.0, 0.0, 1.0);
 // Directory with game resources such as textures
 const std::string resources_directory_g = RESOURCES_DIRECTORY;
 
-;
+const unsigned int world_scale = 100;
+const float minX = -50.0f;
+const float maxX = 50.0f;    
+const float minY = -50.0f;
+const float maxY = 50.0f;   
 
 
 
@@ -221,6 +225,7 @@ void Game::SetupGameWorld(void)
     GameObject* text = new TextGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &text_shader_, tex_[27]);
     shop_.BuildShop(node_sprite, in_p, in_number, text);
     shop_.SetPlayer(game_objects_[0]);
+
     //GameObject*  shop= new DrawingGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &drawing_shader_, tex_[5]);
     //shop->SetScale(glm::vec2(5.0f, 4.0f));
     //shop->SetRGB(1.0, 1.0, 1.0, 1.0);
@@ -631,7 +636,7 @@ void Game::HandleControls(double delta_time)
         }
     }
     if (glfwGetKey(window_, GLFW_KEY_L) == GLFW_PRESS) {//press J to shoot
-
+        //std::cout << "x: "<<player->GetPosition().x <<" y:  "<<player->GetPosition().y << std::endl;;
         player->Set_Lazer_On(true);
         
     }
@@ -668,6 +673,7 @@ void Game::setMap(bool b) {
     map_ = b;
 }
 void Game::set_up_maze() {
+    maze_setup = true;
     GameObject* wall_sp = new GameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[32]);
 
     wall_sp->SetScale(glm::vec2(1.5, 1.5));
@@ -683,7 +689,7 @@ void Game::set_up_maze() {
     Node* current_node;
     glm::vec3 wall_position;
     GameObject* brick;
-    for (int i = 0;i < temp_wall.size();i++) {
+    for (int i = 0;i < temp_wall.size()-2;i++) {
         current_node = temp_wall[i];
         wall_position = glm::vec3(current_node->GetX(), current_node->GetY(), 0.0);
         if (current_node->IsWall()) {
@@ -692,6 +698,7 @@ void Game::set_up_maze() {
             game_objects_.insert(game_objects_.begin() + 1, brick);
         }
     }
+    
     
     
 }
@@ -714,6 +721,13 @@ void Game::destory_level_1() {
     for (int i = 1; i < game_objects_.size()-4; i++) {
         game_objects_[i]->SetAlive(false);
     }
+    for (int i = 0;i < (game_objects_.size() - 3);i++) {
+        if (game_objects_[i]->GetAlive() == false) {
+            delete game_objects_[i];//delete the obj
+            game_objects_.erase(game_objects_.begin() + i);//shrink vector
+        }
+    }
+
 }
 void Game::set_up_level_2() {
     GameObject* lazer_ = new Lazer(glm::vec3(1.0f, 0.0f, 0.0f), sprite_, &animate_shader_, tex_[22], game_objects_[0]);
@@ -725,7 +739,16 @@ void Game::set_up_level_2() {
     game_objects_[0]->AddChild(lazer_);
     game_objects_[0]->AddChild(shield);
     game_objects_[0]->SetPosition(glm::vec3(0, 0, 0));
+
     set_up_maze();
+    GameObject* boss = new MonsterObject(glm::vec3(-20.0f, -20.0f, 0.0f), sprite_, &animate_shader_, tex_[20], Circle(), current_time_, 0, 100);
+    boss->SetNumFrame(glm::vec2(1, 1));
+    boss->SetCurrentFrame(0);
+    boss->GetCircle()->SetRadius(boss->GetScale().x / 2);//set the circle radius as scale/2
+    boss->SetPlayer(game_objects_[0]);//set player pointer for each enemy
+    game_objects_.insert(game_objects_.begin() + 1, boss);
+
+    std::cout << "set up maze!!" << std::endl;
 }
 
 bool Game::check_level_2() {
@@ -749,7 +772,7 @@ bool Game::check_level_2() {
 }
 
 void Game::CollisionEvent(GameObject* object1, GameObject* object2,double delta_time) {
-    std::cout << "hit!!!!" << std::endl;
+    //std::cout << "hit!!!!" << std::endl;
     glm::vec3 player, wall;
     glm::vec2 circleCenter, ractCenter, delta;
     float halfWidth, halfHeight;
@@ -819,31 +842,40 @@ bool Game::collision_Check(GameObject* a, GameObject* b) {
 
 void Game::Update(double delta_time)
 {
+<<<<<<< Updated upstream
     if (level_1_timer.Finished()) {
         if (!changing_level_) {
             changing_level_ = true;
             generateDifferentEnemy();
         } 
         wakeup_monster();
+=======
+    if (level_1_timer.Finished()&& changing_timer.Finished()) {
+        if ((!changing_level_) &&(level_==1)) {
+                changing_timer.Start(10);
+                changing_level_ = true;
+                generateDifferentEnemy();
+                std::cout << "im here" << std::endl;
+                wakeup_monster();
+            }
+>>>>>>> Stashed changes
     }
     //level_ = 2;
-    if (changing_level_) {
-        if (check_level_2()) {
-            changing_timer.Start(10);
+
+    if (changing_level_&&check_level_2()) {
+        if (!maze_setup) {
             
             destory_level_1();
-            
             BossRoom();
+
             set_up_level_2();
-            
+           // std::cout << "check 2 correct" << std::endl;
         }
     }
-    if (changing_level_ && changing_timer.Finished()) {
-        level_ = 2;
+    if (changing_level_&&changing_timer.Finished()) {
         changing_level_ = false;
-
+        level_ = 2;
     }
-
 
 
         if (getStop()) { return; }
@@ -990,7 +1022,7 @@ void Game::Update(double delta_time)
                             }
                             else if (other_game_object->GetType() == 41) {
                                 if (other_game_object->Ract_Circle_Collition(current_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {
-                                    std::cout << " attack wall!! " << std::endl;;
+                                   // std::cout << " attack wall!! " << std::endl;;
                                     current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
                                     other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
                                     if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
@@ -1153,7 +1185,7 @@ void Game::Update(double delta_time)
 
                     delete game_objects_[i];//delete the obj
                     game_objects_.erase(game_objects_.begin() + i);//shrink vector
-                    //std::cout << "delete!" << std::endl;//print delete
+                    std::cout << "delete!" << std::endl;//print delete
                     continue;
                 }
             }
@@ -1258,7 +1290,8 @@ void Game::Update_HUD(double delta_time) {
 
 
 void Game::generateDifferentEnemy() {
-    if (level_ == 2) { return; }
+   
+   // if (level_ != 1) { return; }
     if (changing_level_) { 
         
         GameObject* new_enemy;
@@ -1271,6 +1304,7 @@ void Game::generateDifferentEnemy() {
         game_objects_.insert(game_objects_.begin() + 1, new_enemy);
         return; 
     }
+    if (level_ == 2) { return; }
     if (game_objects_.size() > 100) { return; }
     glm::vec3 random_position = generateRandomPosition();//random position in the window
     int r1 = rand() % 100;//
@@ -1504,7 +1538,12 @@ void Game::Render(void){
     }
 
     glm::vec3 player_position = game_objects_[0]->GetPosition();//get player position
+    
+
     glm::vec3 camera_position = glm::vec3(player_position.x, player_position.y, 1.0f);//camera center is the player
+
+  
+
     glm::mat4 camera_trans = glm::translate(glm::mat4(1.0f),-game_objects_[0]->GetPosition());//calculate the matrix
     //camera_trans = glm::rotate(glm::mat4(1.0f),game_objects_[0]->GetRotation(), glm::vec3(0,0,1))* camera_trans;
     // Set view to zoom out, centered by default at 0,0
@@ -1629,6 +1668,7 @@ void Game::Init(void)
     stop_ = false;
     map_ = true;
     changing_level_ = false;
+    maze_setup = false;
     level_ = 1;
     changing_timer = Timer();
     load_timer = Timer();
