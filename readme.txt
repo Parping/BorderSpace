@@ -1,29 +1,5 @@
-All sprite and audio taken from Website itch.io under CC license
-
-spaceship:
-https://fearless-design.itch.io/tiny-ships-free-spaceships
-player's sprite taken from Website itch.io under CC license
-
-http://creativecommons.org/publicdomain/zero/1.0/
-
-explosion:
-https://cuxrie.itch.io/spaceship-shooter-pixel-art-space-pack
-
-audio:
-https://nebula-audio.itch.io/free-sf-electronic-music-pixel-perfect
-and the .txt file in the audio file.
-
-
-https://lmglolo.itch.io/free-8bit-sfx
-I only have one request: whatever you do, make your game fun! This content is under CC BY-ND 4.0 https://creativecommons.org/licenses/by-nd/4.0/
-
-Item:
-https://grafxkid.itch.io/mini-pixel-pack-3
-You can freely use these assets for personal and commercial use. Crediting is optional, but if you'd like to, thank you very much!
-I draw this texture follow this style
-
-projectile:
-draw by myself
+Jill Li
+Isen McDonald
 
 
 
@@ -109,6 +85,7 @@ arm has three parts.
 UI:
 HP, Energy, exp, bomb, collections, collect action progress bar, level, minimap, shop.
 Shop gives text to describe the things player can unlock or buy.
+The Screen has to much things so I delete the score UI.
 
 Advanced method:
 robot arm can find player's position and move itself to the player.
@@ -118,3 +95,34 @@ animate shader, text shader, number shader.
 
 Extra:
 Minimap, level2...
+
+
+
+
+
+All sprite and audio taken from Website itch.io under CC license
+
+spaceship:
+https://fearless-design.itch.io/tiny-ships-free-spaceships
+player's sprite taken from Website itch.io under CC license
+
+http://creativecommons.org/publicdomain/zero/1.0/
+
+explosion:
+https://cuxrie.itch.io/spaceship-shooter-pixel-art-space-pack
+
+audio:
+https://nebula-audio.itch.io/free-sf-electronic-music-pixel-perfect
+and the .txt file in the audio file.
+
+
+https://lmglolo.itch.io/free-8bit-sfx
+I only have one request: whatever you do, make your game fun! This content is under CC BY-ND 4.0 https://creativecommons.org/licenses/by-nd/4.0/
+
+Item:
+https://grafxkid.itch.io/mini-pixel-pack-3
+You can freely use these assets for personal and commercial use. Crediting is optional, but if you'd like to, thank you very much!
+I draw this texture follow this style
+
+projectile and other things:
+draw by Jill Li
