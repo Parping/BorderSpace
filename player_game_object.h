@@ -84,14 +84,19 @@ namespace game {
             void CollideWall(double delta_time, glm::vec3 new_velocity);
          //   CircleCollider* GetCircleCollider() override { return &collider_; }
           //  CircleCollider collider_;
-            
-
+            bool GetAcc() override { return accelerate; }
+            bool GetEngine() override { return engine_active; }
+            void SetAcc(bool a) override;
+            void SetEng(bool a) override { engine_active = a; }
+            void clearChild()override;
     private:
         int hitpoint;
         int item;//internal item counter
         int state;//0 normal, 1 invincible
         bool alive;
         bool colliable;
+        bool accelerate;
+        bool engine_active;
         Circle circle;
         Timer timer_invi;//invincible timer
         float speed;//speed for moving

@@ -38,6 +38,8 @@ PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Sh
 	bomb_ = 0;
 	can_lazer_ = false;
 	can_shield_ = false;
+	accelerate = false;
+	engine_active = false;
 
 }
 
@@ -56,6 +58,9 @@ bool PlayerGameObject::GetColliable() {
 }
 void PlayerGameObject::SetColliable(bool a) {
 	colliable = a;
+}
+void PlayerGameObject::clearChild() {
+	chile_game_objects_.clear();
 }
 void PlayerGameObject::SetAlive(bool a) {
 	alive = a;
@@ -178,6 +183,8 @@ void PlayerGameObject::Level_up() {
 	experience_ -= max_exp;
 	level_++;
 	max_exp += 50;
+	max_hp += 50;
+	max_energy += 50;
 }
 void PlayerGameObject::Set_Lazer_On(bool a)  { 
 	if (energy_ <= 0 && a == true) {
@@ -191,11 +198,23 @@ void PlayerGameObject::Set_Shield_On(bool a)  {
 	shield_act_ = a; 
 }
 
+void PlayerGameObject::SetAcc(bool a) {
+	if (energy_ <= 0 && a == true) {
+		return;
+	}
+	accelerate = a;
+}
 // Update function for moving the player object around
 void PlayerGameObject::Update(double delta_time) {
 	glm::vec3 P, d,T;
 	P = GetPosition();
 	d = GetBearing();
+	if (accelerate) {
+		max_velocity = 6.0f;
+	}
+	else {
+		max_velocity = 2.0f;
+	}
 
 	T = P + (float)delta_time * velocity_;
 
@@ -250,6 +269,15 @@ void PlayerGameObject::Update(double delta_time) {
 			act_timer.Start(0.05);
 		}
 	}
+	if (accelerate) {
+		rest_timer.Start(5);
+		if (energy_ > 0) {
+			energy_ -= 1;
+		}
+		else {
+			accelerate = false;
+		}
+	}
 
 
 /*	// Special player updates go here
@@ -293,7 +321,7 @@ void PlayerGameObject::SetVelocity(const glm::vec3& velocity) {
 	
 }
 void PlayerGameObject::AddVelocity(glm::vec3 a) {
-
+	
 	glm::vec3 new_velocity = a + velocity_;
 	if (glm::length(new_velocity)> max_velocity) {//if > max, then normalize it to save the direction
 		velocity_=glm::normalize(new_velocity) * max_velocity;

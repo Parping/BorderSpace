@@ -586,9 +586,18 @@ void Game::HandleControls(double delta_time)
     //std::cout << "speed!"<< speed << std::endl;//print gameover
 
     // Check for player input and make changes accordingly
-    if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
-        player->AddVelocity(dir * motion_increment);//velocity++
+    if ((glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) || (glfwGetKey(window_, GLFW_KEY_Q) == GLFW_PRESS) || (glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS))
+    {
+        player->SetEng(true);
     }
+    if ((glfwGetKey(window_, GLFW_KEY_W) == GLFW_RELEASE) && (glfwGetKey(window_, GLFW_KEY_Q) == GLFW_RELEASE) && (glfwGetKey(window_, GLFW_KEY_E) == GLFW_RELEASE))
+    {
+        player->SetEng(false);
+    }
+    if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
+        player->AddVelocity(dir * motion_increment);//velocity++   
+    }
+
     if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
         player->AddVelocity(-dir*motion_increment);//velocity--
     }
@@ -600,6 +609,7 @@ void Game::HandleControls(double delta_time)
 
         player->AddVelocity(player->GetRight() * motion_increment);//velocity++ and change the direction of the velocity
     }
+
     if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
         player->SetRotation(angle - angle_increment);//change direction only
     }
@@ -640,6 +650,7 @@ void Game::HandleControls(double delta_time)
         player->Set_Lazer_On(true);
         
     }
+
     if (glfwGetKey(window_, GLFW_KEY_L) == GLFW_RELEASE) {
         player->Set_Lazer_On(false);
     }
@@ -648,6 +659,12 @@ void Game::HandleControls(double delta_time)
     }
     if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_RELEASE) {
         player->Set_Shield_On(false);
+    }
+    if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        player->SetAcc(true);
+    }
+    if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) {
+        player->SetAcc(false);
     }
     if (glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS) {
         if (map_zoom_ <= 0.25) {
@@ -703,7 +720,7 @@ void Game::set_up_maze() {
     
 }
 void Game::BossRoom() {
-    GameObject* background = game_objects_[game_objects_.size() - 1];
+    GameObject* background = game_objects_[game_objects_.size() - 2];
     background->SetTexture(tex_[31]);
 
 }
@@ -721,13 +738,13 @@ void Game::destory_level_1() {
     for (int i = 1; i < game_objects_.size()-4; i++) {
         game_objects_[i]->SetAlive(false);
     }
-    for (int i = 0;i < (game_objects_.size() - 3);i++) {
+    for (int i = 0;i < (game_objects_.size() - 4);i++) {
         if (game_objects_[i]->GetAlive() == false) {
             delete game_objects_[i];//delete the obj
             game_objects_.erase(game_objects_.begin() + i);//shrink vector
         }
     }
-
+    game_objects_[0]->clearChild();
 }
 void Game::set_up_level_2() {
     GameObject* lazer_ = new Lazer(glm::vec3(1.0f, 0.0f, 0.0f), sprite_, &animate_shader_, tex_[22], game_objects_[0]);
@@ -842,40 +859,41 @@ bool Game::collision_Check(GameObject* a, GameObject* b) {
 
 void Game::Update(double delta_time)
 {
-<<<<<<< Updated upstream
-    if (level_1_timer.Finished()) {
+
+    if (level_1_timer.Finished()&&(level_ != 2)) {
         if (!changing_level_) {
             changing_level_ = true;
             generateDifferentEnemy();
-        } 
+            changing_timer.Start(3);
+        }
         wakeup_monster();
-=======
-    if (level_1_timer.Finished()&& changing_timer.Finished()) {
-        if ((!changing_level_) &&(level_==1)) {
-                changing_timer.Start(10);
-                changing_level_ = true;
-                generateDifferentEnemy();
-                std::cout << "im here" << std::endl;
-                wakeup_monster();
-            }
->>>>>>> Stashed changes
     }
+        if ( (!changing_timer.Finished()) && (level_!=2)) {
+                
+                
+            generateDifferentEnemy();
+            std::cout << "im here" << std::endl;
+            wakeup_monster();
+
+
+        }
     //level_ = 2;
 
-    if (changing_level_&&check_level_2()) {
-        if (!maze_setup) {
+    if (changing_level_&&changing_timer.Finished()&&(level_ != 2)) {
+
             
             destory_level_1();
             BossRoom();
-
-            set_up_level_2();
+            if (!maze_setup) {
+                set_up_level_2();
+                changing_level_ = false;
+                level_ = 2;
+            }
+            
            // std::cout << "check 2 correct" << std::endl;
-        }
+        
     }
-    if (changing_level_&&changing_timer.Finished()) {
-        changing_level_ = false;
-        level_ = 2;
-    }
+
 
 
         if (getStop()) { return; }
@@ -1122,7 +1140,7 @@ void Game::Update(double delta_time)
                     glfwSetWindowShouldClose(window_, GLFW_TRUE);//set the window, it need to be shutdown
                     return;//jump out of the function
                 }
-                else if(changing_level_){
+                else if(level_==2){
                     delete game_objects_[i];//delete the obj
                     game_objects_.erase(game_objects_.begin() + i);//shrink vector
                     continue;
@@ -1559,15 +1577,18 @@ void Game::Render(void){
         game_objects_[game_objects_.size() - 3]->Render(view_matrix, current_time_);
     }
     // Render all game objects
-    
-    for (int i = 0; i < game_objects_.size(); i++) {
+
+    for (int i = 0; i < game_objects_.size()-1; i++) {
         if (i == game_objects_.size() - 3) { continue; }
        // if (i == game_objects_.size() - 1) {
             //maze_.Render(view_matrix, current_time_);
       //  }
         game_objects_[i]->Render(view_matrix, current_time_);
-    }
 
+    }
+    if (game_objects_[0]->GetEngine()) {
+        game_objects_[game_objects_.size() - 1]->Render(view_matrix, current_time_);
+    }
 
 }
 
@@ -1592,6 +1613,9 @@ void Game::MainLoop(void)
         // Update all the game objects
         Update(delta_time);
 
+        if (glfwWindowShouldClose(window_)) {
+            break; // jump out
+        }
         // Render all the game objects
         Render();
 
@@ -1692,6 +1716,8 @@ Game::~Game()
     // Free rendering resources
     delete sprite_;
     delete particles_;
+    delete bg;
+
 //    delete hud_;
     // Close window
     glfwDestroyWindow(window_);

@@ -306,8 +306,13 @@ namespace game {
 
             virtual void wakeup() {};
 
-
+            virtual bool GetAcc()  { return false; }
+            virtual bool GetEngine()  { return false; }
+            virtual void SetAcc(bool a)  {  }
+            virtual void SetEng(bool a)  { }
             
+            virtual void clearChild() {};
+
          //   virtual void SetCollider(Collider* c) {};
             
          //   virtual RactCollider* GetRactCollider() { return nullptr; }
