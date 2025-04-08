@@ -110,6 +110,7 @@ namespace game {
             // Sprite geometry
             Geometry *sprite_;
             Geometry *bg;
+            Geometry *particles_;
             // Shader for rendering sprites in the scene
             Shader sprite_shader_;
             Shader number_shader_;
@@ -118,6 +119,8 @@ namespace game {
             // Shader for rendering text
             Shader text_shader_;
             Shader drawing_shader_;
+            // Shader for rendering particles
+            Shader particle_shader_;
 
             // References to textures
             // This needs to be a pointer
