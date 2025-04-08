@@ -66,7 +66,7 @@ void Particles::CreateGeometry(int num_particles)
             theta = (2.0*rand_num() -1.0f)*0.13f + pi;
             //theta = two_pi*rand_num();
             // Radius (length) of the stream
-            r = 0.0f + 0.8*rand_num();
+            r = 0.0f + 0.4*rand_num();
             // Time phase
             tmod = rand_num();
         }

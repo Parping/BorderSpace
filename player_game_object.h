@@ -88,7 +88,7 @@ namespace game {
             bool GetEngine() override { return engine_active; }
             void SetAcc(bool a) override;
             void SetEng(bool a) override { engine_active = a; }
-
+            void clearChild()override;
     private:
         int hitpoint;
         int item;//internal item counter

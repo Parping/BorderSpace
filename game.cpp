@@ -744,7 +744,7 @@ void Game::destory_level_1() {
             game_objects_.erase(game_objects_.begin() + i);//shrink vector
         }
     }
-
+    game_objects_[0]->clearChild();
 }
 void Game::set_up_level_2() {
     GameObject* lazer_ = new Lazer(glm::vec3(1.0f, 0.0f, 0.0f), sprite_, &animate_shader_, tex_[22], game_objects_[0]);
@@ -1613,6 +1613,9 @@ void Game::MainLoop(void)
         // Update all the game objects
         Update(delta_time);
 
+        if (glfwWindowShouldClose(window_)) {
+            break; // jump out
+        }
         // Render all the game objects
         Render();
 

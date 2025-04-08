@@ -311,6 +311,8 @@ namespace game {
             virtual void SetAcc(bool a)  {  }
             virtual void SetEng(bool a)  { }
             
+            virtual void clearChild() {};
+
          //   virtual void SetCollider(Collider* c) {};
             
          //   virtual RactCollider* GetRactCollider() { return nullptr; }
