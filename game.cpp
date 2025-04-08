@@ -182,7 +182,7 @@ void Game::SetupGameWorld(void)
 
     //setup timer for new enemy
     timer.Start(10.0);
-    level_1_timer.Start(5.0);
+    level_1_timer.Start(60.0);
     // **** Setup all the game objects in the world
 
     // Setup the player object (position, texture, vertex count,hp,circle)
@@ -246,10 +246,12 @@ void Game::SetupGameWorld(void)
     GameObject* shield = new Effect(glm::vec3(0.0f, 0.0f, -1.0f), sprite_, &animate_shader_, tex_[tex_shield], game_objects_[0], 31);
     shield->SetNumFrame(glm::vec2(5, 1));
     game_objects_.push_back(shield);
+
     game_objects_[4]->GetCircle()->SetRadius(game_objects_[4]->GetScale().x*0.6);
 
     game_objects_[0]->AddChild(lazer_);
     game_objects_[0]->AddChild(shield);
+
 
     GameObject* BarObj = new Bar(glm::vec3(0.0f, 0.0f, -1.0f), sprite_, &sprite_shader_, tex_[28], game_objects_[0]);
     game_objects_.push_back(BarObj);
@@ -331,8 +333,9 @@ void Game::Setup_HUD_Bar(GameObject* h) {
     GameObject* number_bar = new Bar(glm::vec3(-1.9f, 0.25f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
 
     GameObject* collaction_bar = new Bar(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
-
-
+    
+    GameObject* collaction_resource_bar= new Bar(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[28], BarObj);
+    
 
     GameObject* hp_sp = new Value_Object(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &bar_shader_, tex_[8], 1, 1, hp_ui_bar);
     GameObject* energy_sp = new Value_Object(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &bar_shader_, tex_[11], 1, 1, hp_ui_bar);
@@ -340,8 +343,11 @@ void Game::Setup_HUD_Bar(GameObject* h) {
     GameObject* lv_text_s = new GameObject(glm::vec3(-2.2f, 0.25f, 0.0f), sprite_, &sprite_shader_, tex_[12]);
     GameObject* level_number = new Value_Object(glm::vec3(0.2f, 0.0f, 0.0f), sprite_, &number_shader_, tex_[9], 2, 0, number_bar);
     GameObject* exp_sp = new Value_Object(glm::vec3(0.0f, -0.2f, 0.0f), sprite_, &bar_shader_, tex_[10], 1, 1, Exp_ui_bar);
-
-
+    GameObject* coll_sp = new Value_Object(glm::vec3(-0.3f, 0.4f, 0.0f), sprite_, &bar_shader_, tex_[10], 1, 1, collaction_resource_bar);
+   // GameObject* collect = new GameObject(game_objects_[0]->GetPosition(), sprite_, &sprite_shader_, tex_[13]);
+  //  collect->SetScale(glm::vec2(2, 1));
+  //  collect->SetNumFrame(glm::vec2(2, 1));
+   // collect->SetTOO(glm::vec2(0.0, 0.5));
     
 
     GameObject* in_p = new GameObject(glm::vec3(-1.7f, -0.195f, 0.0f), sprite_, &number_shader_, tex_[15]);
@@ -396,7 +402,8 @@ void Game::Setup_HUD_Bar(GameObject* h) {
     hud_objects_.push_back(coin_number);
     hud_objects_.push_back(in_b);
     hud_objects_.push_back(bomb_number);
-
+    hud_objects_.push_back(collaction_resource_bar);
+    hud_objects_.push_back(coll_sp);
     
 
     /*
@@ -423,7 +430,9 @@ void Game::Setup_HUD_Bar(GameObject* h) {
     collaction_bar->SetPlace_Screen(1.0f, 0.0f);
     collaction_bar->SetTOO(glm::vec2(-0.5f, -0.5f));
 
-
+    collaction_resource_bar->SetScale(glm::vec2(2.0f, 0.5f));
+    collaction_resource_bar->SetPlace_Screen(0.5f, 0.5f);
+    collaction_resource_bar->SetTOO(glm::vec2(-0.5f, +0.5f));
 
     hp_sp->SetTOO(glm::vec2(0.5, 0.4));
     hp_sp->SetScale(glm::vec2(2, 1));
@@ -432,6 +441,10 @@ void Game::Setup_HUD_Bar(GameObject* h) {
     energy_sp->SetTOO(glm::vec2(0.5, 0.4));
     energy_sp->SetScale(glm::vec2(2, 1));
     energy_sp->SetNumFrame(glm::vec2(2, 1));
+
+    coll_sp->SetScale(glm::vec2(1, 0.5));
+    coll_sp->SetNumFrame(glm::vec2(2, 1));
+    coll_sp->SetTOO(glm::vec2(0.0, 0.5));
 
     exp_sp->SetScale(glm::vec2(5, 1));
     exp_sp->SetNumFrame(glm::vec2(2, 1));
@@ -491,11 +504,12 @@ void Game::Setup_HUD_Bar(GameObject* h) {
     collaction_bar->AddChild(iron_number_bar);
     collaction_bar->AddChild(coin_number_bar);
 
-
+    collaction_resource_bar->AddChild(coll_sp);
 
     BarObj->AddChild(hp_ui_bar);
     BarObj->AddChild(Exp_ui_bar);
     BarObj->AddChild(collaction_bar);
+    BarObj->AddChild(collaction_resource_bar);
    // BarObj->AddChild(minimap_bar);
 
 
@@ -521,7 +535,7 @@ void Game::Setup_HUD_Value() {
     HUDValue_.iron = player->Get_Iron();
 
     HUDValue_.bomb = player->GetBomb();
-    
+    HUDValue_.time_collect = player->Get_collect_timer(current_time_);
 }
 
 void Game::Update_HUD_Value() {
@@ -539,11 +553,16 @@ void Game::Update_HUD_Value() {
     int lev = HUDValue_.level;
     game_objects_[barO]->UpdateValue(1, 1, 0, lev);
 
+
+
     game_objects_[barO]->UpdateValue(2, 3, 0, HUDValue_.ip);
     game_objects_[barO]->UpdateValue(2, 4, 0, HUDValue_.iron);
     game_objects_[barO]->UpdateValue(2, 5, 0, HUDValue_.money);
 
     game_objects_[barO]->UpdateValue(0, 3, 0, HUDValue_.bomb);
+    
+
+    game_objects_[barO]->UpdateValue(3, 0, 0, HUDValue_.time_collect);
    // collaction_bar->AddChild(in_number_bar);
   //  collaction_bar->AddChild(iron_number_bar);
 
@@ -616,12 +635,14 @@ void Game::HandleControls(double delta_time)
     if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
         player->SetRotation(angle + angle_increment);//change direction only
     }
-    if (glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS) {
-     //   player->SetPosition(curpos - motion_increment*player->GetRight());
+
+    if (glfwGetKey(window_, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS) {
+        player->SetCollect_res(true);
     }
-    if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
-      //  player->SetPosition(curpos + motion_increment*player->GetRight());
+    if (glfwGetKey(window_, GLFW_KEY_RIGHT_SHIFT) == GLFW_RELEASE) {
+        player->SetCollect_res(false);
     }
+
     if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window_, true);
     }
@@ -984,10 +1005,18 @@ void Game::Update(double delta_time)
                                         }
                                     }
                                 }
+                                
                             }
                             if (other_game_object->GetType() == 41) {
                                 if (collision_Check(current_game_object, other_game_object)) {
                                     CollisionEvent(current_game_object, other_game_object,delta_time);
+                                }
+                            }
+                            if (current_game_object->GetCollect_res()) {//can it collect?
+                                if (other_game_object->GetType() == 95 && other_game_object->GetState() == 0) {//check
+                                    //yes the distance is ok
+                                        current_game_object->collect_resource(other_game_object);
+
                                 }
                             }
                             break;
@@ -1301,6 +1330,14 @@ void Game::Update_HUD(double delta_time) {
     game_objects_[barO + 1]->SetWindowWidth(width);
 
     minimap_->SetAllChild(enemy_objects_);
+
+    if (game_objects_[0]->IsCollect_Need_render()) {
+        game_objects_[barO]->SetChild(false,3);
+    }
+    else {
+        game_objects_[barO]->SetChild(true,3);
+    }
+
     game_objects_[barO]->Update(delta_time);
     game_objects_[barO + 1]->Update(delta_time);
     Update_HUD_Value();

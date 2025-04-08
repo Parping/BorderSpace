@@ -22,6 +22,14 @@ namespace game {
 	void Bar::AddChild(GameObject* child) {
 		chile_game_objects_.push_back(child);
 	}
+	void Bar::SetChild(bool c, int index) {
+		if (index > chile_game_objects_.size()) { return; }
+		for (int i = 0;i < chile_game_objects_.size();i++) {
+			if (index == i) {
+				chile_game_objects_[i]->SetGhost(c);
+			}
+		}
+	}
 	void Bar::emptyChild() {
 		chile_game_objects_.clear();
 	}

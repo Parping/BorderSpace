@@ -40,6 +40,8 @@ PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Sh
 	can_shield_ = false;
 	accelerate = false;
 	engine_active = false;
+	collect_timer = Timer();
+	collect_re_ = false;
 
 }
 
@@ -89,7 +91,7 @@ void  PlayerGameObject::Get_Collision(double delta_time) {
 	if (state != 1) {//normal state
 		if (collision_timer.Finished()) {
 			if (hitpoint > 0) {// get collision, hitpoint - 1
-				hitpoint--;
+				hitpoint-=5;
 			}
 			collision_timer.Start(delta_time);
 		}
@@ -143,7 +145,49 @@ void PlayerGameObject::Explosion() {
 	timer_exp.Start(5.0);//set the timer. the obj still need to be exist in 5s
 	colliable = false;// when it's explosing, it's not colliable.
 }
+void PlayerGameObject::SetCollect_res(bool a) {
 
+	collect_re_ = a;
+}
+bool PlayerGameObject::GetCollect_res() {
+	return collect_re_;
+}
+bool PlayerGameObject::IsCollect_Need_render() {
+	return collect_re_ && start_collect_;
+}
+void PlayerGameObject::collect_resource(GameObject* g) {
+	float distance = glm::length(GetPosition() - g->GetPosition());
+	if (collect_re_ == true) {
+		if (!start_collect_) {
+			if (distance <= 1.4f * (GetCircle()->get_r() + g->GetCircle()->get_r())) {
+				
+				start_collect_ = true;
+				collect_timer.Start(2);
+			}
+		}
+		else if (distance > 1.4f * (g->GetCircle()->get_r() + GetCircle()->get_r())) {//cannot continue collect
+			start_collect_ = false;
+		}
+		else if (g->GetState() != 0){
+			start_collect_ = false;
+		}
+		else if (start_collect_&&collect_timer.Finished()) {
+			iron_ += 10;
+			energy_ += 20;
+			Add_Exp(30);
+			start_collect_ = false;
+			g->SetStatue(99);
+		}
+	}
+}
+float PlayerGameObject::Get_collect_timer(double t) {
+	float time = (float)collect_timer.getEnd();
+	float current_time = (float)t;
+	if (time > current_time) {
+		return (1 -(time - current_time) / 2.0f);
+	}
+	else return 0;
+}
 void PlayerGameObject::CollectItem(int type) {
 	switch (type)
 	{
@@ -212,8 +256,11 @@ void PlayerGameObject::Update(double delta_time) {
 	if (accelerate) {
 		max_velocity = 6.0f;
 	}
-	else {
+	else if(!collect_re_){
 		max_velocity = 2.0f;
+	}
+	else {
+		max_velocity = 0.1f;
 	}
 
 	T = P + (float)delta_time * velocity_;
@@ -278,7 +325,7 @@ void PlayerGameObject::Update(double delta_time) {
 			accelerate = false;
 		}
 	}
-
+	if (!collect_re_) { start_collect_ = false; }
 
 /*	// Special player updates go here
 	if (alive && (!colliable)) {// if it is alive but it is not colliable, which means it is explosing

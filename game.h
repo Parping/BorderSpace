@@ -64,6 +64,8 @@ namespace game {
                 bool buff;
                 bool collect;
 
+                float time_collect;
+
             };
             struct EnemyDrop {
                 int ip_;
