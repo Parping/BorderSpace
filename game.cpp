@@ -586,9 +586,18 @@ void Game::HandleControls(double delta_time)
     //std::cout << "speed!"<< speed << std::endl;//print gameover
 
     // Check for player input and make changes accordingly
-    if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
-        player->AddVelocity(dir * motion_increment);//velocity++
+    if ((glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) || (glfwGetKey(window_, GLFW_KEY_Q) == GLFW_PRESS) || (glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS))
+    {
+        player->SetEng(true);
     }
+    if ((glfwGetKey(window_, GLFW_KEY_W) == GLFW_RELEASE) && (glfwGetKey(window_, GLFW_KEY_Q) == GLFW_RELEASE) && (glfwGetKey(window_, GLFW_KEY_E) == GLFW_RELEASE))
+    {
+        player->SetEng(false);
+    }
+    if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
+        player->AddVelocity(dir * motion_increment);//velocity++   
+    }
+
     if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
         player->AddVelocity(-dir*motion_increment);//velocity--
     }
@@ -600,6 +609,7 @@ void Game::HandleControls(double delta_time)
 
         player->AddVelocity(player->GetRight() * motion_increment);//velocity++ and change the direction of the velocity
     }
+
     if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
         player->SetRotation(angle - angle_increment);//change direction only
     }
@@ -640,6 +650,7 @@ void Game::HandleControls(double delta_time)
         player->Set_Lazer_On(true);
         
     }
+
     if (glfwGetKey(window_, GLFW_KEY_L) == GLFW_RELEASE) {
         player->Set_Lazer_On(false);
     }
@@ -648,6 +659,12 @@ void Game::HandleControls(double delta_time)
     }
     if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_RELEASE) {
         player->Set_Shield_On(false);
+    }
+    if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        player->SetAcc(true);
+    }
+    if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) {
+        player->SetAcc(false);
     }
     if (glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS) {
         if (map_zoom_ <= 0.25) {
@@ -703,7 +720,7 @@ void Game::set_up_maze() {
     
 }
 void Game::BossRoom() {
-    GameObject* background = game_objects_[game_objects_.size() - 1];
+    GameObject* background = game_objects_[game_objects_.size() - 2];
     background->SetTexture(tex_[31]);
 
 }
@@ -1560,15 +1577,18 @@ void Game::Render(void){
         game_objects_[game_objects_.size() - 3]->Render(view_matrix, current_time_);
     }
     // Render all game objects
-    
-    for (int i = 0; i < game_objects_.size(); i++) {
+
+    for (int i = 0; i < game_objects_.size()-1; i++) {
         if (i == game_objects_.size() - 3) { continue; }
        // if (i == game_objects_.size() - 1) {
             //maze_.Render(view_matrix, current_time_);
       //  }
         game_objects_[i]->Render(view_matrix, current_time_);
-    }
 
+    }
+    if (game_objects_[0]->GetEngine()) {
+        game_objects_[game_objects_.size() - 1]->Render(view_matrix, current_time_);
+    }
 
 }
 
@@ -1693,6 +1713,8 @@ Game::~Game()
     // Free rendering resources
     delete sprite_;
     delete particles_;
+    delete bg;
+
 //    delete hud_;
     // Close window
     glfwDestroyWindow(window_);
