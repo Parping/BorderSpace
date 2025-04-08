@@ -44,6 +44,7 @@ namespace game {
 		int GetWindowWidth() { return window_width; }
 		int GetWindowHeight() { return window_height; }
 		std::vector<GameObject*> GetAllChild() { return chile_game_objects_; }
+		bool isAbar()override { return true; }
 
 	private:
 		std::vector<GameObject*> chile_game_objects_;//内部的所有小东西

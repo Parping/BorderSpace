@@ -4,12 +4,15 @@ spaceship:
 https://fearless-design.itch.io/tiny-ships-free-spaceships
 player's sprite taken from Website itch.io under CC license
 
+http://creativecommons.org/publicdomain/zero/1.0/
+
 explosion:
 https://cuxrie.itch.io/spaceship-shooter-pixel-art-space-pack
 
 audio:
 https://nebula-audio.itch.io/free-sf-electronic-music-pixel-perfect
-this audio is too big so I use the audio demo chord.wav instead.
+and the .txt file in the audio file.
+
 
 https://lmglolo.itch.io/free-8bit-sfx
 I only have one request: whatever you do, make your game fun! This content is under CC BY-ND 4.0 https://creativecommons.org/licenses/by-nd/4.0/
@@ -23,68 +26,95 @@ projectile:
 draw by myself
 
 
-			------------------------------	
-	
-	Void - Fleet Pack 1 (1.0)
-
-	Commissioned from: Baldur (https://twitter.com/the__baldur)
-	Distributed by Foozle (www.foozle.io)
-
-			------------------------------
-
-	License: (Creative Commons Zero, CC0)
-	http://creativecommons.org/publicdomain/zero/1.0/
-
-	This content is free to use and modify for all projects, including commercial projects.
-	Attribution not required.  If you would like to support, consider a voluntary donation.
-
-			------------------------------
-
-	Donate:   https://foozlecc.itch.io/
-	Patreon:  https://www.patreon.com/bePatron?u=48464594
-
-	Follow on YouTube and Twitter for updates:
-	https://www.youtube.com/c/FoozleCC
-	http://twitter.com/FoozleCC
 
 OS: Windows
 
+Press P to open SHOP, press button right up conner to close shop.
+Press M to open MiniMap, 
+Press R_Shift to collect planets,
+Press L_Shift to accelerate, 
+Press L to laser, 
+Press J to shoot, 
+Press K to use bomb,
+Press Enter to pause,
+WASD uses for move,
+up and down use to zoom in/out minimap.
 
-Part1:
-Add a new function into player_obj.
-AddVelocity( velocity )
-velocity changed only, addvelocity cannot where the player face.
-Player can only change its direction by A and D
-Q & E is moved to current_direction+-45 degree.
+How to play:
+Collect, destroy enemy, collect the drops, unlock weapon, level up, wait for level2, pass the maze (use bomb to destroy or just solve it!), kill the boss to win!!!
 
-Part2:
-press J to shoot
-add cooldown timer in game.
-when cooldown, create a new projectile obj at player current position, with a quick speed. the direction is the same as the player.
+Player is the spaceship.
+Resources: Energy, Iron, Invisible point, coin.
+Player can kill enemy to get exp, to level up, level up can increase max hp and max energy and max exp request.
+When level up, player can full hp again.
+With Iron and Coin, player can open shop menu to unlock laser, shield, bomb.
+Use laser, shield, accelerate request energy. Shield only cost energy when player collide with other things.
+Laser and shield only need to unlock once, but bomb can only buy one, it's finite.
 
-Part3:
-in projectile obj, there's a timer, when create the projectile, the timer is counting time. if finished, the projectile set to die.
+The planets player can collect are not planets, they are monsters' eggs. When game playing a while, player can hear the whisper when player get close to the planet. The planet that has been collected cannot turn to monster.
+After 65 seconds (it can be changed), monsters will dash out, player cannot do anything. Then player throw to level 2, a maze. The boss is outside of the maze.
+Game music stops, changes to a horror background music.
+Player need to finish the maze to get out. When player kill the boss, player win the game, a particle firework appears.
+Otherwise a "Gameover" exists.
+When player hit the boss, the game music comes back a little, until boss dies, the music is 100%.
+(The maze can be destroyed by bomb.)
 
-Part4:
-use same code as A2
+Enemy:
+1. minion: stupid intercepting, can shoot.
+2. ex-minion: better intercepting, can shoot.
+3. blue_ship: run away from the player, will go back to fortress.
+4. fortress: can Heal player when player is close enough and the robot arm attach the player , but it can be angry, then it will shoot player.
+5. monster: planet can be collected by player, after wakeup, it will dash to the player to attack. Planet after collected cannot turn to a monster.
+6. boss: like monster but much bigger.
 
-Part5:
-in projectile obj, raytocircle(), calculate the intersection, to get intersection, we need t. and compare it with projectile current_t and last_t, to see if projectile is pass or reach the enemy_object. 
-if so, projectile and enemy get collide, and both of them die.
+Every type, if it can shoot, it has its own projectile, they have different color, and different lethality. 
+They gives different exp, different collections, and different ability to drop collections.
 
-Part6:
-add camera vec3, position is player position, make it into matrix, and add the transformation into the view matrix.
-change the background sprite, change the vertex, and change  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT).
+Weapon:
+1.normal projectile
+2.laser
+3.bomb
+normal projectile use ray-circle collision, laser use rectangle-circle collision, bomb use circle-circle collision.
+projectile is fastest, bomb is slowest, so bomb use circle-circle.
+Ships and planets have different coefficient damage with different type of weapon.
 
-Part7.
-change scale to vec2, update GetScale(),SetScale(). SetScale() now accept a vec2 to change obj scale.
-in Render():
- glm::mat4 scaling_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale_.x, scale_.y, 1.0));
+Collectible items:
+1.energy
+2.invisible point
+3.coin
+4.iron
+Invisible point when collect 5, player can be invisible 5s.
+Coin and iron to unlock laser, shield in shop, buy bomb in shop.
+Laser, shield, accelerate actions cost energy, when energy=0, cannot use them.
+After 5s use none of them, energy will recharge.
+Die enemy drops items, different type enemy drop different type items.
+Can do collect action when close to the planet, need 2s, this action gain exp.
 
-Part8
-add ghost into game_obj
-In Render(), send 1 or 0 to sprite_fragment_shader.glsl.
-if ghost=0, normal mode as usual.
-If ghost=1, add the transformation into the current color, and change the alpha to make it better to see.
+Collision detection
+Circle-Circle,Rect-Circle,Ray-Circle.
+Player cannot pass bricks, it will rebound.
 
-if collection is collected by player, make it in ghost mode.
+Game world
+Bigger game world than the screen.
+When player reach the boundary(though it is big)，player will be set to the another boundary of the world. Make's it like Seamless map.
+
+Particles:
+Player press qwe, gives engine particle, press left-shift to accelerate, the particle turn into blue.
+When player wins, a firework comes out.
+
+Hierarchical transformation：
+fortress shooter,fortress robot arm.
+arm has three parts.
+
+UI:
+HP, Energy, exp, bomb, collections, collect action progress bar, level, minimap, shop.
+Shop gives text to describe the things player can unlock or buy.
+
+Advanced method:
+robot arm can find player's position and move itself to the player.
+blue ship run away from player when player get close to them.
+maze wall collide with the player.
+animate shader, text shader, number shader.
+
+Extra:
+Minimap, level2...

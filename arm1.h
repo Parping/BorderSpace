@@ -6,6 +6,7 @@
 namespace game {
 
     // Inherits from GameObject
+
     class Arm1 : public GameObject {
 
     public:

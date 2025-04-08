@@ -27,10 +27,13 @@ void ParticleSystem::Render(glm::mat4 view_matrix, double current_time){
     if (ghost) { return; }
     // Set up the view matrix
     shader_->SetUniformMat4("view_matrix", view_matrix);
+    if (parent_->isAbar()) {
+        shader_->SetUniform1i("acc", 2);
+    }
     if (!parent_->GetAcc()) {
         shader_->SetUniform1i("acc", 0);
     }
-    else {
+    else if(parent_->GetAcc()){
         shader_->SetUniform1i("acc", 1);
     }
     // Setup the scaling matrix for the shader
