@@ -190,6 +190,17 @@ void AudioManager::SetSoundPosition(int index, double x, double y, double z){
     CheckForErrors("Failed to set sound position");
 }
 
+void AudioManager::SetSoundAttenuation(int index, float ref_distance, float rolloff, float max_distance) {
+    alSourcef(source_[index], AL_REFERENCE_DISTANCE, ref_distance);
+    alSourcef(source_[index], AL_ROLLOFF_FACTOR, rolloff);
+    alSourcef(source_[index], AL_MAX_DISTANCE, max_distance);
+    CheckForErrors("Failed to set sound attenuation");
+}
+void AudioManager::SetSoundGain(int index, float gain) {
+    alSourcef(source_[index], AL_GAIN, gain);
+    CheckForErrors("Failed to set gain");
+}
+
 
 void AudioManager::SetLoop(int index, bool loop){
 

@@ -17,6 +17,8 @@ namespace game {
             // Check if timer has finished
             bool Finished(void) const;
 
+            double getEnd() { return end; }
+
         private:
             double end;// the time that the timer finished
 

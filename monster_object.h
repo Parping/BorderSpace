@@ -37,7 +37,7 @@ namespace game {
         void Explosion() override;//change texture and count 5 s
 
         void InitType(int t);
-
+        int Get_Max_Hp() override { return max_hp; }
 
         // Update function for moving the player object around
         // Update status

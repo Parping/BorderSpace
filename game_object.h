@@ -313,6 +313,12 @@ namespace game {
             
             virtual void clearChild() {};
 
+            virtual void collect_resource(GameObject* g) {};
+            virtual bool GetCollect_res() { return false; }
+            virtual void SetCollect_res(bool a) {};
+            virtual bool IsCollect_Need_render() { return false; }
+            virtual void SetChild(bool c, int index) {};
+            virtual float Get_collect_timer(double t) { return 0.0f; };
          //   virtual void SetCollider(Collider* c) {};
             
          //   virtual RactCollider* GetRactCollider() { return nullptr; }

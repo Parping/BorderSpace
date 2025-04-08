@@ -47,6 +47,8 @@ namespace game {
             int Get_Exper()override { return experience_; }
             int Get_Level() override { return level_; }
 
+            float Get_collect_timer(double t) override;
+
             void Set_INPoint(int i) override { invisible_point_ = i; }
             void Set_Energy(int e)override { energy_ = e; }
             void Set_Iron(int i) override { iron_ = i; }
@@ -89,6 +91,10 @@ namespace game {
             void SetAcc(bool a) override;
             void SetEng(bool a) override { engine_active = a; }
             void clearChild()override;
+            void collect_resource(GameObject* g) override ;
+            bool GetCollect_res() override;
+            void SetCollect_res(bool a) override ;
+            bool IsCollect_Need_render()override;
     private:
         int hitpoint;
         int item;//internal item counter
@@ -97,6 +103,9 @@ namespace game {
         bool colliable;
         bool accelerate;
         bool engine_active;
+
+        bool collect_re_;
+
         Circle circle;
         Timer timer_invi;//invincible timer
         float speed;//speed for moving
@@ -120,9 +129,12 @@ namespace game {
         Timer collision_timer;
         Timer rest_timer;
         Timer act_timer;
+        Timer collect_timer;
 
         bool lazer_act_;
         bool shield_act_;
+
+        bool start_collect_;
 
         bool rest_;
         std::vector<GameObject*> chile_game_objects_;//内部的所有小东西

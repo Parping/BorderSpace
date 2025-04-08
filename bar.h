@@ -17,6 +17,8 @@ namespace game {
 		void AddChild(GameObject* child) override;
 		GameObject* GetChild(int i) override;
 		void emptyChild() override;
+
+		void SetChild(bool c, int index) override;
 	//在gameobject list的末尾阶段，可以直接控制for loop，不追踪它是否alive。
 	//只需要render就行了
 		void Update(double delta_time) override;

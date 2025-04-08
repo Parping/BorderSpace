@@ -164,7 +164,7 @@ namespace game {
                 default:
                     break;
                 }
-                collision_timer.Start(delta_time);
+                collision_timer.Start(0.25f);
             }
         }
     }
@@ -175,7 +175,7 @@ namespace game {
             if (hitpoint > 0) {// get collision, hitpoint - 1
                 hitpoint--;
             }
-            collision_timer.Start(delta_time);
+            collision_timer.Start(0.5);
         }
         
     

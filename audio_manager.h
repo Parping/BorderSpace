@@ -61,6 +61,8 @@ namespace audio_manager {
             void StopSound(int index);
             //new function, stop the current sound
 
+            void SetSoundAttenuation(int index, float ref_distance, float rolloff, float max_distance);
+            void SetSoundGain(int index, float gain);
         private:
             // Audio context used by OpenAl
             ALCcontext *context_;
