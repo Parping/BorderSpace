@@ -721,7 +721,7 @@ void Game::destory_level_1() {
     for (int i = 1; i < game_objects_.size()-4; i++) {
         game_objects_[i]->SetAlive(false);
     }
-    for (int i = 0;i < (game_objects_.size() - 3);i++) {
+    for (int i = 0;i < (game_objects_.size() - 4);i++) {
         if (game_objects_[i]->GetAlive() == false) {
             delete game_objects_[i];//delete the obj
             game_objects_.erase(game_objects_.begin() + i);//shrink vector
@@ -842,40 +842,41 @@ bool Game::collision_Check(GameObject* a, GameObject* b) {
 
 void Game::Update(double delta_time)
 {
-<<<<<<< Updated upstream
-    if (level_1_timer.Finished()) {
+
+    if (level_1_timer.Finished()&&(level_ != 2)) {
         if (!changing_level_) {
             changing_level_ = true;
             generateDifferentEnemy();
-        } 
+            changing_timer.Start(3);
+        }
         wakeup_monster();
-=======
-    if (level_1_timer.Finished()&& changing_timer.Finished()) {
-        if ((!changing_level_) &&(level_==1)) {
-                changing_timer.Start(10);
-                changing_level_ = true;
-                generateDifferentEnemy();
-                std::cout << "im here" << std::endl;
-                wakeup_monster();
-            }
->>>>>>> Stashed changes
     }
+        if ( (!changing_timer.Finished()) && (level_!=2)) {
+                
+                
+            generateDifferentEnemy();
+            std::cout << "im here" << std::endl;
+            wakeup_monster();
+
+
+        }
     //level_ = 2;
 
-    if (changing_level_&&check_level_2()) {
-        if (!maze_setup) {
+    if (changing_level_&&changing_timer.Finished()&&(level_ != 2)) {
+
             
             destory_level_1();
             BossRoom();
-
-            set_up_level_2();
+            if (!maze_setup) {
+                set_up_level_2();
+                changing_level_ = false;
+                level_ = 2;
+            }
+            
            // std::cout << "check 2 correct" << std::endl;
-        }
+        
     }
-    if (changing_level_&&changing_timer.Finished()) {
-        changing_level_ = false;
-        level_ = 2;
-    }
+
 
 
         if (getStop()) { return; }
@@ -1122,7 +1123,7 @@ void Game::Update(double delta_time)
                     glfwSetWindowShouldClose(window_, GLFW_TRUE);//set the window, it need to be shutdown
                     return;//jump out of the function
                 }
-                else if(changing_level_){
+                else if(level_==2){
                     delete game_objects_[i];//delete the obj
                     game_objects_.erase(game_objects_.begin() + i);//shrink vector
                     continue;

@@ -731,3 +731,8 @@ Setup1/Release.zip
 Setup1/Release/setup.exe
 Setup1/Release/Setup1.msi
 Setup1/Setup1.vdproj
+bin/.vs/Borderspace/FileContentIndex/575c6929-f56b-48b6-b720-227e5140063e.vsidx
+bin/.vs/Borderspace/FileContentIndex/5b301b44-891e-4108-98f7-f221699b071f.vsidx
+bin/.vs/Borderspace/FileContentIndex/eccee8d8-706d-466a-9e6b-e492e016075f.vsidx
+bin/Borderspace.dir/Debug/particle_system.obj
+bin/Borderspace.dir/Debug/particles.obj
