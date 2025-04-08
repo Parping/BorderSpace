@@ -180,6 +180,8 @@ void PlayerGameObject::Level_up() {
 	experience_ -= max_exp;
 	level_++;
 	max_exp += 50;
+	max_hp += 50;
+	max_energy += 50;
 }
 void PlayerGameObject::Set_Lazer_On(bool a)  { 
 	if (energy_ <= 0 && a == true) {
@@ -267,7 +269,7 @@ void PlayerGameObject::Update(double delta_time) {
 	if (accelerate) {
 		rest_timer.Start(5);
 		if (energy_ > 0) {
-			energy_ -= 2;
+			energy_ -= 1;
 		}
 		else {
 			accelerate = false;

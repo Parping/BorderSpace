@@ -27,7 +27,12 @@ void ParticleSystem::Render(glm::mat4 view_matrix, double current_time){
 
     // Set up the view matrix
     shader_->SetUniformMat4("view_matrix", view_matrix);
-
+    if (!parent_->GetAcc()) {
+        shader_->SetUniform1i("acc", 0);
+    }
+    else {
+        shader_->SetUniform1i("acc", 1);
+    }
     // Setup the scaling matrix for the shader
     glm::mat4 scaling_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale_.x, scale_.y, 1.0));
 
