@@ -16,6 +16,8 @@ uniform float time; // Timer
 out vec4 color_interp;
 out vec2 uv_interp;
 
+
+
 void main()
 {
     vec4 pos; // Vertex position
@@ -24,6 +26,9 @@ void main()
     float gravity = 2.0; // Gravity in this world
     float acttime; // Cyclic time
     float alpha = 1.0 - (acttime / cycle);
+
+
+
     alpha = clamp(alpha, 0.0, 1.0); // ∑¿÷π‘ΩΩÁ
 
     // Add phase to the time and cycle it

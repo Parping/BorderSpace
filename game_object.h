@@ -319,6 +319,8 @@ namespace game {
             virtual bool IsCollect_Need_render() { return false; }
             virtual void SetChild(bool c, int index) {};
             virtual float Get_collect_timer(double t) { return 0.0f; };
+
+            virtual bool isAbar() { return false; }
          //   virtual void SetCollider(Collider* c) {};
             
          //   virtual RactCollider* GetRactCollider() { return nullptr; }

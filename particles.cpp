@@ -141,6 +141,8 @@ void Particles::CreateGeometry(int num_particles)
             // Copy texture coordinates from standard sprite
             particles[i * vertex_attr + 5] = vertex[(i % 4) * 7 + 5];
             particles[i * vertex_attr + 6] = vertex[(i % 4) * 7 + 6];
+
+
         }
 
         // Initialize all the particle faces
