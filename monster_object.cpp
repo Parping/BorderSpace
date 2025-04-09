@@ -100,7 +100,7 @@ namespace game {
 
     void MonsterObject::Get_Collision(double delta_time) {//when collision, hitpoint --, if hitpoint to 0, explosion
         if (collision_timer.Finished()) {
-            std::cout << " Get Collision" << std::endl;
+            //std::cout << " Get Collision" << std::endl;
             collision_timer.Start((float)delta_time);
             if (hitpoint > 0) {// get collision, hitpoint - 1
                 hitpoint--;
@@ -233,15 +233,15 @@ namespace game {
         else {//it is in x<=0
             SetRotation(-angle);//adjust the angle
         }
-        //std::cout << "Update velocity"<< velocity_.x << std::endl;
+        ////std::cout << "Update velocity"<< velocity_.x << std::endl;
     }
     
     void MonsterObject::setWant(bool s) {
         want_shoot = s;
-        // std::cout << "set shoot :" << s << std::endl;
+        // //std::cout << "set shoot :" << s << std::endl;
     }
     bool MonsterObject::getShoot() {
-        // std::cout << "want shoot :" << want_shoot << std::endl;
+        // //std::cout << "want shoot :" << want_shoot << std::endl;
         return want_shoot;
     }
 

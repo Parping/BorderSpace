@@ -56,6 +56,8 @@ namespace game {
             // Constructor
             GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture);
 
+            float lifespan = -9999;
+
             struct E
             {
                 int hp_;
@@ -294,7 +296,7 @@ namespace game {
             virtual void SetSizeZoom(float f) {};
             virtual void SetShape_(int s) {};
 
-            virtual void AddBomb()  {  };
+            virtual void AddBomb() { };
             virtual void deleteBomb() {};
             virtual void SetCan_Lazer(bool a) {};
             virtual void SetCan_Shield(bool a) {};

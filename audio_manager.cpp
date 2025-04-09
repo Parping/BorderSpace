@@ -156,10 +156,10 @@ bool AudioManager::AnySoundIsPlaying(void){
 
 void AudioManager::ListAudioDevices(void){
 
-    std::cout << "Audio devices:" << std::endl;
+    //std::cout << "Audio devices:" << std::endl;
     const ALCchar *devices = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
     while (((*devices) != 0) && ((*(devices+1)) != 0)){
-        std::cout << (*devices);
+        //std::cout << (*devices);
         devices++;
     }
 }

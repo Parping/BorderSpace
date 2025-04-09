@@ -21,12 +21,12 @@ float Circle:: Area(void) {
 	return glm::pi<float>()*  r* r;
 }
 void Circle::Print(void) {
-	std::cout << x << " " << y << " " << r << std::endl;
+	//std::cout << x << " " << y << " " << r << std::endl;
 }
 
 void Circle::SetRadius(float rp) {
 	r = rp;
-	//std::cout << "Update radius" << r << std::endl;
+	////std::cout << "Update radius" << r << std::endl;
 }
 float Circle::get_x() {
 	return x;

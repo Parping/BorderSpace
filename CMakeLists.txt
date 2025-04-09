@@ -44,6 +44,7 @@ set(HDRS
     RactCollider.h
     particles.h
     particle_system.h
+    sparks.h
 )
  
 set(SRCS
@@ -84,6 +85,7 @@ set(SRCS
     RactCollider.cpp
     particles.cpp
     particle_system.cpp
+    sparks.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     number_fragement_shader.glsl

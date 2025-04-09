@@ -148,7 +148,7 @@ namespace game {
 
     void FortressObject::Get_Collision(double delta_time) {//when collision, hitpoint --, if hitpoint to 0, explosion
         if (collision_timer.Finished()) {
-            std::cout << " Get Collision" << std::endl;
+            //std::cout << " Get Collision" << std::endl;
             collision_timer.Start((float)delta_time);
             if (hitpoint > 0) {// get collision, hitpoint - 1
                 hitpoint--;
@@ -213,14 +213,14 @@ namespace game {
         else {//it is in x<=0
             shooter->SetRotation(angle- angle_);//adjust the angle
         }
-        //std::cout << "Update velocity"<< velocity_.x << std::endl;
+        ////std::cout << "Update velocity"<< velocity_.x << std::endl;
     }
     void FortressObject::setWant(bool s) {
         want_shoot = s;
-        // std::cout << "set shoot :" << s << std::endl;
+        // //std::cout << "set shoot :" << s << std::endl;
     }
     bool FortressObject::getShoot() {
-        // std::cout << "want shoot :" << want_shoot << std::endl;
+        // //std::cout << "want shoot :" << want_shoot << std::endl;
         return want_shoot;
     }
 
@@ -287,12 +287,12 @@ namespace game {
                 
                 break;
             case 9:
-               // std::cout << " angry" << std::endl;               
+               // //std::cout << " angry" << std::endl;               
                 if (get_angry.Finished()) {
                     isAngry = false;
                     statue = 0;
                     GetCircle()->SetRadius(GetScale().x * 0.6);
-                   // std::cout << "not angry" << std::endl;
+                   // //std::cout << "not angry" << std::endl;
                     break;
                 }
                 

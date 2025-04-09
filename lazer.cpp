@@ -65,23 +65,23 @@ namespace game {
         
         
        
-       // std::cout << "Ract_Center.x: " << Ract_Center.x << " Ract_Center.y: " << Ract_Center.y << std::endl;
+       // //std::cout << "Ract_Center.x: " << Ract_Center.x << " Ract_Center.y: " << Ract_Center.y << std::endl;
         /*
-                std::cout << "Ract_Center.x: " << Ract_Center.x << " Ract_Center.y: " << Ract_Center.y << std::endl;
-        std::cout << "Center.x: " << Circle_Center.x << " Center.y: " << Circle_Center.y << std::endl;
+                //std::cout << "Ract_Center.x: " << Ract_Center.x << " Ract_Center.y: " << Ract_Center.y << std::endl;
+        //std::cout << "Center.x: " << Circle_Center.x << " Center.y: " << Circle_Center.y << std::endl;
         Ract_Min = worldPoints[2];
         Ract_Max = worldPoints[0];
         Closest= glm::clamp(Circle_Center, Ract_Max,Ract_Min );
         float distance = glm::length(Closest-Circle_Center);
         */
         if (distance <= r) {
-           // std::cout << "succ!" << std::endl;
+           // //std::cout << "succ!" << std::endl;
          //   ract_.Print();
-         //   std::cout << "Target: " << position.x << " " << position.y << std::endl;
+         //   //std::cout << "Target: " << position.x << " " << position.y << std::endl;
             return true;
         }
         else {
-            //std::cout << "fail!" << std::endl;
+            ////std::cout << "fail!" << std::endl;
                 return false;
         }
 

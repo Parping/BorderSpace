@@ -94,7 +94,7 @@ namespace game {
 
         // Loop through array and print out data for each node
         for (int i = 0; i < node_.size(); i++) {
-            std::cout << "Node " << i << ": id: " << node_[i]->GetId() << ", x: " << node_[i]->GetX() << ", y: " << node_[i]->GetY() << ", number of neighbors: " << node_[i]->GetNumEdges() << std::endl;
+            //std::cout << "Node " << i << ": id: " << node_[i]->GetId() << ", x: " << node_[i]->GetX() << ", y: " << node_[i]->GetY() << ", number of neighbors: " << node_[i]->GetNumEdges() << std::endl;
         }
     }
 
@@ -194,7 +194,7 @@ namespace game {
 
 
     Node* Maze::GetNextNode() {
-        std::cout << path_node_.size() << std::endl;
+        //std::cout << path_node_.size() << std::endl;
         if (path_node_.size() >= 1) {
             return path_node_[1];//just find the next node we are going to go
         }
@@ -301,7 +301,7 @@ namespace game {
 
                 //calculate the new estimate
                 estmiate = (glm::abs(n->GetX() - end_node_->GetX()) + glm::abs(n->GetY() - end_node_->GetY())) * lowestEdgeCost;
-                std::cout << "estmiate: " << estmiate << std::endl;
+                //std::cout << "estmiate: " << estmiate << std::endl;
                 // If the new cost is smaller than the current node cost,
                 // update the node cost, and add an updated QNode to the pq
                 if (node_cost < n->GetCost()) {
@@ -342,7 +342,7 @@ namespace game {
 
         // Uncomment to see the ids in order on the path 
         ///for (Node *ele : path_node_) {
-        //    std::cout << "id:" << ele->GetId() << std::endl;
+        //    //std::cout << "id:" << ele->GetId() << std::endl;
         //}/
     }
 

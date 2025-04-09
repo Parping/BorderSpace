@@ -30,7 +30,7 @@ void Timer::Start(float end_time)
 bool Timer::Finished(void) const
 {   
     double current_time = glfwGetTime();//get the current time
-   /// std::cout<<"current: "<<current_time<<" end: "<<end << std::endl;;
+   /// //std::cout<<"current: "<<current_time<<" end: "<<end << std::endl;;
     if (end <= current_time) {     //if it is greater or equal to the end time, then it is finished. 
         return true;// or it is not counting time.
     }

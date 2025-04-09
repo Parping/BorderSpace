@@ -87,7 +87,7 @@ float PlayerGameObject::GetSpeed() {
 }
 //collision function
 void  PlayerGameObject::Get_Collision(double delta_time) {
-	//std::cout << " Get Collision" << std::endl;
+	////std::cout << " Get Collision" << std::endl;
 	if (state != 1) {//normal state
 		
 		if (collision_timer.Finished()) {
@@ -114,7 +114,7 @@ void PlayerGameObject::CollideWall(double delta_time, glm::vec3 new_velocity) {
 		velocity_ = new_velocity;
 	}
 
-	//std::cout << "Update angle" << angle << std::endl;
+	////std::cout << "Update angle" << angle << std::endl;
 
 }
 void PlayerGameObject::Get_Collision_Pro(double delta_time, int pro_type,int attacker) {
@@ -369,7 +369,7 @@ void PlayerGameObject::SetVelocity(const glm::vec3& velocity) {
 	else {//it is in x<=0
 		SetRotation(-angle);//adjust the angle
 	}
-	std::cout << "Update angle" << angle << std::endl;
+	//std::cout << "Update angle" << angle << std::endl;
 	
 }
 void PlayerGameObject::AddVelocity(glm::vec3 a) {

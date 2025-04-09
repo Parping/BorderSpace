@@ -66,7 +66,7 @@ namespace game {
 		// Use aspect ratio to properly scale the window
 		UpdatePosition(this, window_width, window_height, camera_zoom_);
 		for (int i = 0; i < chile_game_objects_.size(); i++) {
-			//	std::cout << chile_game_objects_[i]->getZoom()<<std::endl;
+			//	//std::cout << chile_game_objects_[i]->getZoom()<<std::endl;
 			UpdatePosition(chile_game_objects_[i], window_width, window_height, chile_game_objects_[i]->getZoom());
 		}
 	}
