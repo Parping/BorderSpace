@@ -111,6 +111,7 @@ namespace game {
             Geometry *sprite_;
             Geometry *bg;
             Geometry *particles_;
+            Geometry* sparks_;
             // Shader for rendering sprites in the scene
             Shader sprite_shader_;
             Shader number_shader_;
@@ -144,6 +145,7 @@ namespace game {
             std::vector<GameObject*> game_objects_;
             std::vector<GameObject*> hud_objects_;
             std::vector<GameObject*> enemy_objects_;
+            std::vector<GameObject*> particle_objects_;
 
             std::vector<GameObject*> wall_objects_;
 

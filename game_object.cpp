@@ -63,18 +63,18 @@ void GameObject::SetRotation(float angle){
     angle_ = angle;
 }
 void GameObject::SetTexture(GLuint new_texture) {
-    //std::cout << "try set new texture" << std::endl;
+    ////std::cout << "try set new texture" << std::endl;
     texture_ = new_texture;
 }
 void GameObject::SetGhost(bool a) {
     ghost = a;
 }
 void GameObject::SetBar_Percent(float b) {
-   // std::cout << "set bar_percent: "<<b << std::endl;
+   // //std::cout << "set bar_percent: "<<b << std::endl;
     bar_percent = b;
 }
 int GameObject::GetBar_Percent() { 
-   // std::cout << "bar_percent: " << bar_percent << std::endl;
+   // //std::cout << "bar_percent: " << bar_percent << std::endl;
     return bar_percent; }
 void GameObject::Update(double delta_time) {
 

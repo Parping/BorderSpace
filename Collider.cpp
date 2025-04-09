@@ -43,17 +43,17 @@ namespace game {
 
 
         if (distance <= radius1) {
-            // std::cout << "succ!" << std::endl;
+            // //std::cout << "succ!" << std::endl;
           //   ract_.Print();
-          //   std::cout << "Target: " << position.x << " " << position.y << std::endl;
-         //   std::cout << "P1£º " << p1.x << " " << p1.y << std::endl;
-          //  std::cout << "P2£º " <<p2.x << " " << p2.y << std::endl;
-          //  std::cout << "P3£º " << p3.x << " " << p3.y << std::endl;
-           // std::cout << "P4£º " << p4.x << " " << p4.y << std::endl;
+          //   //std::cout << "Target: " << position.x << " " << position.y << std::endl;
+         //   //std::cout << "P1£º " << p1.x << " " << p1.y << std::endl;
+          //  //std::cout << "P2£º " <<p2.x << " " << p2.y << std::endl;
+          //  //std::cout << "P3£º " << p3.x << " " << p3.y << std::endl;
+           // //std::cout << "P4£º " << p4.x << " " << p4.y << std::endl;
             return true;
         }
         else {
-            //std::cout << "fail!" << std::endl;
+            ////std::cout << "fail!" << std::endl;
             return false;
         }
     }
@@ -96,13 +96,13 @@ namespace game {
 
 
         if (distance <= radius1) {
-            // std::cout << "succ!" << std::endl;
+            // //std::cout << "succ!" << std::endl;
           //   ract_.Print();
-          //   std::cout << "Target: " << position.x << " " << position.y << std::endl;
+          //   //std::cout << "Target: " << position.x << " " << position.y << std::endl;
             return true;
         }
         else {
-            //std::cout << "fail!" << std::endl;
+            ////std::cout << "fail!" << std::endl;
             return false;
         }
     }

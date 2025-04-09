@@ -27,6 +27,7 @@
 #include "arm1.h"
 #include "particles.h"
 #include "particle_system.h"
+#include "sparks.h"
 
 #include "bar.h"
 #include "Value_Object.h"
@@ -53,7 +54,9 @@ const std::string resources_directory_g = RESOURCES_DIRECTORY;
 
 ;
 
-
+float sparks_timer = 0;
+float last_sparks_spawned = 0;
+float sparks_delay = 0.2;
 
 class Background : public Sprite {//add a new sprite setting for background
 public:
@@ -178,7 +181,9 @@ void Game::SetupGameWorld(void)
 
     //setup timer for new enemy
     timer.Start(10.0);
-    level_1_timer.Start(5.0);
+
+    level_1_timer.Start(0.1);
+
     // **** Setup all the game objects in the world
 
     // Setup the player object (position, texture, vertex count,hp,circle)
@@ -578,7 +583,7 @@ void Game::HandleControls(double delta_time)
     float speed = player->GetSpeed();//get the unit of speed from the player
     float motion_increment = speed * (float)delta_time;//calculate the increment by delta_time
     float angle_increment = (glm::pi<float>() / 1800.0f)*speed;//calculate the increment by delta_time
-    //std::cout << "speed!"<< speed << std::endl;//print gameover
+    ////std::cout << "speed!"<< speed << std::endl;//print gameover
 
     // Check for player input and make changes accordingly
     if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
@@ -616,6 +621,7 @@ void Game::HandleControls(double delta_time)
             //the projectile is start at the player current position, and faster velocity with same direction as player
             game_objects_[1]->GetCircle()->SetRadius(game_objects_[1]->GetScale().x / 2);//set the circle radius
             shooter_timer.Start(0.5f);//cooldown
+
         }
     }
     if (glfwGetKey(window_, GLFW_KEY_K) == GLFW_PRESS) {//press K to shoot bomb
@@ -782,9 +788,21 @@ void Game::CollisionEvent(GameObject* object1, GameObject* object2,double delta_
         }
 
         v_0 = glm::dot(v, w) * w;
-        v_out = v - 2.0f * v_0;
+        v_out = v - 2.0f * v_0; 
         v = v_out * bounceFactor;
         object1->CollideWall(0.1, v_out);
+
+        if (sparks_timer - last_sparks_spawned > sparks_delay) {
+            GameObject* sparks = new ParticleSystem(glm::vec3(0.0f, 0.0f, 0.0f), sparks_, &particle_shader_, tex_[5], game_objects_[0]);
+            sparks->SetScale(glm::vec2(0.1, 0.1));
+            game_objects_.insert(game_objects_.end() - 7, sparks);
+            sparks->SetAlive(true);
+            sparks->SetColliable(false);
+            sparks->lifespan = 0.3;
+            last_sparks_spawned = sparks_timer;
+        }
+
+        //std::cout << std::to_string(game_objects_.size()) << "\n";
     }
 
 }
@@ -866,6 +884,7 @@ void Game::Update(double delta_time)
 
                 // Update the current game object
                 current_game_object->Update(delta_time);
+                current_game_object->lifespan -= delta_time;
 
 
                 // Check for collision with other game objects
@@ -968,7 +987,7 @@ void Game::Update(double delta_time)
                             if (other_game_object->GetType() != current_game_object->getFrom()) {
                                 if (current_game_object->Ract_Circle_Collition(other_game_object->GetPosition(), other_game_object->GetCircle()->get_r(), delta_time)) {
                                     //get enemy position, enemy circle radius, and the delta_time
-                                  //  std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
+                                  //  //std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
                                     other_game_object->Get_Collision_Pro(delta_time, current_game_object->GetType(), current_game_object->getFrom());
                                     // Play the sound when collision
                                     if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
@@ -1042,6 +1061,9 @@ void Game::Update(double delta_time)
                                     if (other_game_object->Ract_Circle_Collition(current_game_object->GetPosition(), current_game_object->GetCircle()->get_r(), delta_time)) {
                                         //get enemy position, enemy circle radius, and the delta_time
                                         std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
+
+                                        //std::cout << "Current ID: " << current_game_object->GetType() << " Attack: " << other_game_object->GetType() << std::endl;
+
                                         current_game_object->Get_Collision_Pro(delta_time, other_game_object->GetType(), other_game_object->getFrom());
                                         // Play the sound when collision
                                         if (!am.SoundIsPlaying(explosion_music_index)) {//if the sound is already playing, don't play it twice
@@ -1097,9 +1119,10 @@ void Game::Update(double delta_time)
                 }
                 else if ((current_game_object->GetType() > 10) && (current_game_object->GetType() < 20)) {
                     if (!current_game_object->GetCollectible()) {
+                        if (game_objects_[i]->getTexture() == tex_[5]) std::cout << "DELETING TEX 5 PANIC PANIC 3!\n";
                         delete game_objects_[i];//delete the obj
                         game_objects_.erase(game_objects_.begin() + i);//shrink vector
-                        //  std::cout << "item delete!" << std::endl;//print delete
+                        //  //std::cout << "item delete!" << std::endl;//print delete
                         continue;
                     }
                 }
@@ -1135,6 +1158,7 @@ void Game::Update(double delta_time)
                     
 
                     if (!current_game_object->getBack()) {
+                        if (game_objects_[i]->getTexture() == tex_[5]) std::cout << "DELETING TEX 5 PANIC PANIC 4!\n";
                         delete game_objects_[i];
                         game_objects_.erase(game_objects_.begin() + i);//shrink vector
                         game_objects_.insert(game_objects_.begin() + 1, expo);
@@ -1142,6 +1166,7 @@ void Game::Update(double delta_time)
                         generateEnemyDrops(posi, type_enemy);
                     }
                     else {
+                        if (game_objects_[i]->getTexture() == tex_[5]) std::cout << "DELETING TEX 5 PANIC PANIC 5!\n";
                         delete game_objects_[i];
                         game_objects_.erase(game_objects_.begin() + i);//shrink vector
                         game_objects_.insert(game_objects_.begin() + 1, expo);
@@ -1149,8 +1174,15 @@ void Game::Update(double delta_time)
 
 
                 }
-                else {//otherthing die
+                else if (current_game_object->lifespan < 0 && current_game_object->lifespan > - 999) {
+                    delete game_objects_[i];//delete the obj
+                    game_objects_.erase(game_objects_.begin() + i);//shrink vector
 
+                   // std::cout << "its not a boss delete!" << std::endl;//print delete
+
+                }
+                else {//otherthing die
+                    if (game_objects_[i]->getTexture() == tex_[5]) continue;
                     delete game_objects_[i];//delete the obj
                     game_objects_.erase(game_objects_.begin() + i);//shrink vector
                     //std::cout << "delete!" << std::endl;//print delete
@@ -1162,7 +1194,7 @@ void Game::Update(double delta_time)
                 current_game_object->getFortress()->become_angry();
                 delete game_objects_[i];//delete the obj
                 game_objects_.erase(game_objects_.begin() + i);//shrink vector
-                std::cout << "delete!" << std::endl;//print delete
+                //std::cout << "delete!" << std::endl;//print delete
 
                 continue;
             }
@@ -1172,7 +1204,7 @@ void Game::Update(double delta_time)
 
         //new enemy
         if (timer.Finished()) {//if the timer is finished, then span new enemy  
-            //std::cout <<"Create new !" << std::endl;
+            ////std::cout <<"Create new !" << std::endl;
             if (!changing_level_) {
                 generateDifferentEnemy();
                 timer.Start(10.0);//start the timer again
@@ -1309,7 +1341,7 @@ void Game::generateDifferentEnemy() {
 
 
 
-    //  std::cout << "Create new GameObject at position ("//print function
+    //  //std::cout << "Create new GameObject at position ("//print function
      //     << random_position.x << ", "
       //    << random_position.y << ")" << std::endl;
 
@@ -1424,7 +1456,7 @@ void Game::Generate_Fortress(GameObject* f) {
    
     
     GameObject* new_small_enemy;
-    //    std::cout << "Create new Fortress at position ("//print function
+    //    //std::cout << "Create new Fortress at position ("//print function
     //<< random_position.x << ", "
     //<< random_position.y << ")" << std::endl;
     glm::vec3 random_position;
@@ -1435,7 +1467,7 @@ void Game::Generate_Fortress(GameObject* f) {
         new_small_enemy->SetPlayer(game_objects_[0]); // set player pointer
         new_small_enemy->setFortress(new_enemy);
         game_objects_.insert(game_objects_.begin() + 1, new_small_enemy);
-        // std::cout << "Create new BBB at position ("//print function
+        // //std::cout << "Create new BBB at position ("//print function
           //   << random_position.x << ", "
             // << random_position.y << ")" << std::endl;
     }
@@ -1605,10 +1637,15 @@ void Game::Init(void)
     sprite_->CreateGeometry();
     bg = new Background();
     bg->CreateGeometry();
+
     // Initialize particle geometry
     Particles* particles_temp = new Particles();
     particles_temp->CreateGeometry(4000); // Use 4000 particles
     particles_ = particles_temp;
+
+    Sparks* sparks_temp = new Sparks();
+    sparks_temp->CreateGeometry(100); // Use 4000 particles
+    sparks_ = sparks_temp;
     // Initialize sprite shader
     sprite_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/sprite_fragment_shader.glsl")).c_str());
     number_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/number_fragement_shader.glsl")).c_str());
@@ -1616,7 +1653,7 @@ void Game::Init(void)
     animate_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/animate_fragment_shader.glsl")).c_str());
     text_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/text_fragment_shader.glsl")).c_str());
     drawing_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/drawing_fragment_shader.glsl")).c_str());
-    // Initialize particle shader
+    // Initialize particle shaders
     particle_shader_.Init((resources_directory_g + std::string("/particle_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/particle_fragment_shader.glsl")).c_str());
 
     // Initialize time
@@ -1676,7 +1713,7 @@ void Game::SetTexture(GLuint w, const char *fname,int type)
     int width, height;
     unsigned char* image = SOIL_load_image(fname, &width, &height, 0, SOIL_LOAD_RGBA);
     if (!image){
-        std::cout << "Cannot load texture " << fname << std::endl;
+        //std::cout << "Cannot load texture " << fname << std::endl;
     }
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
     

@@ -56,9 +56,9 @@ namespace game {
             SetRotation(angle_ - angle_increment);
 
         }
-      //  std::cout << "O: " << O.x << ", " << O.y << std::endl;
-     //   std::cout << "E: " << E.x << ", " << E.y << std::endl;
-       // std::cout << "T: " << T.x << ", " << T.y << std::endl;
+      //  //std::cout << "O: " << O.x << ", " << O.y << std::endl;
+     //   //std::cout << "E: " << E.x << ", " << E.y << std::endl;
+       // //std::cout << "T: " << T.x << ", " << T.y << std::endl;
 
 
     }
@@ -108,21 +108,21 @@ namespace game {
 
 
 
-        // std::cout << "Ract_Center.x: " << Ract_Center.x << " Ract_Center.y: " << Ract_Center.y << std::endl;
+        // //std::cout << "Ract_Center.x: " << Ract_Center.x << " Ract_Center.y: " << Ract_Center.y << std::endl;
          /*
-                 std::cout << "Ract_Center.x: " << Ract_Center.x << " Ract_Center.y: " << Ract_Center.y << std::endl;
-         std::cout << "Center.x: " << Circle_Center.x << " Center.y: " << Circle_Center.y << std::endl;
+                 //std::cout << "Ract_Center.x: " << Ract_Center.x << " Ract_Center.y: " << Ract_Center.y << std::endl;
+         //std::cout << "Center.x: " << Circle_Center.x << " Center.y: " << Circle_Center.y << std::endl;
          Ract_Min = worldPoints[2];
          Ract_Max = worldPoints[0];
          Closest= glm::clamp(Circle_Center, Ract_Max,Ract_Min );
          float distance = glm::length(Closest-Circle_Center);
          */
         if (distance <= r) {
-            // std::cout << "succ!" << std::endl;
+            // //std::cout << "succ!" << std::endl;
             return true;
         }
         else {
-            //std::cout << "fail!" << std::endl;
+            ////std::cout << "fail!" << std::endl;
             return false;
         }
 

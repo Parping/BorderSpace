@@ -16,7 +16,7 @@ namespace game {
 
 	void  Expo_obj::Update(double delta_time) {
 		if (time.Finished()) {
-			//std::cout << "finished" << std::endl;
+			////std::cout << "finished" << std::endl;
 			alive = false;
 		}
 	}

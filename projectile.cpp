@@ -6,7 +6,7 @@ namespace game {
 		circle = circle;
 		colliable = true;
 		exist_timer= Timer();
-		//std::cout << " Projectile created!" << std::endl;
+		////std::cout << " Projectile created!" << std::endl;
 		alive = true;
 		angle_ = angle;
 		t_ = 0;		
@@ -139,7 +139,7 @@ namespace game {
 		T = P + (float)t_ * velocity;//calculate the new position by new velocity
 		SetPosition(glm::vec3(T.x, T.y, 0));//set the new position
 		if (exist_timer.Finished()) {
-			//std::cout << "shooter Died" << std::endl;
+			////std::cout << "shooter Died" << std::endl;
 			alive = false;
 			colliable = false;
 		}

@@ -8,7 +8,7 @@ namespace game {
 		collectible = true;
 		colliable = true;
 		type = ty;
-		//std::cout << " collectible created!" << std::endl;
+		////std::cout << " collectible created!" << std::endl;
 		ghost = false;
 		num_frame = glm::vec2(4,1);
 		scale_ = glm::vec2(0.5, 0.5);
@@ -48,7 +48,7 @@ namespace game {
 
 
 	void  CollectibleGameObject::Get_Collision(double delta_time) {
-		//std::cout << " Get Collision" << std::endl;
+		////std::cout << " Get Collision" << std::endl;
 		collectible = false;
 		ghost = true;//set ghost mode
 		colliable = false;

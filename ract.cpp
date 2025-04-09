@@ -44,10 +44,10 @@ glm::vec2 Ract:: get_My_Center() {
     return glm::vec2(world_pos.x, world_pos.y);
 }
 void Ract::Print(){
-    std::cout << "P1£º " << get_point(0).x << " " << get_point(0).y << std::endl;
-    std::cout << "P2£º " << get_point(1).x << " " << get_point(1).y << std::endl;
-    std::cout << "P3£º " << get_point(2).x << " " << get_point(2).y << std::endl;
-    std::cout << "P4£º " << get_point(3).x << " " << get_point(3).y << std::endl;
-    std::cout << "P5£º " << get_point(4).x << " " << get_point(4).y << std::endl;
-    std::cout << "P6£º " << get_point(5).x << " " << get_point(5).y << std::endl;
+    //std::cout << "P1£º " << get_point(0).x << " " << get_point(0).y << std::endl;
+    //std::cout << "P2£º " << get_point(1).x << " " << get_point(1).y << std::endl;
+    //std::cout << "P3£º " << get_point(2).x << " " << get_point(2).y << std::endl;
+    //std::cout << "P4£º " << get_point(3).x << " " << get_point(3).y << std::endl;
+    //std::cout << "P5£º " << get_point(4).x << " " << get_point(4).y << std::endl;
+    //std::cout << "P6£º " << get_point(5).x << " " << get_point(5).y << std::endl;
     }
